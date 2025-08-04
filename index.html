@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memo memo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    },
+                    animation: {
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <!-- Detect dark mode -->
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+    <div id="mainContent">
+        <div class="container mx-auto px-4 py-3 max-w-5xl">
+        <h1 class="text-2xl font-bold text-center mb-3 text-primary dark:text-primary">
+            Memo Memo
+        </h1>
+
+        <div class="mb-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+            <h2 class="text-lg font-semibold mb-3">Upload Translation Memory File</h2>
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+                <label for="fileInput" class="flex-1">
+                    <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span id="fileText" class="text-sm">Select or drop your file</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
+                </label>
+            </div>
+            <div id="fileInfo" class="mt-3 text-sm hidden">
+                <div class="flex justify-between">
+                    <span id="fileName" class="font-medium"></span>
+                    <span id="fileSize" class="text-gray-600 dark:text-gray-400"></span>
+                </div>
+                <div id="fileStats" class="mt-1"></div>
+            </div>
+        </div>
+
+        <div id="searchSection" class="mb-4 hidden">
+            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                <h2 class="text-lg font-semibold mb-3">Search Translation Memory</h2>
+                <div class="flex flex-col md:flex-row gap-3 items-center">
+                    <div class="w-full">
+                        <input type="text" id="searchInput" placeholder="Search in source or target text..." 
+                               class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div class="flex gap-2 text-sm">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="sourceOnly" class="form-checkbox h-4 w-4 text-primary" />
+                            <span class="ml-1">Source only</span>
+                        </label>
+                        <label class="inline-flex items-center ml-3">
+                            <input type="checkbox" id="targetOnly" class="form-checkbox h-4 w-4 text-primary" />
+                            <span class="ml-1">Target only</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        <span id="resultsCount">0 results</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="hidden">
+            <div class="flex justify-center items-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="hidden bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg mb-8">
+            Error loading the TMX file. Please make sure it is a valid TMX format.
+        </div>
+
+        <div id="resultsSection" class="hidden">
+            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider w-1/2">
+                                Source (<span id="sourceLanguage">--</span>)
+                            </th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider w-1/2">
+                                Target (<span id="targetLanguage">--</span>)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Results will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="pagination" class="mt-6 flex justify-center space-x-2">
+                <!-- Pagination will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let tmxData = {
+            units: [],
+            sourceLanguage: '',
+            targetLanguage: ''
+        };
+        let filteredUnits = [];
+        const itemsPerPage = 30;
+        let currentPage = 1;
+
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const fileText = document.getElementById('fileText');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileStats = document.getElementById('fileStats');
+        const searchSection = document.getElementById('searchSection');
+        const searchInput = document.getElementById('searchInput');
+        const sourceOnly = document.getElementById('sourceOnly');
+        const targetOnly = document.getElementById('targetOnly');
+        const resultsCount = document.getElementById('resultsCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsSection = document.getElementById('resultsSection');
+        const sourceLanguage = document.getElementById('sourceLanguage');
+        const targetLanguage = document.getElementById('targetLanguage');
+        const resultsTable = document.getElementById('resultsTable');
+        const pagination = document.getElementById('pagination');
+
+        // Event listeners
+        fileInput.addEventListener('change', handleFileSelect);
+        searchInput.addEventListener('input', debounce(performSearch, 300));
+        sourceOnly.addEventListener('change', updateSearchFilters);
+        targetOnly.addEventListener('change', updateSearchFilters);
+
+        // Setup drag and drop
+        const dropZone = document.querySelector('label[for="fileInput"]');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
+        });
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
+        });
+
+        // Utility function to debounce search input
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Handle file selection
+        function handleFileSelect() {
+            if (fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const fileName = file.name.toLowerCase();
+            
+            // Verify file extension
+            if (!fileName.endsWith('.tmx') && !fileName.endsWith('.xliff') && !fileName.endsWith('.xlf') && !fileName.endsWith('.sdlxliff') && !fileName.endsWith('.csv')) {
+                errorMessage.textContent = "Please select a valid translation memory file (.tmx, .xliff, .xlf, .sdlxliff, .csv)";
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            
+            // Update UI
+            fileText.textContent = 'File selected!';
+            document.getElementById('fileName').textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            searchSection.classList.add('hidden');
+
+            // Read and parse file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // Different parsing based on file extension
+                    if (fileName.endsWith('.tmx')) {
+                        parseTMX(e.target.result);
+                    } else if (fileName.endsWith('.xliff') || fileName.endsWith('.xlf') || fileName.endsWith('.sdlxliff')) {
+                        parseXLIFF(e.target.result);
+                    } else if (fileName.endsWith('.csv')) {
+                        parseCSV(e.target.result);
+                    }
+                    
+                    loadingIndicator.classList.add('hidden');
+                    searchSection.classList.remove('hidden');
+                    resultsSection.classList.remove('hidden');
+
+                    // Update UI with stats
+                    fileStats.textContent = `${tmxData.units.length} translation units found`;
+                    sourceLanguage.textContent = tmxData.sourceLanguage || '--';
+                    targetLanguage.textContent = tmxData.targetLanguage || '--';
+
+                    // Initialize with all results
+                    filteredUnits = [...tmxData.units];
+                    updateResults();
+                } catch (error) {
+                    console.error("Error parsing file:", error);
+                    loadingIndicator.classList.add('hidden');
+                    errorMessage.textContent = `Error loading the file. Please make sure it is a valid ${file.name.split('.').pop().toUpperCase()} format.`;
+                    errorMessage.classList.remove('hidden');
+                }
+            };
+            
+            reader.onerror = function() {
+                loadingIndicator.classList.add('hidden');
+                errorMessage.textContent = "Error reading the file. Please try again.";
+                errorMessage.classList.remove('hidden');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Parse TMX file
+        function parseTMX(content) {
+            // Parse XML
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(content, "text/xml");
+            
+            // Check for parsing errors
+            const parserError = xmlDoc.querySelector('parsererror');
+            if (parserError) {
+                throw new Error("Invalid XML format");
+            }
+            
+            // Reset data
+            tmxData = {
+                units: [],
+                sourceLanguage: '',
+                targetLanguage: ''
+            };
+            
+            // Extract translation units
+            const tuElements = xmlDoc.getElementsByTagName('tu');
+            
+            // No translation units found
+            if (tuElements.length === 0) {
+                throw new Error("No translation units found in TMX file");
+            }
+            
+            // Process each translation unit
+            Array.from(tuElements).forEach(tu => {
+                const tuvs = tu.getElementsByTagName('tuv');
+                let sourceText = null;
+                let targetText = null;
+                let sourceLang = null;
+                let targetLang = null;
+
+                // Process each translation unit variant
+                Array.from(tuvs).forEach(tuv => {
+                    const lang = tuv.getAttribute('xml:lang') || tuv.getAttribute('lang');
+                    const segElements = tuv.getElementsByTagName('seg');
+                    
+                    if (segElements.length > 0) {
+                        // Some TMX might have the content directly in the seg element or as child nodes
+                        const segText = segElements[0].textContent.trim();
+                        
+                        if (sourceText === null) {
+                            sourceText = segText;
+                            sourceLang = lang;
+                        } else {
+                            targetText = segText;
+                            targetLang = lang;
+                        }
+                    }
+                });
+
+                // Only add if we have both source and target
+                if (sourceText !== null && targetText !== null) {
+                    tmxData.units.push({
+                        source: sourceText,
+                        target: targetText,
+                        sourceLang,
+                        targetLang
+                    });
+                }
+            });
+            
+            // Set languages
+            if (tmxData.units.length > 0) {
+                tmxData.sourceLanguage = tmxData.units[0].sourceLang || 'Unknown';
+                tmxData.targetLanguage = tmxData.units[0].targetLang || 'Unknown';
+            }
+        }
+        
+        // Parse XLIFF file (including SDLXLIFF and Smartcat XLIFF)
+        function parseXLIFF(content) {
+            // Parse XML
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(content, "text/xml");
+            
+            // Check for parsing errors
+            const parserError = xmlDoc.querySelector('parsererror');
+            if (parserError) {
+                throw new Error("Invalid XML format");
+            }
+            
+            // Reset data
+            tmxData = {
+                units: [],
+                sourceLanguage: '',
+                targetLanguage: ''
+            };
+            
+            // Get file element to extract language info
+            const fileElement = xmlDoc.querySelector('file');
+            if (fileElement) {
+                tmxData.sourceLanguage = fileElement.getAttribute('source-language') || 'Unknown';
+                tmxData.targetLanguage = fileElement.getAttribute('target-language') || 'Unknown';
+            }
+            
+            // Find all translation units
+            // XLIFF 1.2 uses 'trans-unit', XLIFF 2.0 uses 'unit', SDLXLIFF uses 'trans-unit'
+            const transUnits = xmlDoc.querySelectorAll('trans-unit, unit');
+            
+            if (transUnits.length === 0) {
+                throw new Error("No translation units found in XLIFF file");
+            }
+            
+            // Process each translation unit
+            Array.from(transUnits).forEach(unit => {
+                let sourceText = null;
+                let targetText = null;
+                
+                // XLIFF 1.2 structure
+                const sourceElement = unit.querySelector('source');
+                const targetElement = unit.querySelector('target');
+                
+                if (sourceElement) {
+                    sourceText = sourceElement.textContent.trim();
+                }
+                
+                if (targetElement) {
+                    targetText = targetElement.textContent.trim();
+                }
+                
+                // XLIFF 2.0 structure (if not found above)
+                if (!sourceText || !targetText) {
+                    const segments = unit.querySelectorAll('segment');
+                    if (segments.length > 0) {
+                        Array.from(segments).forEach(segment => {
+                            const source = segment.querySelector('source');
+                            const target = segment.querySelector('target');
+                            
+                            if (source && !sourceText) {
+                                sourceText = source.textContent.trim();
+                            }
+                            if (target && !targetText) {
+                                targetText = target.textContent.trim();
+                            }
+                        });
+                    }
+                }
+                
+                // SDLXLIFF/Smartcat specific (sometimes uses 'mrk' tags)
+                if (!sourceText || !targetText) {
+                    const mrkElements = unit.querySelectorAll('mrk');
+                    if (mrkElements.length > 0) {
+                        Array.from(mrkElements).forEach(mrk => {
+                            if (mrk.getAttribute('mtype') === 'seg') {
+                                if (!sourceText) {
+                                    sourceText = mrk.textContent.trim();
+                                } else if (!targetText) {
+                                    targetText = mrk.textContent.trim();
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // Add to data if we have both source and target
+                if (sourceText && targetText) {
+                    tmxData.units.push({
+                        source: sourceText,
+                        target: targetText,
+                        sourceLang: tmxData.sourceLanguage,
+                        targetLang: tmxData.targetLanguage
+                    });
+                }
+            });
+        }
+        
+        // Parse CSV file
+        function parseCSV(content) {
+            // Reset data
+            tmxData = {
+                units: [],
+                sourceLanguage: 'Source',
+                targetLanguage: 'Target'
+            };
+            
+            // Split content into lines
+            const lines = content.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                throw new Error("No content found in CSV file");
+            }
+            
+            // Detect delimiter (comma, tab, or semicolon)
+            let delimiter = ',';
+            const firstLine = lines[0];
+            if (firstLine.includes('\t')) {
+                delimiter = '\t';
+            } else if (firstLine.includes(';')) {
+                delimiter = ';';
+            }
+            
+            // Check if there's a header row
+            let startIndex = 0;
+            const headerRow = splitCSVRow(firstLine, delimiter);
+            
+            // If header has exactly 2 columns, use them as language names
+            if (headerRow.length === 2) {
+                tmxData.sourceLanguage = headerRow[0].trim() || 'Source';
+                tmxData.targetLanguage = headerRow[1].trim() || 'Target';
+                startIndex = 1;
+            }
+            
+            // Process each line
+            for (let i = startIndex; i < lines.length; i++) {
+                const line = lines[i];
+                const columns = splitCSVRow(line, delimiter);
+                
+                // Skip if not enough columns
+                if (columns.length < 2) continue;
+                
+                const sourceText = columns[0].trim();
+                const targetText = columns[1].trim();
+                
+                // Add to data if both columns are not empty
+                if (sourceText && targetText) {
+                    tmxData.units.push({
+                        source: sourceText,
+                        target: targetText,
+                        sourceLang: tmxData.sourceLanguage,
+                        targetLang: tmxData.targetLanguage
+                    });
+                }
+            }
+            
+            if (tmxData.units.length === 0) {
+                throw new Error("No valid translation pairs found in CSV file");
+            }
+        }
+        
+        // Helper function to split CSV row correctly handling quoted fields
+        function splitCSVRow(row, delimiter = ',') {
+            const result = [];
+            let inQuotes = false;
+            let currentValue = '';
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === delimiter && !inQuotes) {
+                    result.push(currentValue);
+                    currentValue = '';
+                } else {
+                    currentValue += char;
+                }
+            }
+            
+            // Add the last value
+            result.push(currentValue);
+            
+            // Remove quotes from values
+            return result.map(value => {
+                if (value.startsWith('"') && value.endsWith('"')) {
+                    return value.slice(1, -1).replace(/""/g, '"');
+                }
+                return value;
+            });
+        }
+
+        // Perform search on the TMX data
+        function performSearch() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (searchTerm === '') {
+                // If search is empty, show all results
+                filteredUnits = [...tmxData.units];
+            } else {
+                // Filter based on search term and checkboxes
+                filteredUnits = tmxData.units.filter(unit => {
+                    const sourceMatch = unit.source.toLowerCase().includes(searchTerm);
+                    const targetMatch = unit.target.toLowerCase().includes(searchTerm);
+                    
+                    if (sourceOnly.checked && !targetOnly.checked) {
+                        return sourceMatch;
+                    } else if (targetOnly.checked && !sourceOnly.checked) {
+                        return targetMatch;
+                    } else {
+                        return sourceMatch || targetMatch;
+                    }
+                });
+            }
+            
+            // Reset to first page and update results
+            currentPage = 1;
+            updateResults();
+        }
+
+        // Update search when filters change
+        function updateSearchFilters() {
+            // Make sure both can't be checked simultaneously
+            if (sourceOnly.checked && targetOnly.checked) {
+                if (this === sourceOnly) {
+                    targetOnly.checked = false;
+                } else {
+                    sourceOnly.checked = false;
+                }
+            }
+            
+            // Re-run search with new filters
+            performSearch();
+        }
+
+        // Update search results display
+        function updateResults() {
+            // Update count
+            resultsCount.textContent = `${filteredUnits.length} results`;
+            
+            // Calculate pagination
+            const pageCount = Math.ceil(filteredUnits.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredUnits.length);
+            const currentUnits = filteredUnits.slice(startIndex, endIndex);
+            
+            // Clear previous results
+            resultsTable.innerHTML = '';
+            
+            // Add results to table
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            currentUnits.forEach((unit, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 dark:hover:bg-gray-750 transition';
+                
+                // Create source cell with copy button
+                const sourceCell = document.createElement('td');
+                sourceCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm';
+                
+                // Create wrapper div to position the text and button
+                const sourceCellContent = document.createElement('div');
+                sourceCellContent.className = 'flex items-start';
+                
+                // Text content div
+                const sourceTextDiv = document.createElement('div');
+                sourceTextDiv.className = 'flex-grow pr-8';
+                sourceTextDiv.innerHTML = searchTerm ? 
+                    highlightText(unit.source, searchTerm, sourceOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
+                    unit.source;
+                
+                // Copy button for source
+                const sourceCopyBtn = document.createElement('button');
+                sourceCopyBtn.className = 'ml-2 p-1 text-gray-500 hover:text-primary focus:outline-none absolute right-4 top-3';
+                sourceCopyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>';
+                sourceCopyBtn.title = 'Copy source text';
+                sourceCopyBtn.setAttribute('data-text', unit.source);
+                sourceCopyBtn.addEventListener('click', copyTextToClipboard);
+                
+                // Add text and button to cell
+                sourceCellContent.appendChild(sourceTextDiv);
+                sourceCell.appendChild(sourceCellContent);
+                sourceCell.appendChild(sourceCopyBtn);
+                
+                // Create target cell with copy button
+                const targetCell = document.createElement('td');
+                targetCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm';
+                
+                // Create wrapper div for target
+                const targetCellContent = document.createElement('div');
+                targetCellContent.className = 'flex items-start';
+                
+                // Text content div
+                const targetTextDiv = document.createElement('div');
+                targetTextDiv.className = 'flex-grow pr-8';
+                targetTextDiv.innerHTML = searchTerm ? 
+                    highlightText(unit.target, searchTerm, targetOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
+                    unit.target;
+                
+                // Copy button for target
+                const targetCopyBtn = document.createElement('button');
+                targetCopyBtn.className = 'ml-2 p-1 text-gray-500 hover:text-primary focus:outline-none absolute right-4 top-3';
+                targetCopyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>';
+                targetCopyBtn.title = 'Copy target text';
+                targetCopyBtn.setAttribute('data-text', unit.target);
+                targetCopyBtn.addEventListener('click', copyTextToClipboard);
+                
+                // Add text and button to cell
+                targetCellContent.appendChild(targetTextDiv);
+                targetCell.appendChild(targetCellContent);
+                targetCell.appendChild(targetCopyBtn);
+                
+                // Add cells to row
+                row.appendChild(sourceCell);
+                row.appendChild(targetCell);
+                
+                // Add row to table
+                resultsTable.appendChild(row);
+            });
+            
+            // Update pagination
+            updatePagination(pageCount);
+            
+            // Show/hide no results message
+            if (filteredUnits.length === 0) {
+                const noResults = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 2;
+                cell.className = 'px-4 py-6 text-center text-gray-500 dark:text-gray-400';
+                cell.textContent = 'No matching translation units found';
+                noResults.appendChild(cell);
+                resultsTable.appendChild(noResults);
+            }
+        }
+        
+        // Copy text to clipboard
+        function copyTextToClipboard(e) {
+            const text = e.currentTarget.getAttribute('data-text');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    // Show success feedback
+                    const originalTitle = e.currentTarget.getAttribute('title') || 'Copy text';
+                    
+                    // Store button for reference
+                    const button = e.currentTarget;
+                    
+                    // Change to green and update title
+                    button.style.color = '#22c55e'; // green
+                    button.setAttribute('title', 'Copied!');
+                    
+                    // Change back after a delay
+                    setTimeout(() => {
+                        button.style.color = ''; // Reset to default
+                        button.setAttribute('title', originalTitle);
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('Error copying text: ', err);
+                    // Use a less intrusive error notification
+                    const button = e.currentTarget;
+                    button.style.color = '#ef4444'; // red
+                    button.setAttribute('title', 'Copy failed');
+                    
+                    setTimeout(() => {
+                        button.style.color = '';
+                        button.setAttribute('title', 'Copy text');
+                    }, 1500);
+                });
+            
+            // Stop event propagation
+            e.stopPropagation();
+        }
+
+        // Highlight search term in text
+        function highlightText(text, searchTerm, shouldHighlight) {
+            if (!shouldHighlight) return text;
+            
+            // Escape special regex characters
+            const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            
+            // Create regex with case-insensitive flag
+            const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+            
+            // Replace matches with highlighted version
+            return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-800">$1</span>');
+        }
+
+        // Update pagination controls
+        function updatePagination(pageCount) {
+            pagination.innerHTML = '';
+            
+            if (pageCount <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&laquo;';
+            prevButton.className = `px-3 py-1 rounded ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateResults();
+                }
+            });
+            pagination.appendChild(prevButton);
+            
+            // Page buttons
+            const maxPages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(pageCount, startPage + maxPages - 1);
+            
+            // Adjust if we're near the end
+            if (endPage - startPage + 1 < maxPages) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-primary text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    updateResults();
+                });
+                pagination.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '&raquo;';
+            nextButton.className = `px-3 py-1 rounded ${currentPage === pageCount ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+            nextButton.disabled = currentPage === pageCount;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < pageCount) {
+                    currentPage++;
+                    updateResults();
+                }
+            });
+            pagination.appendChild(nextButton);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+<footer class="text-center py-4 text-sm text-primary dark:text-secondary">
+    <a href="https://www.linkedin.com/in/gsaguma" target="_blank" 
+       class="hover:text-accent dark:hover:text-accent transition-colors">
+       Created with ♥ by Gabriel Saguma
+    </a>
+</footer>
+</html>
+
+
+
+
