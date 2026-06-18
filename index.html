@@ -51,6 +51,9 @@
                 Memo Memo
             </h1>
 
+            <!-- Session Banner -->
+            <div id="sessionBanner" class="hidden flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm mb-4"></div>
+
             <!-- Tab Navigation -->
             <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
                 <button id="tabSearchBtn" class="py-2 px-4 text-sm font-medium border-b-2 border-primary text-primary focus:outline-none flex items-center gap-2">
@@ -103,6 +106,63 @@
                         </div>
                     </div>
 
+                    <!-- Stats Panel -->
+                    <div id="statsPanel" class="hidden bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <button id="statsToggle" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                            <span class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                                File Statistics
+                            </span>
+                            <svg id="statsChevron" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div id="statsBody" class="hidden px-4 pb-4">
+                            <!-- Metric cards row -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total segments</div>
+                                    <div id="statTotal" class="text-xl font-semibold text-primary">—</div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Unique segments</div>
+                                    <div id="statUnique" class="text-xl font-semibold text-primary">—</div>
+                                    <div id="statDupes" class="text-xs text-gray-400 mt-0.5"></div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Source words</div>
+                                    <div id="statSrcWords" class="text-xl font-semibold text-primary">—</div>
+                                    <div id="statSrcAvgWords" class="text-xs text-gray-400 mt-0.5"></div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Target words</div>
+                                    <div id="statTgtWords" class="text-xl font-semibold text-primary">—</div>
+                                    <div id="statTgtAvgWords" class="text-xs text-gray-400 mt-0.5"></div>
+                                </div>
+                            </div>
+                            <!-- Second row -->
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Empty source</div>
+                                    <div id="statEmptySrc" class="text-xl font-semibold text-primary">—</div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Empty target</div>
+                                    <div id="statEmptyTgt" class="text-xl font-semibold text-primary">—</div>
+                                </div>
+                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg src / tgt length</div>
+                                    <div id="statAvgChars" class="text-xl font-semibold text-primary">—</div>
+                                    <div class="text-xs text-gray-400 mt-0.5">characters</div>
+                                </div>
+                            </div>
+                            <!-- Histogram -->
+                            <div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Source segment length distribution (words)</div>
+                                <div id="statHistogram" class="flex items-end gap-1 h-16"></div>
+                                <div id="statHistogramLabels" class="flex gap-1 mt-1 text-xs text-gray-400"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Search Section & Results -->
                     <div id="searchAndResultsContainer" class="hidden flex flex-col gap-4">
                         <!-- Search Section -->
@@ -114,7 +174,7 @@
                                         <input type="text" id="searchInput" placeholder="Search in source or target text..." 
                                                class="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" />
                                     </div>
-                                    <div class="flex gap-2 text-sm">
+                                    <div class="flex flex-wrap gap-2 text-sm">
                                         <label class="inline-flex items-center">
                                             <input type="checkbox" id="sourceOnly" class="form-checkbox h-4 w-4 text-primary" />
                                             <span class="ml-1">Source only</span>
@@ -123,12 +183,18 @@
                                             <input type="checkbox" id="targetOnly" class="form-checkbox h-4 w-4 text-primary" />
                                             <span class="ml-1">Target only</span>
                                         </label>
+                                        <label class="inline-flex items-center ml-3" title="Use regular expressions (e.g. \d+, colou?r, ^Start)">
+                                            <input type="checkbox" id="useRegex" class="form-checkbox h-4 w-4 text-primary" />
+                                            <span class="ml-1 font-mono text-xs tracking-tight">.*</span>
+                                            <span class="ml-1">Regex</span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="mt-3">
+                                <div class="mt-3 flex items-center gap-3">
                                     <div class="text-sm text-gray-600 dark:text-gray-400">
                                         <span id="resultsCount">0 results</span>
                                     </div>
+                                    <div id="regexError" class="hidden text-xs text-red-500 dark:text-red-400 font-mono"></div>
                                 </div>
                             </div>
                         </div>
@@ -141,8 +207,15 @@
                         </div>
 
                         <!-- Error Message -->
-                        <div id="errorMessage" class="hidden bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
-                            Error loading the TMX file. Please make sure it is a valid TMX format.
+                        <div id="errorMessage" class="hidden bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-lg">
+                            <div class="flex items-start gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <div>
+                                    <div id="errorTitle" class="font-semibold text-sm"></div>
+                                    <div id="errorDetail" class="text-xs mt-1 opacity-80 font-mono whitespace-pre-wrap"></div>
+                                    <div id="errorHint" class="text-xs mt-2 text-red-600 dark:text-red-400 not-italic"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Results Section -->
@@ -375,6 +448,72 @@
     </div>
 
     <script>
+        // ================================================================
+        // PERSISTENCE MODULE — localStorage (prefs) + IndexedDB (data)
+        // ================================================================
+        const _DB_NAME  = 'MemoMemo_DB';
+        const _DB_VER   = 1;
+        const _DB_STORE = 'sessions';
+
+        function _openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(_DB_NAME, _DB_VER);
+                req.onupgradeneeded = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(_DB_STORE))
+                        db.createObjectStore(_DB_STORE);
+                };
+                req.onsuccess = e => resolve(e.target.result);
+                req.onerror  = e => reject(e.target.error);
+            });
+        }
+        async function idbSet(key, value) {
+            try {
+                const db = await _openDB();
+                await new Promise((res, rej) => {
+                    const tx = db.transaction(_DB_STORE, 'readwrite');
+                    tx.objectStore(_DB_STORE).put(value, key);
+                    tx.oncomplete = res;
+                    tx.onerror = e => rej(e.target.error);
+                });
+            } catch(e) { console.warn('[IDB] write:', e); }
+        }
+        async function idbGet(key) {
+            try {
+                const db = await _openDB();
+                return await new Promise((res, rej) => {
+                    const tx  = db.transaction(_DB_STORE, 'readonly');
+                    const req = tx.objectStore(_DB_STORE).get(key);
+                    req.onsuccess = e => res(e.target.result ?? null);
+                    req.onerror   = e => rej(e.target.error);
+                });
+            } catch(e) { console.warn('[IDB] read:', e); return null; }
+        }
+        async function idbDelete(key) {
+            try {
+                const db = await _openDB();
+                await new Promise((res, rej) => {
+                    const tx = db.transaction(_DB_STORE, 'readwrite');
+                    tx.objectStore(_DB_STORE).delete(key);
+                    tx.oncomplete = res;
+                    tx.onerror = e => rej(e.target.error);
+                });
+            } catch(e) { console.warn('[IDB] delete:', e); }
+        }
+        function lsSet(key, value) {
+            try { localStorage.setItem('mm_' + key, JSON.stringify(value)); } catch(e) {}
+        }
+        function lsGet(key, fallback = null) {
+            try {
+                const v = localStorage.getItem('mm_' + key);
+                return v !== null ? JSON.parse(v) : fallback;
+            } catch(e) { return fallback; }
+        }
+        function lsDel(key) {
+            try { localStorage.removeItem('mm_' + key); } catch(e) {}
+        }
+        // ================================================================
+
         // Global variables
         let tmxData = {
             units: [],
@@ -396,9 +535,18 @@
         const searchInput = document.getElementById('searchInput');
         const sourceOnly = document.getElementById('sourceOnly');
         const targetOnly = document.getElementById('targetOnly');
+        const useRegex = document.getElementById('useRegex');
+        const regexError = document.getElementById('regexError');
         const resultsCount = document.getElementById('resultsCount');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
+        const errorTitle = document.getElementById('errorTitle');
+        const errorDetail = document.getElementById('errorDetail');
+        const errorHint = document.getElementById('errorHint');
+        const statsPanel = document.getElementById('statsPanel');
+        const statsToggle = document.getElementById('statsToggle');
+        const statsBody = document.getElementById('statsBody');
+        const statsChevron = document.getElementById('statsChevron');
         const resultsSection = document.getElementById('resultsSection');
         const sourceLanguage = document.getElementById('sourceLanguage');
         const targetLanguage = document.getElementById('targetLanguage');
@@ -410,6 +558,24 @@
         searchInput.addEventListener('input', debounce(performSearch, 300));
         sourceOnly.addEventListener('change', updateSearchFilters);
         targetOnly.addEventListener('change', updateSearchFilters);
+        useRegex.addEventListener('change', () => {
+            regexError.classList.add('hidden');
+            regexError.textContent = '';
+            performSearch();
+        });
+
+        statsToggle.addEventListener('click', () => {
+            const open = !statsBody.classList.contains('hidden');
+            statsBody.classList.toggle('hidden', open);
+            statsChevron.style.transform = open ? '' : 'rotate(180deg)';
+        });
+
+        function showError(title, detail, hint) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = detail || '';
+            errorHint.textContent = hint || '';
+            errorMessage.classList.remove('hidden');
+        }
 
         // Setup drag and drop
         const dropZone = document.querySelector('label[for="fileInput"]');
@@ -475,6 +641,7 @@
                     content.classList.add('hidden');
                 }
             });
+            lsSet('activeTab', tab);
         }
 
         // Helper to generate TMX XML string from units and metadata
@@ -548,57 +715,210 @@
 
             const file = fileInput.files[0];
             const fileNameLower = file.name.toLowerCase();
-            
-            // Verify file extension
-            if (!fileNameLower.endsWith('.tmx') && !fileNameLower.endsWith('.xliff') && !fileNameLower.endsWith('.xlf') && !fileNameLower.endsWith('.sdlxliff') && !fileNameLower.endsWith('.csv')) {
-                errorMessage.textContent = "Please select a valid translation memory file (.tmx, .xliff, .xlf, .sdlxliff, .csv)";
-                errorMessage.classList.remove('hidden');
+            const ext = fileNameLower.split('.').pop();
+
+            // --- Extension validation ---
+            const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
+            if (!validExts.includes(ext)) {
+                showError(
+                    `Unsupported file type: .${ext}`,
+                    '',
+                    `Supported formats: ${validExts.map(e => '.'+e).join(', ')}`
+                );
                 searchAndResultsContainer.classList.add('hidden');
+                statsPanel.classList.add('hidden');
                 return;
             }
-            
+
+            // --- File size pre-check (warn over 20 MB) ---
+            const MB = 1024 * 1024;
+            if (file.size > 20 * MB) {
+                showError(
+                    'File too large to process in the browser',
+                    `File size: ${formatFileSize(file.size)} (limit ~20 MB)`,
+                    'Consider splitting the file before uploading.'
+                );
+                searchAndResultsContainer.classList.add('hidden');
+                statsPanel.classList.add('hidden');
+                return;
+            }
+
             // Update UI
             fileText.textContent = 'File selected!';
             document.getElementById('fileName').textContent = file.name;
             fileSize.textContent = formatFileSize(file.size);
             fileInfo.classList.remove('hidden');
             errorMessage.classList.add('hidden');
+            statsPanel.classList.add('hidden');
             loadingIndicator.classList.remove('hidden');
             searchAndResultsContainer.classList.add('hidden');
 
-            // Read and parse file
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    tmxData = parseFileContent(file.name, e.target.result);
-                    
+                    const raw = e.target.result;
+
+                    // --- XML pre-validation for TMX / XLIFF ---
+                    if (['tmx','xliff','xlf','sdlxliff'].includes(ext)) {
+                        const trimmed = raw.trimStart();
+                        if (!trimmed.startsWith('<?xml') && !trimmed.startsWith('<tmx') && !trimmed.startsWith('<xliff')) {
+                            throw { title: 'File does not appear to be valid XML', detail: `First characters: ${trimmed.slice(0,80)}`, hint: 'Make sure the file was not corrupted or saved in wrong format.' };
+                        }
+                        // Use DOMParser to get exact parse error location
+                        const tempDoc = new DOMParser().parseFromString(raw, 'text/xml');
+                        const pe = tempDoc.querySelector('parsererror');
+                        if (pe) {
+                            const errText = pe.textContent.replace(/\s+/g, ' ').trim();
+                            throw { title: 'XML parse error', detail: errText, hint: 'Check for unclosed tags, invalid characters, or encoding issues.' };
+                        }
+                        // TMX-specific: must have <tmx> root
+                        if (ext === 'tmx' && !tempDoc.querySelector('tmx')) {
+                            throw { title: 'Not a valid TMX file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <tmx>`, hint: 'Make sure the file is exported from a CAT tool as TMX 1.4.' };
+                        }
+                        // XLIFF-specific: must have <xliff> root
+                        if (['xliff','xlf','sdlxliff'].includes(ext) && !tempDoc.querySelector('xliff')) {
+                            throw { title: 'Not a valid XLIFF file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <xliff>`, hint: 'SDLXLIFF and XLF files must have an <xliff> root element.' };
+                        }
+                    }
+
+                    // --- CSV pre-validation ---
+                    if (ext === 'csv') {
+                        const firstLines = raw.split(/\r?\n/).slice(0, 5);
+                        const hasDelimiter = firstLines.some(l => l.includes(',') || l.includes(';') || l.includes('\t'));
+                        if (!hasDelimiter) {
+                            throw { title: 'CSV format not detected', detail: `First line: ${firstLines[0]?.slice(0,100)}`, hint: 'The file must use comma (,), semicolon (;), or tab (\\t) as delimiter.' };
+                        }
+                    }
+
+                    tmxData = parseFileContent(file.name, raw);
+
                     loadingIndicator.classList.add('hidden');
                     searchAndResultsContainer.classList.remove('hidden');
                     resultsSection.classList.remove('hidden');
 
-                    // Update UI with stats
-                    fileStats.textContent = `${tmxData.units.length} translation units found`;
+                    fileStats.textContent = `${tmxData.units.length} translation units`;
                     sourceLanguage.textContent = tmxData.sourceLanguage || '--';
                     targetLanguage.textContent = tmxData.targetLanguage || '--';
 
-                    // Initialize with all results
                     filteredUnits = [...tmxData.units];
                     updateResults();
+                    renderStats(tmxData.units);
+
+                    // Persist parsed data
+                    idbSet('tmxData', tmxData);
+                    lsSet('fileName', file.name);
+                    lsSet('fileSize', formatFileSize(file.size));
+                    savePreferences();
+
                 } catch (error) {
-                    console.error("Error parsing file:", error);
+                    console.error('Error parsing file:', error);
                     loadingIndicator.classList.add('hidden');
-                    errorMessage.textContent = `Error loading the file. Please make sure it is a valid ${file.name.split('.').pop().toUpperCase()} format.`;
-                    errorMessage.classList.remove('hidden');
+                    statsPanel.classList.add('hidden');
+                    if (error && error.title) {
+                        showError(error.title, error.detail, error.hint);
+                    } else {
+                        const extUp = ext.toUpperCase();
+                        const msg = error?.message || String(error);
+                        showError(
+                            `Could not parse ${extUp} file`,
+                            msg,
+                            'Verify the file is a valid ' + extUp + ' exported from your CAT tool.'
+                        );
+                    }
                 }
             };
-            
+
             reader.onerror = function() {
                 loadingIndicator.classList.add('hidden');
-                errorMessage.textContent = "Error reading the file. Please try again.";
-                errorMessage.classList.remove('hidden');
+                showError('Could not read the file', 'The browser failed to read the file from disk.', 'Try again or use a different browser.');
             };
-            
+
             reader.readAsText(file);
+        }
+
+        // Compute and render the stats panel
+        function renderStats(units) {
+            if (!units || units.length === 0) return;
+
+            const total = units.length;
+
+            // Unique by source+target
+            const seen = new Set();
+            let dupes = 0;
+            units.forEach(u => {
+                const key = u.source.trim() + '|||' + u.target.trim();
+                if (seen.has(key)) dupes++;
+                else seen.add(key);
+            });
+            const unique = total - dupes;
+
+            // Word counts
+            const countWords = str => str.trim() === '' ? 0 : str.trim().split(/\s+/).length;
+            let srcWords = 0, tgtWords = 0, emptySrc = 0, emptyTgt = 0;
+            const srcWordCounts = [];
+            units.forEach(u => {
+                const sw = countWords(u.source);
+                const tw = countWords(u.target);
+                srcWords += sw;
+                tgtWords += tw;
+                srcWordCounts.push(sw);
+                if (!u.source.trim()) emptySrc++;
+                if (!u.target.trim()) emptyTgt++;
+            });
+
+            const avgSrcWords = (srcWords / total).toFixed(1);
+            const avgTgtWords = (tgtWords / total).toFixed(1);
+            const avgSrcChars = Math.round(units.reduce((s, u) => s + u.source.length, 0) / total);
+            const avgTgtChars = Math.round(units.reduce((s, u) => s + u.target.length, 0) / total);
+
+            // Fill metric cards
+            document.getElementById('statTotal').textContent = total.toLocaleString();
+            document.getElementById('statUnique').textContent = unique.toLocaleString();
+            document.getElementById('statDupes').textContent = dupes > 0 ? `${dupes.toLocaleString()} duplicate${dupes > 1 ? 's' : ''}` : 'no duplicates';
+            document.getElementById('statSrcWords').textContent = srcWords.toLocaleString();
+            document.getElementById('statSrcAvgWords').textContent = `avg ${avgSrcWords} per segment`;
+            document.getElementById('statTgtWords').textContent = tgtWords.toLocaleString();
+            document.getElementById('statTgtAvgWords').textContent = `avg ${avgTgtWords} per segment`;
+            document.getElementById('statEmptySrc').textContent = emptySrc.toLocaleString();
+            document.getElementById('statEmptyTgt').textContent = emptyTgt.toLocaleString();
+            document.getElementById('statAvgChars').textContent = `${avgSrcChars} / ${avgTgtChars}`;
+
+            // Histogram: bucket source word counts
+            const buckets = [
+                { label: '1–5',   min: 1,   max: 5   },
+                { label: '6–15',  min: 6,   max: 15  },
+                { label: '16–30', min: 16,  max: 30  },
+                { label: '31–50', min: 31,  max: 50  },
+                { label: '51–100',min: 51,  max: 100 },
+                { label: '100+',  min: 101, max: Infinity }
+            ];
+            const counts = buckets.map(b => srcWordCounts.filter(w => w >= b.min && w <= b.max).length);
+            const maxCount = Math.max(...counts, 1);
+
+            const histEl = document.getElementById('statHistogram');
+            const labelsEl = document.getElementById('statHistogramLabels');
+            histEl.innerHTML = '';
+            labelsEl.innerHTML = '';
+
+            counts.forEach((count, i) => {
+                const pct = Math.max(4, Math.round((count / maxCount) * 100));
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 bg-primary rounded-t opacity-80 hover:opacity-100 transition cursor-default';
+                bar.style.height = pct + '%';
+                bar.title = `${buckets[i].label} words: ${count.toLocaleString()} segments`;
+                histEl.appendChild(bar);
+
+                const lbl = document.createElement('div');
+                lbl.className = 'flex-1 text-center overflow-hidden';
+                lbl.style.fontSize = '10px';
+                lbl.textContent = buckets[i].label;
+                labelsEl.appendChild(lbl);
+            });
+
+            statsPanel.classList.remove('hidden');
+            // Auto-open the panel
+            statsBody.classList.remove('hidden');
+            statsChevron.style.transform = 'rotate(180deg)';
         }
 
         // Parse TMX file content
@@ -914,30 +1234,52 @@
 
         // Perform search on the TMX data
         function performSearch() {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            
-            if (searchTerm === '') {
-                // If search is empty, show all results
+            const rawTerm = searchInput.value.trim();
+            const isRegex = useRegex.checked;
+
+            // Clear previous regex error
+            regexError.classList.add('hidden');
+            regexError.textContent = '';
+
+            if (rawTerm === '') {
                 filteredUnits = [...tmxData.units];
-            } else {
-                // Filter based on search term and checkboxes
-                filteredUnits = tmxData.units.filter(unit => {
-                    const sourceMatch = unit.source.toLowerCase().includes(searchTerm);
-                    const targetMatch = unit.target.toLowerCase().includes(searchTerm);
-                    
-                    if (sourceOnly.checked && !targetOnly.checked) {
-                        return sourceMatch;
-                    } else if (targetOnly.checked && !sourceOnly.checked) {
-                        return targetMatch;
-                    } else {
-                        return sourceMatch || targetMatch;
-                    }
-                });
+                currentPage = 1;
+                updateResults();
+                return;
             }
-            
-            // Reset to first page and update results
+
+            let searchRegex;
+            if (isRegex) {
+                try {
+                    searchRegex = new RegExp(rawTerm, 'gi');
+                } catch (e) {
+                    regexError.textContent = 'Invalid regex: ' + e.message;
+                    regexError.classList.remove('hidden');
+                    filteredUnits = [];
+                    currentPage = 1;
+                    updateResults();
+                    return;
+                }
+            } else {
+                const escaped = rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                searchRegex = new RegExp(escaped, 'gi');
+            }
+
+            filteredUnits = tmxData.units.filter(unit => {
+                // Reset lastIndex between uses of the same regex object
+                searchRegex.lastIndex = 0;
+                const sourceMatch = searchRegex.test(unit.source);
+                searchRegex.lastIndex = 0;
+                const targetMatch = searchRegex.test(unit.target);
+
+                if (sourceOnly.checked && !targetOnly.checked) return sourceMatch;
+                if (targetOnly.checked && !sourceOnly.checked) return targetMatch;
+                return sourceMatch || targetMatch;
+            });
+
             currentPage = 1;
             updateResults();
+            savePreferences();
         }
 
         // Update search when filters change
@@ -969,8 +1311,21 @@
             // Clear previous results
             resultsTable.innerHTML = '';
             
-            // Add results to table
-            const searchTerm = searchInput.value.trim().toLowerCase();
+            // Build search regex for highlighting
+            const rawTerm = searchInput.value.trim();
+            let highlightRegex = null;
+            if (rawTerm) {
+                try {
+                    if (useRegex.checked) {
+                        highlightRegex = new RegExp(rawTerm, 'gi');
+                    } else {
+                        const escaped = rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        highlightRegex = new RegExp(escaped, 'gi');
+                    }
+                } catch (e) {
+                    highlightRegex = null;
+                }
+            }
             
             currentUnits.forEach((unit, index) => {
                 const row = document.createElement('tr');
@@ -987,9 +1342,9 @@
                 // Text content div
                 const sourceTextDiv = document.createElement('div');
                 sourceTextDiv.className = 'flex-grow pr-8';
-                sourceTextDiv.innerHTML = searchTerm ? 
-                    highlightText(unit.source, searchTerm, sourceOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
-                    unit.source;
+                sourceTextDiv.innerHTML = highlightRegex ? 
+                    highlightText(unit.source, highlightRegex, sourceOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
+                    escapeHtml(unit.source);
                 
                 // Copy button for source
                 const sourceCopyBtn = document.createElement('button');
@@ -1015,9 +1370,9 @@
                 // Text content div
                 const targetTextDiv = document.createElement('div');
                 targetTextDiv.className = 'flex-grow pr-8';
-                targetTextDiv.innerHTML = searchTerm ? 
-                    highlightText(unit.target, searchTerm, targetOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
-                    unit.target;
+                targetTextDiv.innerHTML = highlightRegex ? 
+                    highlightText(unit.target, highlightRegex, targetOnly.checked || (!sourceOnly.checked && !targetOnly.checked)) : 
+                    escapeHtml(unit.target);
                 
                 // Copy button for target
                 const targetCopyBtn = document.createElement('button');
@@ -1096,17 +1451,31 @@
         }
 
         // Highlight search term in text
-        function highlightText(text, searchTerm, shouldHighlight) {
-            if (!shouldHighlight) return text;
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function highlightText(text, regex, shouldHighlight) {
+            if (!shouldHighlight) return escapeHtml(text);
             
-            // Escape special regex characters
-            const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            
-            // Create regex with case-insensitive flag
-            const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
-            
-            // Replace matches with highlighted version
-            return text.replace(regex, '<span class="bg-yellow-200 dark:bg-yellow-800">$1</span>');
+            regex.lastIndex = 0;
+            let result = '';
+            let lastIndex = 0;
+            let match;
+
+            while ((match = regex.exec(text)) !== null) {
+                // Avoid infinite loops on zero-length matches
+                if (match.index === regex.lastIndex) { regex.lastIndex++; continue; }
+                result += escapeHtml(text.slice(lastIndex, match.index));
+                result += '<mark class="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5">' + escapeHtml(match[0]) + '</mark>';
+                lastIndex = regex.lastIndex;
+            }
+            result += escapeHtml(text.slice(lastIndex));
+            return result;
         }
 
         // Update pagination controls
@@ -1239,6 +1608,7 @@
                         }
                         
                         renderMergeFileList();
+                        idbSet('mergeFiles', mergeFiles);
                         showMergeStatus(`Successfully uploaded ${file.name}`, 'info');
                     } catch (error) {
                         console.error("Error parsing merge file:", error);
@@ -1299,6 +1669,7 @@
         function removeMergeFile(id) {
             mergeFiles = mergeFiles.filter(f => f.id !== id);
             renderMergeFileList();
+            idbSet('mergeFiles', mergeFiles);
             showMergeStatus('File removed from list', 'info');
         }
 
@@ -1476,6 +1847,11 @@
                     document.getElementById('metaTgtLang').value = metaEditorData.metadata.adminlang || '';
                     document.getElementById('metaDatatype').value = metaEditorData.metadata.datatype || '';
                     document.getElementById('metaSegtype').value = metaEditorData.metadata.segtype || '';
+
+                    // Persist to IndexedDB
+                    idbSet('metaEditorData', metaEditorData);
+                    lsSet('metaFileName', file.name);
+                    lsSet('metaFileSize', formatFileSize(file.size));
                 } catch (error) {
                     console.error("Error parsing meta editor file:", error);
                     showMetaEditorStatus(`Error parsing ${file.name}: ${error.message}`, 'error');
@@ -1530,6 +1906,192 @@
             
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
+
+        // ================================================================
+        // PERSISTENCE HELPERS — depend on DOM refs declared above
+        // ================================================================
+
+        /** Save lightweight UI preferences to localStorage */
+        function savePreferences() {
+            lsSet('searchQuery',          searchInput?.value || '');
+            lsSet('sourceOnly',           sourceOnly?.checked || false);
+            lsSet('targetOnly',           targetOnly?.checked || false);
+            lsSet('useRegex',             useRegex?.checked  || false);
+            lsSet('currentPage',          currentPage);
+            lsSet('mergeSrcLang',         mergeSrcLang?.value || '');
+            lsSet('mergeTgtLang',         mergeTgtLang?.value || '');
+            lsSet('mergeAuthor',          mergeAuthor?.value  || '');
+            lsSet('mergeTool',            mergeTool?.value    || '');
+            lsSet('mergeRemoveDuplicates',mergeRemoveDuplicates?.checked ?? true);
+        }
+
+        /** Show a dismissible banner below the title */
+        function showSessionBanner(html, isSuccess = false) {
+            const banner = document.getElementById('sessionBanner');
+            if (!banner) return;
+            banner.innerHTML = html;
+            const base = 'flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm mb-4 ';
+            banner.className = base + (isSuccess
+                ? 'bg-green-50 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700'
+                : 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700');
+            banner.classList.remove('hidden');
+            if (isSuccess) setTimeout(() => banner.classList.add('hidden'), 7000);
+        }
+
+        /** Wipe all persisted data and reset UI state */
+        async function clearSession() {
+            await Promise.all([
+                idbDelete('tmxData'),
+                idbDelete('mergeFiles'),
+                idbDelete('metaEditorData')
+            ]);
+            ['searchQuery','sourceOnly','targetOnly','useRegex','currentPage','activeTab',
+             'mergeSrcLang','mergeTgtLang','mergeAuthor','mergeTool','mergeRemoveDuplicates',
+             'fileName','fileSize','metaFileName','metaFileSize'].forEach(lsDel);
+
+            // Reset in-memory state
+            tmxData = { units: [], sourceLanguage: '', targetLanguage: '' };
+            filteredUnits = [];
+            mergeFiles = [];
+            metaEditorData = { units: [], metadata: {} };
+
+            // Reset Search & View UI
+            fileText.textContent = 'Select or drop your file';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('fileSize').textContent = '';
+            document.getElementById('fileInfo').classList.add('hidden');
+            searchAndResultsContainer.classList.add('hidden');
+            statsPanel.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            searchInput.value = '';
+            sourceOnly.checked = false;
+            targetOnly.checked = false;
+            useRegex.checked = false;
+
+            // Reset Merge UI
+            renderMergeFileList();
+            mergeSrcLang.value = '';
+            mergeTgtLang.value = '';
+            mergeAuthor.value  = '';
+            mergeTool.value    = 'MemoMemo';
+
+            // Reset Metadata UI
+            document.getElementById('metaFileText').textContent = 'Select or drop your file';
+            document.getElementById('metaFileName').textContent = '';
+            document.getElementById('metaFileSize').textContent = '';
+            document.getElementById('metaFileInfo').classList.add('hidden');
+            metadataCard.classList.add('hidden');
+            metaEditorStatus.classList.add('hidden');
+
+            document.getElementById('sessionBanner').classList.add('hidden');
+            showSessionBanner('🗑️ Sesión limpiada correctamente.', false);
+        }
+
+        /** On page load: restore all persisted state from localStorage + IndexedDB */
+        async function restoreSession() {
+            // --- Lightweight prefs (localStorage) ---
+            const savedTab = lsGet('activeTab', 'search');
+
+            const savedQuery  = lsGet('searchQuery', '');
+            const savedSrcO   = lsGet('sourceOnly', false);
+            const savedTgtO   = lsGet('targetOnly', false);
+            const savedRegex  = lsGet('useRegex', false);
+
+            if (savedQuery)  searchInput.value     = savedQuery;
+            if (savedSrcO)   sourceOnly.checked     = true;
+            if (savedTgtO)   targetOnly.checked     = true;
+            if (savedRegex)  useRegex.checked       = true;
+            currentPage = lsGet('currentPage', 1);
+
+            const msl = lsGet('mergeSrcLang');          if (msl !== null) mergeSrcLang.value = msl;
+            const mtl = lsGet('mergeTgtLang');          if (mtl !== null) mergeTgtLang.value = mtl;
+            const ma  = lsGet('mergeAuthor');           if (ma  !== null) mergeAuthor.value  = ma;
+            const mt  = lsGet('mergeTool');             if (mt  !== null) mergeTool.value    = mt;
+            const mrd = lsGet('mergeRemoveDuplicates'); if (mrd !== null) mergeRemoveDuplicates.checked = mrd;
+
+            // --- Heavy data (IndexedDB) ---
+            const [savedTmx, savedMerge, savedMeta] = await Promise.all([
+                idbGet('tmxData'),
+                idbGet('mergeFiles'),
+                idbGet('metaEditorData')
+            ]);
+
+            let restored = false;
+
+            // Restore Search & View
+            if (savedTmx && savedTmx.units && savedTmx.units.length > 0) {
+                tmxData       = savedTmx;
+                filteredUnits = [...tmxData.units];
+
+                const fn = lsGet('fileName', '');
+                const fs = lsGet('fileSize', '');
+                fileText.textContent = 'File loaded!';
+                if (fn) document.getElementById('fileName').textContent = fn;
+                if (fs) document.getElementById('fileSize').textContent = fs;
+                document.getElementById('fileInfo').classList.remove('hidden');
+                document.getElementById('fileStats').textContent = `${tmxData.units.length} translation units`;
+                sourceLanguage.textContent = tmxData.sourceLanguage || '--';
+                targetLanguage.textContent = tmxData.targetLanguage || '--';
+                errorMessage.classList.add('hidden');
+                searchAndResultsContainer.classList.remove('hidden');
+                resultsSection.classList.remove('hidden');
+                updateResults();
+                renderStats(tmxData.units);
+                restored = true;
+            }
+
+            // Restore Merge TMs
+            if (savedMerge && savedMerge.length > 0) {
+                mergeFiles = savedMerge;
+                renderMergeFileList();
+                restored = true;
+            }
+
+            // Restore Edit Metadata
+            if (savedMeta && savedMeta.units && savedMeta.units.length > 0) {
+                metaEditorData = savedMeta;
+                const mfn = lsGet('metaFileName', '');
+                const mfs = lsGet('metaFileSize', '');
+                document.getElementById('metaFileText').textContent = 'File loaded!';
+                if (mfn) document.getElementById('metaFileName').textContent = mfn;
+                if (mfs) document.getElementById('metaFileSize').textContent = mfs;
+                document.getElementById('metaFileInfo').classList.remove('hidden');
+                document.getElementById('metaFileStats').textContent =
+                    `${metaEditorData.units.length} translation units found`;
+                document.getElementById('metaAuthor').value        = metaEditorData.metadata.creationid          || '';
+                document.getElementById('metaToolDisplay').textContent = metaEditorData.metadata.creationtool   || 'MemoMemo';
+                document.getElementById('metaToolVersion').value   = metaEditorData.metadata.creationtoolversion || '';
+                document.getElementById('metaCreationDate').value  = metaEditorData.metadata.creationdate        || '';
+                document.getElementById('metaSrcLang').value       = metaEditorData.metadata.srclang             || '';
+                document.getElementById('metaTgtLang').value       = metaEditorData.metadata.adminlang           || '';
+                document.getElementById('metaDatatype').value      = metaEditorData.metadata.datatype            || '';
+                document.getElementById('metaSegtype').value       = metaEditorData.metadata.segtype             || '';
+                metadataCard.classList.remove('hidden');
+                restored = true;
+            }
+
+            // Switch to the last active tab
+            switchTab(savedTab);
+
+            if (restored) {
+                showSessionBanner(
+                    `<span>✓ Sesión anterior restaurada automáticamente.</span>` +
+                    `<button onclick="clearSession()" ` +
+                    `class="ml-4 px-3 py-1 rounded border border-current font-semibold text-xs hover:opacity-75 transition whitespace-nowrap">` +
+                    `Limpiar sesión</button>`,
+                    true
+                );
+            }
+
+            // Auto-save merge config on input
+            [mergeSrcLang, mergeTgtLang, mergeAuthor, mergeTool].forEach(el =>
+                el.addEventListener('input', savePreferences)
+            );
+            mergeRemoveDuplicates.addEventListener('change', savePreferences);
+        }
+
+        // Kick off session restore
+        restoreSession();
     </script>
 </body>
 <footer class="text-center py-4 text-sm text-primary dark:text-secondary">
