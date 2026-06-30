@@ -12,5 +12,6 @@ export const state = {
         units: [],
         metadata: {}
     },
-    itemsPerPage: 30
+    itemsPerPage: 30,
+    alignedPairs: []
 };

@@ -12,8 +12,10 @@ import {
     showMergeStatus,
     showMetaEditorStatus,
     updateTabUI,
-    formatFileSize
+    formatFileSize,
+    renderAlignmentPreviewTable
 } from './ui.js';
+import { alignTexts, extractTextFromDocx, extractTextFromPptx } from './aligner.js';
 
 function debounce(func, wait) {
     let timeout;
@@ -417,7 +419,8 @@ export async function clearSession() {
     await Promise.all([
         idbDelete('tmxData'),
         idbDelete('mergeFiles'),
-        idbDelete('metaEditorData')
+        idbDelete('metaEditorData'),
+        idbDelete('alignedPairs')
     ]);
     ['searchQuery','sourceOnly','targetOnly','useRegex','currentPage','activeTab',
      'mergeSrcLang','mergeTgtLang','mergeAuthor','mergeTool','mergeRemoveDuplicates',
@@ -429,6 +432,7 @@ export async function clearSession() {
     state.mergeFiles = [];
     state.metaEditorData = { units: [], metadata: {} };
     state.currentPage = 1;
+    state.alignedPairs = [];
 
     // Reset Search & View UI
     els.fileText.textContent = 'Select or drop your file';
@@ -473,6 +477,23 @@ export async function clearSession() {
     els.metaFileInfo.classList.add('hidden');
     els.metadataCard.classList.add('hidden');
     els.metaEditorStatus.classList.add('hidden');
+
+    // Reset Alignment UI
+    if (els.alignSourceFileInput) els.alignSourceFileInput.value = '';
+    if (els.alignSourceFileName) els.alignSourceFileName.textContent = '';
+    if (els.alignSourceFileInfo) els.alignSourceFileInfo.classList.add('hidden');
+    if (els.alignSourceDropZone) els.alignSourceDropZone.classList.remove('hidden');
+    if (els.alignSourceText) els.alignSourceText.value = '';
+    
+    if (els.alignTargetFileInput) els.alignTargetFileInput.value = '';
+    if (els.alignTargetFileName) els.alignTargetFileName.textContent = '';
+    if (els.alignTargetFileInfo) els.alignTargetFileInfo.classList.add('hidden');
+    if (els.alignTargetDropZone) els.alignTargetDropZone.classList.remove('hidden');
+    if (els.alignTargetText) els.alignTargetText.value = '';
+    
+    if (els.alignPreviewTable) els.alignPreviewTable.innerHTML = '';
+    if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
+    if (els.alignPlaceholder) els.alignPlaceholder.classList.remove('hidden');
 
     document.getElementById('sessionBanner').classList.add('hidden');
     showSessionBanner('🗑️ Sesión limpiada correctamente.', false);
@@ -581,6 +602,16 @@ async function restoreSession() {
         restored = true;
     }
 
+    // Restore Alignment tab data
+    const savedAlign = await idbGet('alignedPairs');
+    if (savedAlign && savedAlign.length > 0) {
+        state.alignedPairs = savedAlign;
+        els.alignPlaceholder.classList.add('hidden');
+        els.alignPreviewSection.classList.remove('hidden');
+        renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
+        restored = true;
+    }
+
     // Switch to the last active tab
     switchTab(savedTab);
 
@@ -676,6 +707,74 @@ function handleGlobalKeydown(e) {
             }
         }
     }
+}
+
+async function handleAlignFileUpload(file, isSource) {
+    try {
+        const text = await parseAlignmentFile(file);
+        if (isSource) {
+            els.alignSourceText.value = text;
+            els.alignSourceDropZone.classList.add('hidden');
+            els.alignSourceFileInfo.classList.remove('hidden');
+            els.alignSourceFileName.textContent = file.name;
+        } else {
+            els.alignTargetText.value = text;
+            els.alignTargetDropZone.classList.add('hidden');
+            els.alignTargetFileInfo.classList.remove('hidden');
+            els.alignTargetFileName.textContent = file.name;
+        }
+    } catch (err) {
+        console.error('Failed to parse alignment file:', err);
+        alert(`Error al cargar el archivo de alineación: ${err.message}`);
+    }
+}
+
+async function parseAlignmentFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'docx') {
+        const buffer = await file.arrayBuffer();
+        return await extractTextFromDocx(buffer);
+    } else if (ext === 'pptx') {
+        const buffer = await file.arrayBuffer();
+        return await extractTextFromPptx(buffer);
+    } else {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (err) => reject(err);
+            reader.readAsText(file);
+        });
+    }
+}
+
+function handleAlignRowAction(action, index) {
+    if (action === 'merge') {
+        if (index < state.alignedPairs.length - 1) {
+            const current = state.alignedPairs[index];
+            const next = state.alignedPairs[index + 1];
+            current.source = (current.source + ' ' + next.source).trim();
+            current.target = (current.target + ' ' + next.target).trim();
+            state.alignedPairs.splice(index + 1, 1);
+        }
+    } else if (action === 'shift') {
+        let prevTarget = "";
+        for (let i = index; i < state.alignedPairs.length; i++) {
+            const temp = state.alignedPairs[i].target;
+            state.alignedPairs[i].target = prevTarget;
+            prevTarget = temp;
+        }
+        if (prevTarget.trim()) {
+            state.alignedPairs.push({
+                id: 'align-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                source: '',
+                target: prevTarget
+            });
+        }
+    } else if (action === 'delete') {
+        state.alignedPairs.splice(index, 1);
+    }
+    idbSet('alignedPairs', state.alignedPairs);
+    renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
 }
 
 function init() {
@@ -949,6 +1048,166 @@ function formatTmxDate(inputStr) {
     if (changeMetaFileBtn) {
         changeMetaFileBtn.addEventListener('click', () => {
             els.metaFileInput.click();
+        });
+    }
+
+    // --- Alignment Tab Setup ---
+    if (els.tabAlignBtn) {
+        els.tabAlignBtn.addEventListener('click', () => switchTab('align'));
+    }
+
+    // Source File Drag and Drop / Input change
+    if (els.alignSourceDropZone) {
+        els.alignSourceDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            els.alignSourceDropZone.classList.add('bg-gray-100');
+        });
+        els.alignSourceDropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            els.alignSourceDropZone.classList.remove('bg-gray-100');
+        });
+        els.alignSourceDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            els.alignSourceDropZone.classList.remove('bg-gray-100');
+            if (e.dataTransfer.files.length) {
+                handleAlignFileUpload(e.dataTransfer.files[0], true);
+            }
+        });
+    }
+
+    if (els.alignSourceFileInput) {
+        els.alignSourceFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleAlignFileUpload(e.target.files[0], true);
+            }
+        });
+    }
+
+    if (els.changeAlignSourceBtn) {
+        els.changeAlignSourceBtn.addEventListener('click', () => {
+            els.alignSourceFileInput.value = '';
+            els.alignSourceFileName.textContent = '';
+            els.alignSourceFileInfo.classList.add('hidden');
+            els.alignSourceDropZone.classList.remove('hidden');
+            els.alignSourceText.value = '';
+        });
+    }
+
+    // Target File Drag and Drop / Input change
+    if (els.alignTargetDropZone) {
+        els.alignTargetDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            els.alignTargetDropZone.classList.add('bg-gray-100');
+        });
+        els.alignTargetDropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            els.alignTargetDropZone.classList.remove('bg-gray-100');
+        });
+        els.alignTargetDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            els.alignTargetDropZone.classList.remove('bg-gray-100');
+            if (e.dataTransfer.files.length) {
+                handleAlignFileUpload(e.dataTransfer.files[0], false);
+            }
+        });
+    }
+
+    if (els.alignTargetFileInput) {
+        els.alignTargetFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleAlignFileUpload(e.target.files[0], false);
+            }
+        });
+    }
+
+    if (els.changeAlignTargetBtn) {
+        els.changeAlignTargetBtn.addEventListener('click', () => {
+            els.alignTargetFileInput.value = '';
+            els.alignTargetFileName.textContent = '';
+            els.alignTargetFileInfo.classList.add('hidden');
+            els.alignTargetDropZone.classList.remove('hidden');
+            els.alignTargetText.value = '';
+        });
+    }
+
+    // Start Alignment button click
+    if (els.startAlignBtn) {
+        els.startAlignBtn.addEventListener('click', () => {
+            const srcText = els.alignSourceText.value;
+            const tgtText = els.alignTargetText.value;
+            
+            if (!srcText.trim() || !tgtText.trim()) {
+                alert('Por favor introduce texto o carga archivos tanto en origen como en destino.');
+                return;
+            }
+            
+            state.alignedPairs = alignTexts(srcText, tgtText);
+            idbSet('alignedPairs', state.alignedPairs);
+            
+            els.alignPlaceholder.classList.add('hidden');
+            els.alignPreviewSection.classList.remove('hidden');
+            renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
+        });
+    }
+
+    // Direct Injection to Workspace Button
+    if (els.alignOpenInAppBtn) {
+        els.alignOpenInAppBtn.addEventListener('click', () => {
+            const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
+            if (!validPairs.length) return;
+            
+            const alignedData = {
+                units: validPairs.map(p => ({
+                    source: p.source,
+                    target: p.target
+                })),
+                sourceLanguage: 'en',
+                targetLanguage: 'es',
+                metadata: {
+                    creationid: 'MemoMemo Align',
+                    creationtool: 'MemoMemo',
+                    creationtoolversion: '1.0',
+                    creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
+                    srclang: 'en',
+                    adminlang: 'es',
+                    datatype: 'plaintext',
+                    segtype: 'sentence'
+                }
+            };
+            
+            loadSharedFile(alignedData, 'aligned_translations.tmx', 'Dynamic');
+            switchTab('search');
+            showSessionBanner('✓ Alineaciones cargadas correctamente en el buscador de MemoMemo.', true);
+        });
+    }
+
+    // Download TMX Button
+    if (els.alignDownloadTmxBtn) {
+        els.alignDownloadTmxBtn.addEventListener('click', () => {
+            const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
+            if (!validPairs.length) return;
+            
+            const tmxXml = generateTMXXML(
+                validPairs.map(p => ({ source: p.source, target: p.target })),
+                {
+                    creationid: 'MemoMemo Align',
+                    creationtool: 'MemoMemo',
+                    creationtoolversion: '1.0',
+                    creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
+                    srclang: 'en',
+                    adminlang: 'es',
+                    datatype: 'plaintext',
+                    segtype: 'sentence'
+                }
+            );
+            
+            const blob = new Blob([tmxXml], { type: 'text/xml;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'aligned_translation_memory.tmx');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     }
 

@@ -35,9 +35,11 @@ export const els = {
     tabSearchBtn: document.getElementById('tabSearchBtn'),
     tabMergeBtn: document.getElementById('tabMergeBtn'),
     tabMetaBtn: document.getElementById('tabMetaBtn'),
+    tabAlignBtn: document.getElementById('tabAlignBtn'),
     tabSearchContent: document.getElementById('tabSearchContent'),
     tabMergeContent: document.getElementById('tabMergeContent'),
     tabMetaContent: document.getElementById('tabMetaContent'),
+    tabAlignContent: document.getElementById('tabAlignContent'),
     
     // Merger
     mergeFileInput: document.getElementById('mergeFileInput'),
@@ -70,7 +72,27 @@ export const els = {
     metaSrcLang: document.getElementById('metaSrcLang'),
     metaTgtLang: document.getElementById('metaTgtLang'),
     metaDatatype: document.getElementById('metaDatatype'),
-    metaSegtype: document.getElementById('metaSegtype')
+    metaSegtype: document.getElementById('metaSegtype'),
+
+    // Alignment Tab Elements
+    alignSourceFileInput: document.getElementById('alignSourceFileInput'),
+    alignTargetFileInput: document.getElementById('alignTargetFileInput'),
+    alignSourceDropZone: document.getElementById('alignSourceDropZone'),
+    alignTargetDropZone: document.getElementById('alignTargetDropZone'),
+    alignSourceFileInfo: document.getElementById('alignSourceFileInfo'),
+    alignTargetFileInfo: document.getElementById('alignTargetFileInfo'),
+    alignSourceFileName: document.getElementById('alignSourceFileName'),
+    alignTargetFileName: document.getElementById('alignTargetFileName'),
+    changeAlignSourceBtn: document.getElementById('changeAlignSourceBtn'),
+    changeAlignTargetBtn: document.getElementById('changeAlignTargetBtn'),
+    alignSourceText: document.getElementById('alignSourceText'),
+    alignTargetText: document.getElementById('alignTargetText'),
+    startAlignBtn: document.getElementById('startAlignBtn'),
+    alignPreviewSection: document.getElementById('alignPreviewSection'),
+    alignPreviewTable: document.getElementById('alignPreviewTable'),
+    alignPlaceholder: document.getElementById('alignPlaceholder'),
+    alignOpenInAppBtn: document.getElementById('alignOpenInAppBtn'),
+    alignDownloadTmxBtn: document.getElementById('alignDownloadTmxBtn')
 };
 
 export function formatFileSize(bytes) {
@@ -602,26 +624,124 @@ export function showMetaEditorStatus(message, type) {
 }
 
 export function updateTabUI(tab) {
-    const buttons = [els.tabSearchBtn, els.tabMergeBtn, els.tabMetaBtn];
-    const contents = [els.tabSearchContent, els.tabMergeContent, els.tabMetaContent];
-    const activeBtn = tab === 'search' ? els.tabSearchBtn : (tab === 'merge' ? els.tabMergeBtn : els.tabMetaBtn);
-    const activeContent = tab === 'search' ? els.tabSearchContent : (tab === 'merge' ? els.tabMergeContent : els.tabMetaContent);
+    const tabs = {
+        search: { btn: els.tabSearchBtn, content: els.tabSearchContent },
+        meta: { btn: els.tabMetaBtn, content: els.tabMetaContent },
+        align: { btn: els.tabAlignBtn, content: els.tabAlignContent },
+        merge: { btn: els.tabMergeBtn, content: els.tabMergeContent }
+    };
 
-    buttons.forEach(btn => {
-        if (btn === activeBtn) {
-            btn.classList.add('border-primary', 'text-primary');
-            btn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+    Object.keys(tabs).forEach(k => {
+        const item = tabs[k];
+        if (!item.btn || !item.content) return;
+        if (k === tab) {
+            item.btn.classList.add('border-primary', 'text-primary');
+            item.btn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            item.content.classList.remove('hidden');
         } else {
-            btn.classList.remove('border-primary', 'text-primary');
-            btn.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            item.btn.classList.remove('border-primary', 'text-primary');
+            item.btn.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            item.content.classList.add('hidden');
         }
     });
+}
 
-    contents.forEach(content => {
-        if (content === activeContent) {
-            content.classList.remove('hidden');
-        } else {
-            content.classList.add('hidden');
+export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
+    const tableBody = document.getElementById('alignPreviewTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    
+    alignedPairs.forEach((pair, index) => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-[#93C5FD] hover:bg-gray-50 dark:hover:bg-gray-800 transition';
+        
+        // Calculate length ratio warning
+        const srcWords = pair.source.trim().split(/\s+/).filter(Boolean).length;
+        const tgtWords = pair.target.trim().split(/\s+/).filter(Boolean).length;
+        let skewClass = "";
+        let skewTitle = "";
+        
+        if (srcWords > 0 && tgtWords > 0) {
+            const ratio = srcWords / tgtWords;
+            if (ratio > 2.5 || ratio < 0.4) {
+                skewClass = " bg-yellow-50 dark:bg-yellow-900/20";
+                skewTitle = `Length ratio mismatch warning: ${srcWords} words source vs ${tgtWords} words target.`;
+            }
         }
+        
+        if (skewClass) {
+            row.className += skewClass;
+            row.title = skewTitle;
+        }
+
+        // Source Cell
+        const srcTd = document.createElement('td');
+        srcTd.className = 'px-2 py-2 w-5/12 align-top';
+        const srcTextArea = document.createElement('textarea');
+        srcTextArea.className = 'w-full bg-transparent border-0 focus:ring-1 focus:ring-primary rounded p-1 resize-y font-normal text-xs';
+        srcTextArea.value = pair.source;
+        srcTextArea.rows = Math.max(1, Math.ceil(pair.source.length / 50));
+        srcTextArea.addEventListener('input', (e) => {
+            pair.source = e.target.value;
+        });
+        srcTd.appendChild(srcTextArea);
+
+        // Target Cell
+        const tgtTd = document.createElement('td');
+        tgtTd.className = 'px-2 py-2 w-5/12 align-top';
+        const tgtTextArea = document.createElement('textarea');
+        tgtTextArea.className = 'w-full bg-transparent border-0 focus:ring-1 focus:ring-primary rounded p-1 resize-y font-normal text-xs';
+        tgtTextArea.value = pair.target;
+        tgtTextArea.rows = Math.max(1, Math.ceil(pair.target.length / 50));
+        tgtTextArea.addEventListener('input', (e) => {
+            pair.target = e.target.value;
+        });
+        tgtTd.appendChild(tgtTextArea);
+
+        // Actions Cell
+        const actionsTd = document.createElement('td');
+        actionsTd.className = 'px-2 py-2 w-2/12 text-right align-middle whitespace-nowrap';
+        
+        // Merge Down Button (↓)
+        const mergeBtn = document.createElement('button');
+        mergeBtn.className = 'text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
+        mergeBtn.title = 'Merge with segment below';
+        mergeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7" /></svg>`;
+        if (index === alignedPairs.length - 1) {
+            mergeBtn.disabled = true;
+            mergeBtn.classList.add('opacity-30', 'cursor-not-allowed');
+        } else {
+            mergeBtn.addEventListener('click', () => {
+                if (onRowAction) onRowAction('merge', index);
+            });
+        }
+
+        // Shift Down Button (▼)
+        const shiftBtn = document.createElement('button');
+        shiftBtn.className = 'text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
+        shiftBtn.title = 'Insert blank space in target here';
+        shiftBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+        shiftBtn.addEventListener('click', () => {
+            if (onRowAction) onRowAction('shift', index);
+        });
+
+        // Delete Button (🗑️)
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 p-1 rounded focus:outline-none focus:ring-1 focus:ring-red-500';
+        deleteBtn.title = 'Delete segment pair';
+        deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
+        deleteBtn.addEventListener('click', () => {
+            if (onRowAction) onRowAction('delete', index);
+        });
+
+        actionsTd.appendChild(mergeBtn);
+        actionsTd.appendChild(shiftBtn);
+        actionsTd.appendChild(deleteBtn);
+
+        row.appendChild(srcTd);
+        row.appendChild(tgtTd);
+        row.appendChild(actionsTd);
+        
+        tableBody.appendChild(row);
     });
 }
