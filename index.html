@@ -12,7 +12,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#5D5CDE',
+                        primary: '#3B82F6',
+                        secondary: '#93C5FD',
                     },
                     animation: {
                         'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
@@ -30,7 +31,7 @@
         }
     </script>
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen">
     <!-- Detect dark mode -->
     <script>
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -80,7 +81,7 @@
             <div id="tabSearchContent">
                 <div class="flex flex-col gap-4">
                     <!-- Upload Card -->
-                    <div id="uploadCard" class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                    <div id="uploadCard" class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                         <h2 class="text-lg font-semibold mb-3">Upload Translation Memory File</h2>
                         <div class="flex flex-col gap-3">
                             <label for="fileInput">
@@ -107,7 +108,7 @@
                     </div>
 
                     <!-- Stats Panel -->
-                    <div id="statsPanel" class="hidden bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    <div id="statsPanel" class="hidden bg-white rounded-lg shadow-md border border-[#93C5FD] overflow-hidden">
                         <button id="statsToggle" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                             <span class="flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -167,12 +168,12 @@
                     <div id="searchAndResultsContainer" class="hidden flex flex-col gap-4">
                         <!-- Search Section -->
                         <div id="searchSection">
-                            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                                 <h2 class="text-lg font-semibold mb-3">Search Translation Memory</h2>
                                 <div class="flex flex-col md:flex-row gap-3 items-center">
                                     <div class="w-full">
                                         <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
-                                               class="w-full px-3 py-2 rounded-md border border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
+                                               class="w-full px-3 py-2 rounded-md border border-[#93C5FD] bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
                                     </div>
                                     <div class="flex flex-wrap items-center gap-3 text-sm">
                                         <input type="checkbox" id="sourceOnly" class="hidden" />
@@ -231,19 +232,19 @@
 
                         <!-- Results Section -->
                         <div id="resultsSection" class="hidden">
-                            <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+                            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] overflow-x-auto">
+                                <table class="min-w-full divide-y divide-[#93C5FD]">
                                     <thead>
                                         <tr>
-                                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider w-1/2">
+                                            <th class="px-4 py-3 text-left text-sm font-medium text-[#1F2937] dark:text-gray-300 uppercase tracking-wider w-1/2">
                                                 Source (<span id="sourceLanguage">--</span>)
                                             </th>
-                                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider w-1/2">
+                                            <th class="px-4 py-3 text-left text-sm font-medium text-[#1F2937] dark:text-gray-300 uppercase tracking-wider w-1/2">
                                                 Target (<span id="targetLanguage">--</span>)
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody id="resultsTable" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tbody id="resultsTable" class="divide-y divide-[#93C5FD]">
                                         <!-- Results will be inserted here -->
                                     </tbody>
                                 </table>
@@ -263,7 +264,7 @@
                     <!-- Left Column: Upload Area & Uploaded Files List -->
                     <div class="lg:col-span-1 flex flex-col gap-4">
                         <!-- Multi-upload Card -->
-                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                             <h2 class="text-lg font-semibold mb-3">Upload Memories to Merge</h2>
                             <label for="mergeFileInput" class="block cursor-pointer">
                                 <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-5 text-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
@@ -278,7 +279,7 @@
                         </div>
 
                         <!-- Uploaded Files List Card -->
-                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                             <div class="flex justify-between items-center mb-3">
                                 <h2 class="text-lg font-semibold">Selected Files</h2>
                                 <span id="mergeFileCountBadge" class="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">0</span>
@@ -292,7 +293,7 @@
                     <!-- Right Column: Settings and Action Buttons -->
                     <div class="lg:col-span-2 flex flex-col gap-4">
                         <!-- Settings Card -->
-                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -348,7 +349,7 @@
                     <!-- Left Column: File Upload & Stats -->
                     <div class="lg:col-span-1 flex flex-col gap-4">
                         <!-- Upload Card for Metadata Editor -->
-                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                             <h2 class="text-lg font-semibold mb-3">Upload File to Edit Metadata</h2>
                             <div class="flex flex-col gap-3">
                                 <label for="metaFileInput">
@@ -378,7 +379,7 @@
                     <!-- Right Column: Metadata Editor Card -->
                     <div class="lg:col-span-2 flex flex-col gap-4">
                         <!-- Metadata Card -->
-                        <div id="metadataCard" class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md hidden">
+                        <div id="metadataCard" class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] hidden">
                             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -389,7 +390,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="metaAuthor" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Author (creationid)</label>
-                                        <input type="text" id="metaAuthor" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaAuthor" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Tool (read-only)</label>
@@ -401,21 +402,21 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="metaToolVersion" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Tool Version</label>
-                                        <input type="text" id="metaToolVersion" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaToolVersion" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                     <div>
                                         <label for="metaCreationDate" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Date</label>
-                                        <input type="text" id="metaCreationDate" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" placeholder="e.g. 20260604T203000Z" />
+                                        <input type="text" id="metaCreationDate" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" placeholder="e.g. 20260604T203000Z" />
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="metaSrcLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Source Lang</label>
-                                        <input type="text" id="metaSrcLang" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaSrcLang" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                     <div>
                                         <label for="metaTgtLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Target Lang</label>
-                                        <input type="text" id="metaTgtLang" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaTgtLang" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -431,11 +432,11 @@
                                                 </span>
                                             </span>
                                         </label>
-                                        <input type="text" id="metaDatatype" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaDatatype" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                     <div>
                                         <label for="metaSegtype" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Seg Type</label>
-                                        <input type="text" id="metaSegtype" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                                        <input type="text" id="metaSegtype" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                                     </div>
                                 </div>
                                 

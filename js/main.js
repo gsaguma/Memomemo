@@ -403,6 +403,9 @@ function updateSearchScopeUI(scope) {
 }
 
 export async function clearSession() {
+    if (!confirm("¿Estás seguro de que deseas limpiar la sesión? Se borrarán de forma permanente todos los archivos cargados y modificaciones de traducción no descargadas.")) {
+        return;
+    }
     await Promise.all([
         idbDelete('tmxData'),
         idbDelete('mergeFiles'),
@@ -859,13 +862,30 @@ function init() {
         }
     });
 
+function formatTmxDate(inputStr) {
+    if (!inputStr) {
+        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+    if (/^\d{8}T\d{6}Z$/.test(inputStr)) {
+        return inputStr;
+    }
+    const timestamp = Date.parse(inputStr);
+    if (isNaN(timestamp)) {
+        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+    return new Date(timestamp).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
     els.exportMetadataBtn.addEventListener('click', () => {
         if (!state.metaEditorData.units.length) return;
+
+        const formattedDate = formatTmxDate(els.metaCreationDate.value.trim());
+        els.metaCreationDate.value = formattedDate;
 
         // Gather values (Creation Tool remains unchanged/read-only)
         state.metaEditorData.metadata.creationid = els.metaAuthor.value.trim();
         state.metaEditorData.metadata.creationtoolversion = els.metaToolVersion.value.trim();
-        state.metaEditorData.metadata.creationdate = els.metaCreationDate.value.trim();
+        state.metaEditorData.metadata.creationdate = formattedDate;
         state.metaEditorData.metadata.srclang = els.metaSrcLang.value.trim();
         state.metaEditorData.metadata.adminlang = els.metaTgtLang.value.trim();
         state.metaEditorData.metadata.datatype = els.metaDatatype.value.trim();
