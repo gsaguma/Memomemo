@@ -48,8 +48,9 @@
 
     <div id="mainContent">
         <div class="container mx-auto px-4 py-3 max-w-5xl">
-            <h1 class="text-2xl font-bold text-center mb-3 text-primary dark:text-primary">
-                Memo Memo
+            <h1 class="text-2xl font-bold text-center mb-3 text-primary dark:text-primary flex items-center justify-center gap-2">
+                <img src="media/memotmx.png" alt="Memo TMX Logo" class="h-6 w-auto object-contain" />
+                <span>Memo Memo</span>
             </h1>
 
             <!-- Session Banner -->
@@ -84,7 +85,7 @@
                     <div id="uploadCard" class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                         <h2 class="text-lg font-semibold mb-3">Upload Translation Memory File</h2>
                         <div class="flex flex-col gap-3">
-                            <label for="fileInput">
+                            <label for="fileInput" id="dropZoneContainer" class="block">
                                 <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -95,13 +96,17 @@
                                 <input type="file" id="fileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
                             </label>
                             
-                            <div id="fileInfo" class="mt-1 text-sm hidden">
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                                    <div class="flex justify-between font-medium text-gray-900 dark:text-white truncate">
-                                        <span id="fileName" class="truncate" style="max-width: 180px;"></span>
-                                        <span id="fileSize" class="text-xs text-gray-600 dark:text-gray-400 self-center"></span>
-                                    </div>
-                                    <div id="fileStats" class="mt-1 text-xs text-gray-500"></div>
+                            <div id="fileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-3 rounded-lg border border-[#93C5FD] shadow-sm text-sm">
+                                <div class="flex items-center gap-2 truncate">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span id="fileName" class="font-medium truncate text-[#1F2937] max-w-[240px]"></span>
+                                    <span id="fileUnits" class="text-xs text-gray-500 whitespace-nowrap"></span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="fileSize" class="text-xs text-gray-500 font-medium"></span>
+                                    <button type="button" id="changeFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Cambiar archivo</button>
                                 </div>
                             </div>
                         </div>
@@ -352,7 +357,7 @@
                         <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                             <h2 class="text-lg font-semibold mb-3">Upload File to Edit Metadata</h2>
                             <div class="flex flex-col gap-3">
-                                <label for="metaFileInput">
+                                <label for="metaFileInput" id="metaDropZoneContainer" class="block">
                                     <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -363,13 +368,17 @@
                                     <input type="file" id="metaFileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
                                 </label>
                                 
-                                <div id="metaFileInfo" class="mt-1 text-sm hidden">
-                                    <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
-                                        <div class="flex justify-between font-medium text-gray-900 dark:text-white truncate">
-                                            <span id="metaFileName" class="truncate" style="max-width: 180px;"></span>
-                                            <span id="metaFileSize" class="text-xs text-gray-600 dark:text-gray-400 self-center"></span>
-                                        </div>
-                                        <div id="metaFileStats" class="mt-1 text-xs text-gray-500"></div>
+                                <div id="metaFileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-3 rounded-lg border border-[#93C5FD] shadow-sm text-sm">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span id="metaFileName" class="font-medium truncate text-[#1F2937] max-w-[240px]"></span>
+                                        <span id="metaFileUnits" class="text-xs text-gray-500 whitespace-nowrap"></span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span id="metaFileSize" class="text-xs text-gray-500 font-medium"></span>
+                                        <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Cambiar archivo</button>
                                     </div>
                                 </div>
                             </div>

@@ -42,6 +42,12 @@ function loadSharedFile(parsedData, fileName, fileSize) {
     els.fileText.textContent = 'File loaded!';
     els.fileName.textContent = fileName;
     els.fileSize.textContent = fileSize;
+    
+    const dropZone = document.getElementById('dropZoneContainer');
+    const fUnits = document.getElementById('fileUnits');
+    if (dropZone) dropZone.classList.add('hidden');
+    if (fUnits) fUnits.textContent = ` • ${parsedData.units.length} units`;
+    
     els.fileInfo.classList.remove('hidden');
     els.errorMessage.classList.add('hidden');
     els.searchAndResultsContainer.classList.remove('hidden');
@@ -60,6 +66,12 @@ function loadSharedFile(parsedData, fileName, fileSize) {
     els.metaFileText.textContent = 'File loaded!';
     els.metaFileName.textContent = fileName;
     els.metaFileSize.textContent = fileSize;
+    
+    const metaDropZone = document.getElementById('metaDropZoneContainer');
+    const mUnits = document.getElementById('metaFileUnits');
+    if (metaDropZone) metaDropZone.classList.add('hidden');
+    if (mUnits) mUnits.textContent = ` • ${parsedData.units.length} units`;
+    
     els.metaFileInfo.classList.remove('hidden');
     els.metaEditorStatus.classList.add('hidden');
     els.metadataCard.classList.remove('hidden');
@@ -426,6 +438,12 @@ export async function clearSession() {
     els.fileText.textContent = 'Select or drop your file';
     els.fileName.textContent = '';
     els.fileSize.textContent = '';
+    
+    const dropZone = document.getElementById('dropZoneContainer');
+    const fUnits = document.getElementById('fileUnits');
+    if (dropZone) dropZone.classList.remove('hidden');
+    if (fUnits) fUnits.textContent = '';
+
     els.fileInfo.classList.add('hidden');
     els.searchAndResultsContainer.classList.add('hidden');
     els.statsPanel.classList.add('hidden');
@@ -450,6 +468,12 @@ export async function clearSession() {
     els.metaFileText.textContent = 'Select or drop file';
     els.metaFileName.textContent = '';
     els.metaFileSize.textContent = '';
+    
+    const metaDropZone = document.getElementById('metaDropZoneContainer');
+    const mUnits = document.getElementById('metaFileUnits');
+    if (metaDropZone) metaDropZone.classList.remove('hidden');
+    if (mUnits) mUnits.textContent = '';
+
     els.metaFileInfo.classList.add('hidden');
     els.metadataCard.classList.add('hidden');
     els.metaEditorStatus.classList.add('hidden');
@@ -504,6 +528,12 @@ async function restoreSession() {
         els.fileText.textContent = 'File loaded!';
         if (fn) els.fileName.textContent = fn;
         if (fs) els.fileSize.textContent = fs;
+        
+        const dropZone = document.getElementById('dropZoneContainer');
+        const fUnits = document.getElementById('fileUnits');
+        if (dropZone) dropZone.classList.add('hidden');
+        if (fUnits) fUnits.textContent = ` • ${state.tmxData.units.length} units`;
+
         els.fileInfo.classList.remove('hidden');
         els.fileStats.textContent = `${state.tmxData.units.length} translation units`;
         els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
@@ -534,6 +564,12 @@ async function restoreSession() {
         els.metaFileText.textContent = 'File loaded!';
         if (mfn) els.metaFileName.textContent = mfn;
         if (mfs) els.metaFileSize.textContent = mfs;
+        
+        const metaDropZone = document.getElementById('metaDropZoneContainer');
+        const mUnits = document.getElementById('metaFileUnits');
+        if (metaDropZone) metaDropZone.classList.add('hidden');
+        if (mUnits) mUnits.textContent = ` • ${state.metaEditorData.units.length} units`;
+
         els.metaFileInfo.classList.remove('hidden');
         els.metaFileStats.textContent =
             `${state.metaEditorData.units.length} translation units found`;
@@ -906,6 +942,19 @@ function formatTmxDate(inputStr) {
         link.click();
         document.body.removeChild(link);
     });
+
+    const changeFileBtn = document.getElementById('changeFileBtn');
+    if (changeFileBtn) {
+        changeFileBtn.addEventListener('click', () => {
+            els.fileInput.click();
+        });
+    }
+    const changeMetaFileBtn = document.getElementById('changeMetaFileBtn');
+    if (changeMetaFileBtn) {
+        changeMetaFileBtn.addEventListener('click', () => {
+            els.metaFileInput.click();
+        });
+    }
 
     restoreSession();
 }
