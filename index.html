@@ -40,7 +40,7 @@
         }
     </style>
 </head>
-<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen flex flex-col font-sans transition-colors duration-200">
+<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen flex flex-col font-sans transition-colors duration-200 pb-16 md:pb-0">
     <div id="mainContent">
         <div class="container mx-auto px-4 py-3 max-w-5xl">
             <h1 class="text-2xl font-bold text-center mb-3 text-primary dark:text-primary flex items-center justify-center gap-2">
@@ -52,26 +52,26 @@
             <div id="sessionBanner" class="hidden flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm mb-4"></div>
 
             <!-- Tab Navigation -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
-                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="py-2 px-4 text-sm font-medium border-b-2 border-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex items-center gap-2">
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6 md:static fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1E293B] border-t md:border-t-0 p-2 md:p-0 md:mb-6 mb-0 shadow-lg md:shadow-none justify-around md:justify-start">
+                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     Search & View
                 </button>
-                <button id="tabMetaBtn" aria-label="Edit Metadata" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex items-center gap-2">
+                <button id="tabMetaBtn" aria-label="Edit Metadata" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Metadata
                 </button>
-                <button id="tabAlignBtn" aria-label="Align Translations" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex items-center gap-2">
+                <button id="tabAlignBtn" aria-label="Align Translations" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                     Align Translations
                 </button>
-                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="py-2 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex items-center gap-2">
+                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>

@@ -305,11 +305,11 @@ export function updateResults(state) {
         const row = document.createElement('tr');
         row.setAttribute('tabindex', '0');
         row.setAttribute('aria-label', 'Segment ' + (startIndex + index + 1));
-        row.className = 'group hover:bg-gray-50 dark:hover:bg-gray-750 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition cursor-pointer';
+        row.className = 'group hover:bg-gray-50 dark:hover:bg-gray-750 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition cursor-pointer flex flex-col md:table-row bg-white dark:bg-gray-800 p-3 md:p-0 mb-4 md:mb-0 rounded-lg md:rounded-none shadow-sm md:shadow-none border border-[#93C5FD] md:border-0';
         
         // Create source cell with copy button
         const sourceCell = document.createElement('td');
-        sourceCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm';
+        sourceCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm w-full md:w-1/2 block md:table-cell border-b md:border-b-0 border-gray-100 dark:border-gray-700 pb-3 md:pb-2';
         
         // Create wrapper div to position the text and button
         const sourceCellContent = document.createElement('div');
@@ -324,7 +324,7 @@ export function updateResults(state) {
         
         // Copy button for source
         const sourceCopyBtn = document.createElement('button');
-        sourceCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
+        sourceCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
         sourceCopyBtn.title = 'Copy source text';
         sourceCopyBtn.setAttribute('aria-label', 'Copy source text for segment ' + (startIndex + index + 1));
         sourceCopyBtn.setAttribute('data-text', unit.source);
@@ -337,7 +337,7 @@ export function updateResults(state) {
         
         // Create target cell with copy button & edit button
         const targetCell = document.createElement('td');
-        targetCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm';
+        targetCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm w-full md:w-1/2 block md:table-cell pt-3 md:pt-2';
         
         // Create wrapper div for target
         const targetCellContent = document.createElement('div');
@@ -353,13 +353,13 @@ export function updateResults(state) {
         
         // Edit button for target
         const targetEditBtn = document.createElement('button');
-        targetEditBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-10 top-3 transition-opacity';
+        targetEditBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-10 top-3 transition-opacity';
         targetEditBtn.title = 'Edit target text';
         targetEditBtn.setAttribute('aria-label', 'Edit target text for segment ' + (startIndex + index + 1));
         
         // Copy button for target
         const targetCopyBtn = document.createElement('button');
-        targetCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
+        targetCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
         targetCopyBtn.title = 'Copy target text';
         targetCopyBtn.setAttribute('aria-label', 'Copy target text for segment ' + (startIndex + index + 1));
         targetCopyBtn.setAttribute('data-text', unit.target);

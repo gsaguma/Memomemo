@@ -95,26 +95,24 @@ export function renderSearchTab() {
                 <div id="searchSection">
                     <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                         <h2 class="text-lg font-semibold mb-3">Search Translation Memory</h2>
-                        <div class="flex flex-col md:flex-row gap-3 items-center">
-                            <div class="w-full">
-                                <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
-                                       class="w-full px-3 py-2 rounded-md border border-[#93C5FD] bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
-                            </div>
+                        <div class="flex flex-col gap-3">
+                            <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
+                                   class="w-full px-3 py-2 rounded-md border border-[#93C5FD] bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
                             <div class="flex flex-wrap items-center gap-3 text-sm">
                                 <input type="checkbox" id="sourceOnly" class="hidden" />
                                 <input type="checkbox" id="targetOnly" class="hidden" />
-                                <div class="inline-flex rounded-md shadow-sm" role="group">
-                                    <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="px-3 py-1.5 text-xs font-medium rounded-l-md border border-gray-400 dark:border-gray-500 bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
+                                <div class="inline-flex rounded-md shadow-sm flex-grow md:flex-grow-0" role="group">
+                                    <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-l-md border border-gray-400 dark:border-gray-500 bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
                                         Both
                                     </button>
-                                    <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="px-3 py-1.5 text-xs font-medium border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
+                                    <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
                                         Source
                                     </button>
-                                    <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="px-3 py-1.5 text-xs font-medium rounded-r-md border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
+                                    <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-r-md border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
                                         Target
                                     </button>
                                 </div>
-                                <label class="inline-flex items-center cursor-pointer" title="Use regular expressions (e.g. \\d+, colou?r, ^Start)">
+                                <label class="inline-flex items-center cursor-pointer min-h-[44px] md:min-h-0" title="Use regular expressions (e.g. \\d+, colou?r, ^Start)">
                                     <input type="checkbox" id="useRegex" aria-label="Use regular expression search" class="form-checkbox h-4 w-4 text-primary rounded border-gray-400 dark:border-gray-500 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
                                     <span class="ml-1 font-mono text-xs tracking-tight">.*</span>
                                     <span class="ml-1">Regex</span>
@@ -159,7 +157,7 @@ export function renderSearchTab() {
                 <div id="resultsSection" class="hidden">
                     <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] overflow-x-auto">
                         <table class="min-w-full divide-y divide-[#93C5FD]">
-                            <thead>
+                            <thead class="hidden md:table-header-group">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-sm font-medium text-[#1F2937] dark:text-gray-300 uppercase tracking-wider w-1/2">
                                         Source (<span id="sourceLanguage">--</span>)
