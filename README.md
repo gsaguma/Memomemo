@@ -3,7 +3,7 @@
 > **A fully client-side, browser-based editor for Translation Memory files.** No server. No installation. Your data never leaves your machine.
 
 Memo Memo is a professional tool designed for translators, localization engineers, and language service providers who need a fast, lightweight way to inspect, clean, search, edit, merge, and align bilingual translation assets — directly in the browser.
-
+<img src="media/memomemo.png" alt="Memo Memo"/>
 ---
 
 ## ✨ Features
