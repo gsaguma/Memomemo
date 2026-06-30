@@ -179,9 +179,9 @@ export function renderStats(units) {
     });
 
     els.statsPanel.classList.remove('hidden');
-    // Auto-open the panel
-    els.statsBody.classList.remove('hidden');
-    els.statsChevron.style.transform = 'rotate(180deg)';
+    // Keep stats panel closed by default
+    els.statsBody.classList.add('hidden');
+    els.statsChevron.style.transform = '';
 }
 
 export function escapeHtml(text) {
@@ -498,7 +498,7 @@ export function updatePagination(pageCount, state) {
     els.pagination.appendChild(nextButton);
 }
 
-export function renderMergeFileList(state, removeMergeCallback) {
+export function renderMergeFileList(state, removeMergeCallback, moveMergeCallback) {
     els.mergeFileList.innerHTML = '';
     els.mergeFileCountBadge.textContent = state.mergeFiles.length;
 
@@ -511,7 +511,7 @@ export function renderMergeFileList(state, removeMergeCallback) {
     // Enable merge button if we have at least one file (for conversion / metadata updates too)
     els.executeMergeBtn.disabled = false;
 
-    state.mergeFiles.forEach(file => {
+    state.mergeFiles.forEach((file, index) => {
         const item = document.createElement('div');
         item.className = 'flex justify-between items-center bg-white dark:bg-gray-700 p-2.5 rounded border border-gray-200 dark:border-gray-600 shadow-sm text-sm';
         
@@ -529,16 +529,54 @@ export function renderMergeFileList(state, removeMergeCallback) {
         fileInfoDiv.appendChild(nameSpan);
         fileInfoDiv.appendChild(detailsSpan);
         
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'flex items-center gap-1';
+        
+        // Up button
+        const upBtn = document.createElement('button');
+        upBtn.className = 'text-gray-500 dark:text-gray-400 hover:text-primary focus:outline-none p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition';
+        upBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>';
+        upBtn.title = 'Move up';
+        upBtn.setAttribute('aria-label', `Move ${file.name} up`);
+        if (index === 0) {
+            upBtn.disabled = true;
+            upBtn.classList.add('opacity-30', 'cursor-not-allowed');
+        } else {
+            upBtn.addEventListener('click', () => {
+                if (moveMergeCallback) moveMergeCallback(file.id, -1);
+            });
+        }
+        
+        // Down button
+        const downBtn = document.createElement('button');
+        downBtn.className = 'text-gray-500 dark:text-gray-400 hover:text-primary focus:outline-none p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition';
+        downBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>';
+        downBtn.title = 'Move down';
+        downBtn.setAttribute('aria-label', `Move ${file.name} down`);
+        if (index === state.mergeFiles.length - 1) {
+            downBtn.disabled = true;
+            downBtn.classList.add('opacity-30', 'cursor-not-allowed');
+        } else {
+            downBtn.addEventListener('click', () => {
+                if (moveMergeCallback) moveMergeCallback(file.id, 1);
+            });
+        }
+        
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-gray-600 p-1.5 rounded transition';
+        deleteBtn.className = 'text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-gray-600 p-1.5 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-gray-700 transition';
         deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
         deleteBtn.title = 'Remove file';
+        deleteBtn.setAttribute('aria-label', `Remove ${file.name}`);
         deleteBtn.addEventListener('click', () => {
             removeMergeCallback(file.id);
         });
 
+        btnContainer.appendChild(upBtn);
+        btnContainer.appendChild(downBtn);
+        btnContainer.appendChild(deleteBtn);
+
         item.appendChild(fileInfoDiv);
-        item.appendChild(deleteBtn);
+        item.appendChild(btnContainer);
         els.mergeFileList.appendChild(item);
     });
 }

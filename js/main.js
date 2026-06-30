@@ -28,6 +28,63 @@ function switchTab(tab) {
     lsSet('activeTab', tab);
 }
 
+function loadSharedFile(parsedData, fileName, fileSize) {
+    // Synchronize in-memory state
+    state.tmxData = parsedData;
+    state.metaEditorData = {
+        units: parsedData.units,
+        metadata: parsedData.metadata
+    };
+    state.filteredUnits = [...parsedData.units];
+    state.currentPage = 1;
+    
+    // Update Search UI
+    els.fileText.textContent = 'File loaded!';
+    els.fileName.textContent = fileName;
+    els.fileSize.textContent = fileSize;
+    els.fileInfo.classList.remove('hidden');
+    els.errorMessage.classList.add('hidden');
+    els.searchAndResultsContainer.classList.remove('hidden');
+    els.resultsSection.classList.remove('hidden');
+    els.fileStats.textContent = `${state.tmxData.units.length} translation units`;
+    els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
+    els.targetLanguage.textContent = state.tmxData.targetLanguage || '--';
+    if (els.downloadUpdatedTmxBtn) {
+        els.downloadUpdatedTmxBtn.classList.remove('hidden');
+    }
+    
+    updateResults(state);
+    renderStats(state.tmxData.units);
+    
+    // Update Metadata UI
+    els.metaFileText.textContent = 'File loaded!';
+    els.metaFileName.textContent = fileName;
+    els.metaFileSize.textContent = fileSize;
+    els.metaFileInfo.classList.remove('hidden');
+    els.metaEditorStatus.classList.add('hidden');
+    els.metadataCard.classList.remove('hidden');
+    els.metaFileStats.textContent = `${state.metaEditorData.units.length} translation units found`;
+    
+    els.metaAuthor.value = state.metaEditorData.metadata.creationid || '';
+    els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool || 'MemoMemo';
+    els.metaToolVersion.value = state.metaEditorData.metadata.creationtoolversion || '';
+    els.metaCreationDate.value = state.metaEditorData.metadata.creationdate || '';
+    els.metaSrcLang.value = state.metaEditorData.metadata.srclang || '';
+    els.metaTgtLang.value = state.metaEditorData.metadata.adminlang || '';
+    els.metaDatatype.value = state.metaEditorData.metadata.datatype || '';
+    els.metaSegtype.value = state.metaEditorData.metadata.segtype || '';
+
+    // Persist to IndexedDB & localStorage
+    idbSet('tmxData', state.tmxData);
+    idbSet('metaEditorData', state.metaEditorData);
+    lsSet('fileName', fileName);
+    lsSet('fileSize', fileSize);
+    lsSet('metaFileName', fileName);
+    lsSet('metaFileSize', fileSize);
+    
+    savePreferences();
+}
+
 function handleFileSelect() {
     if (els.fileInput.files.length === 0) return;
 
@@ -61,7 +118,7 @@ function handleFileSelect() {
         return;
     }
 
-    // Update UI
+    // Update UI loading state
     els.fileText.textContent = 'File selected!';
     els.fileName.textContent = file.name;
     els.fileSize.textContent = formatFileSize(file.size);
@@ -108,28 +165,9 @@ function handleFileSelect() {
                 }
             }
 
-            state.tmxData = parseFileContent(file.name, raw);
-
+            const parsedData = parseFileContent(file.name, raw);
             els.loadingIndicator.classList.add('hidden');
-            els.searchAndResultsContainer.classList.remove('hidden');
-            els.resultsSection.classList.remove('hidden');
-            if (els.downloadUpdatedTmxBtn) {
-                els.downloadUpdatedTmxBtn.classList.remove('hidden');
-            }
-
-            els.fileStats.textContent = `${state.tmxData.units.length} translation units`;
-            els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
-            els.targetLanguage.textContent = state.tmxData.targetLanguage || '--';
-
-            state.filteredUnits = [...state.tmxData.units];
-            updateResults(state);
-            renderStats(state.tmxData.units);
-
-            // Persist parsed data
-            idbSet('tmxData', state.tmxData);
-            lsSet('fileName', file.name);
-            lsSet('fileSize', formatFileSize(file.size));
-            savePreferences();
+            loadSharedFile(parsedData, file.name, formatFileSize(file.size));
 
         } catch (error) {
             console.error('Error parsing file:', error);
@@ -258,7 +296,7 @@ function processMergeFiles(filesList) {
                     els.mergeTgtLang.value = fileData.targetLanguage;
                 }
                 
-                renderMergeFileList(state, removeMergeFile);
+                renderMergeFileList(state, removeMergeFile, moveMergeFile);
                 idbSet('mergeFiles', state.mergeFiles);
                 showMergeStatus(`Successfully uploaded ${file.name}`, 'info');
             } catch (error) {
@@ -272,9 +310,24 @@ function processMergeFiles(filesList) {
 
 function removeMergeFile(id) {
     state.mergeFiles = state.mergeFiles.filter(f => f.id !== id);
-    renderMergeFileList(state, removeMergeFile);
+    renderMergeFileList(state, removeMergeFile, moveMergeFile);
     idbSet('mergeFiles', state.mergeFiles);
     showMergeStatus('File removed from list', 'info');
+}
+
+function moveMergeFile(id, direction) {
+    const idx = state.mergeFiles.findIndex(f => f.id === id);
+    if (idx === -1) return;
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= state.mergeFiles.length) return;
+
+    // Swap indexes
+    const temp = state.mergeFiles[idx];
+    state.mergeFiles[idx] = state.mergeFiles[targetIdx];
+    state.mergeFiles[targetIdx] = temp;
+
+    renderMergeFileList(state, removeMergeFile, moveMergeFile);
+    idbSet('mergeFiles', state.mergeFiles);
 }
 
 function processMetaEditorFile(file) {
@@ -287,37 +340,11 @@ function processMetaEditorFile(file) {
         return;
     }
 
-    // Update UI upload state
-    els.metaFileText.textContent = 'File loaded!';
-    els.metaFileName.textContent = file.name;
-    els.metaFileSize.textContent = formatFileSize(file.size);
-    els.metaFileInfo.classList.remove('hidden');
-    els.metaEditorStatus.classList.add('hidden');
-    els.metadataCard.classList.add('hidden');
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            state.metaEditorData = parseFileContent(file.name, e.target.result);
-            
-            // Show edit card
-            els.metadataCard.classList.remove('hidden');
-            els.metaFileStats.textContent = `${state.metaEditorData.units.length} translation units found`;
-
-            // Populate fields
-            els.metaAuthor.value = state.metaEditorData.metadata.creationid || '';
-            els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool || 'MemoMemo';
-            els.metaToolVersion.value = state.metaEditorData.metadata.creationtoolversion || '';
-            els.metaCreationDate.value = state.metaEditorData.metadata.creationdate || '';
-            els.metaSrcLang.value = state.metaEditorData.metadata.srclang || '';
-            els.metaTgtLang.value = state.metaEditorData.metadata.adminlang || '';
-            els.metaDatatype.value = state.metaEditorData.metadata.datatype || '';
-            els.metaSegtype.value = state.metaEditorData.metadata.segtype || '';
-
-            // Persist to IndexedDB
-            idbSet('metaEditorData', state.metaEditorData);
-            lsSet('metaFileName', file.name);
-            lsSet('metaFileSize', formatFileSize(file.size));
+            const parsedData = parseFileContent(file.name, e.target.result);
+            loadSharedFile(parsedData, file.name, formatFileSize(file.size));
         } catch (error) {
             console.error("Error parsing meta editor file:", error);
             showMetaEditorStatus(`Error parsing ${file.name}: ${error.message}`, 'error');
@@ -338,6 +365,41 @@ function savePreferences() {
     lsSet('mergeAuthor',          els.mergeAuthor?.value  || '');
     lsSet('mergeTool',            els.mergeTool?.value    || '');
     lsSet('mergeRemoveDuplicates',els.mergeRemoveDuplicates?.checked ?? true);
+}
+
+function updateSearchScopeUI(scope) {
+    const btnBoth = document.getElementById('searchScopeBoth');
+    const btnSrc = document.getElementById('searchScopeSource');
+    const btnTgt = document.getElementById('searchScopeTarget');
+    
+    const activeClasses = ['bg-primary', 'text-white'];
+    const inactiveClasses = ['bg-white', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-650'];
+    
+    [btnBoth, btnSrc, btnTgt].forEach(btn => {
+        if (!btn) return;
+        activeClasses.forEach(c => btn.classList.remove(c));
+        inactiveClasses.forEach(c => btn.classList.add(c));
+    });
+    
+    let activeBtn;
+    if (scope === 'both') {
+        activeBtn = btnBoth;
+        els.sourceOnly.checked = false;
+        els.targetOnly.checked = false;
+    } else if (scope === 'source') {
+        activeBtn = btnSrc;
+        els.sourceOnly.checked = true;
+        els.targetOnly.checked = false;
+    } else if (scope === 'target') {
+        activeBtn = btnTgt;
+        els.sourceOnly.checked = false;
+        els.targetOnly.checked = true;
+    }
+    
+    if (activeBtn) {
+        inactiveClasses.forEach(c => activeBtn.classList.remove(c));
+        activeClasses.forEach(c => activeBtn.classList.add(c));
+    }
 }
 
 export async function clearSession() {
@@ -372,9 +434,10 @@ export async function clearSession() {
     if (els.downloadUpdatedTmxBtn) {
         els.downloadUpdatedTmxBtn.classList.add('hidden');
     }
+    updateSearchScopeUI('both');
 
     // Reset Merge UI
-    renderMergeFileList(state, removeMergeFile);
+    renderMergeFileList(state, removeMergeFile, moveMergeFile);
     els.mergeSrcLang.value = '';
     els.mergeTgtLang.value = '';
     els.mergeAuthor.value  = '';
@@ -402,10 +465,16 @@ async function restoreSession() {
     const savedRegex  = lsGet('useRegex', false);
 
     if (savedQuery)  els.searchInput.value     = savedQuery;
-    if (savedSrcO)   els.sourceOnly.checked     = true;
-    if (savedTgtO)   els.targetOnly.checked     = true;
     if (savedRegex)  els.useRegex.checked       = true;
     state.currentPage = lsGet('currentPage', 1);
+
+    if (savedSrcO) {
+        updateSearchScopeUI('source');
+    } else if (savedTgtO) {
+        updateSearchScopeUI('target');
+    } else {
+        updateSearchScopeUI('both');
+    }
 
     const msl = lsGet('mergeSrcLang');          if (msl !== null) els.mergeSrcLang.value = msl;
     const mtl = lsGet('mergeTgtLang');          if (mtl !== null) els.mergeTgtLang.value = mtl;
@@ -450,7 +519,7 @@ async function restoreSession() {
     // Restore Merge TMs
     if (savedMerge && savedMerge.length > 0) {
         state.mergeFiles = savedMerge;
-        renderMergeFileList(state, removeMergeFile);
+        renderMergeFileList(state, removeMergeFile, moveMergeFile);
         restored = true;
     }
 
@@ -579,6 +648,17 @@ function init() {
 
     // Search page event listeners
     els.fileInput.addEventListener('change', handleFileSelect);
+
+    const btnBoth = document.getElementById('searchScopeBoth');
+    const btnSrc = document.getElementById('searchScopeSource');
+    const btnTgt = document.getElementById('searchScopeTarget');
+    
+    if (btnBoth && btnSrc && btnTgt) {
+        btnBoth.addEventListener('click', () => { updateSearchScopeUI('both'); performSearch(); });
+        btnSrc.addEventListener('click', () => { updateSearchScopeUI('source'); performSearch(); });
+        btnTgt.addEventListener('click', () => { updateSearchScopeUI('target'); performSearch(); });
+    }
+
     if (els.downloadUpdatedTmxBtn) {
         els.downloadUpdatedTmxBtn.addEventListener('click', () => {
             if (!state.tmxData.units.length) return;
