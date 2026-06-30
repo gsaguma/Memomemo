@@ -1,4 +1,4 @@
-# <img src="media/memotmx.png" alt="Memo Memo Logo" height="28" align="center" /> Memo Memo — Translation Memory Editor
+# <img src="media/memotmx.png" alt="Memo Memo Logo" height="28" align="center" /> Memo Memo — Translation Memory Toolkit
 
 > **A fully client-side, browser-based editor for Translation Memory files.** No server. No installation. Your data never leaves your machine.
 
