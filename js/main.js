@@ -16,6 +16,10 @@ import {
     renderAlignmentPreviewTable
 } from './ui.js';
 import { alignTexts, extractTextFromDocx, extractTextFromPptx } from './aligner.js';
+import { renderSearchTab } from './components/searchTab.js';
+import { renderMetaTab } from './components/metaTab.js';
+import { renderAlignTab } from './components/alignTab.js';
+import { renderMergeTab } from './components/mergeTab.js';
 
 function debounce(func, wait) {
     let timeout;
@@ -479,21 +483,7 @@ export async function clearSession() {
     els.metaEditorStatus.classList.add('hidden');
 
     // Reset Alignment UI
-    if (els.alignSourceFileInput) els.alignSourceFileInput.value = '';
-    if (els.alignSourceFileName) els.alignSourceFileName.textContent = '';
-    if (els.alignSourceFileInfo) els.alignSourceFileInfo.classList.add('hidden');
-    if (els.alignSourceDropZone) els.alignSourceDropZone.classList.remove('hidden');
-    if (els.alignSourceText) els.alignSourceText.value = '';
-    
-    if (els.alignTargetFileInput) els.alignTargetFileInput.value = '';
-    if (els.alignTargetFileName) els.alignTargetFileName.textContent = '';
-    if (els.alignTargetFileInfo) els.alignTargetFileInfo.classList.add('hidden');
-    if (els.alignTargetDropZone) els.alignTargetDropZone.classList.remove('hidden');
-    if (els.alignTargetText) els.alignTargetText.value = '';
-    
-    if (els.alignPreviewTable) els.alignPreviewTable.innerHTML = '';
-    if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
-    if (els.alignPlaceholder) els.alignPlaceholder.classList.remove('hidden');
+    resetAlignment();
 
     document.getElementById('sessionBanner').classList.add('hidden');
     showSessionBanner('🗑️ Sesión limpiada correctamente.', false);
@@ -606,8 +596,8 @@ async function restoreSession() {
     const savedAlign = await idbGet('alignedPairs');
     if (savedAlign && savedAlign.length > 0) {
         state.alignedPairs = savedAlign;
-        els.alignPlaceholder.classList.add('hidden');
-        els.alignPreviewSection.classList.remove('hidden');
+        if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
+        if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
         renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
         restored = true;
     }
@@ -777,7 +767,39 @@ function handleAlignRowAction(action, index) {
     renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
 }
 
+function resetAlignment() {
+    state.alignedPairs = [];
+    idbDelete('alignedPairs');
+    
+    if (els.alignSourceFileInput) els.alignSourceFileInput.value = '';
+    if (els.alignSourceFileName) els.alignSourceFileName.textContent = '';
+    if (els.alignSourceFileInfo) els.alignSourceFileInfo.classList.add('hidden');
+    if (els.alignSourceDropZone) els.alignSourceDropZone.classList.remove('hidden');
+    if (els.alignSourceText) els.alignSourceText.value = '';
+    
+    if (els.alignTargetFileInput) els.alignTargetFileInput.value = '';
+    if (els.alignTargetFileName) els.alignTargetFileName.textContent = '';
+    if (els.alignTargetFileInfo) els.alignTargetFileInfo.classList.add('hidden');
+    if (els.alignTargetDropZone) els.alignTargetDropZone.classList.remove('hidden');
+    if (els.alignTargetText) els.alignTargetText.value = '';
+    
+    if (els.alignPreviewTable) els.alignPreviewTable.innerHTML = '';
+    if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
+    if (els.alignInputSection) els.alignInputSection.classList.remove('hidden');
+}
+
 function init() {
+    // Inject Tab Components HTML
+    const tabSearchContent = document.getElementById('tabSearchContent');
+    const tabMetaContent = document.getElementById('tabMetaContent');
+    const tabAlignContent = document.getElementById('tabAlignContent');
+    const tabMergeContent = document.getElementById('tabMergeContent');
+    
+    if (tabSearchContent) tabSearchContent.innerHTML = renderSearchTab();
+    if (tabMetaContent) tabMetaContent.innerHTML = renderMetaTab();
+    if (tabAlignContent) tabAlignContent.innerHTML = renderAlignTab();
+    if (tabMergeContent) tabMergeContent.innerHTML = renderMergeTab();
+
     window.addEventListener('keydown', handleGlobalKeydown);
 
     // Search page event listeners
@@ -1144,8 +1166,8 @@ function formatTmxDate(inputStr) {
             state.alignedPairs = alignTexts(srcText, tgtText);
             idbSet('alignedPairs', state.alignedPairs);
             
-            els.alignPlaceholder.classList.add('hidden');
-            els.alignPreviewSection.classList.remove('hidden');
+            if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
+            if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
             renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
         });
     }
@@ -1181,34 +1203,81 @@ function formatTmxDate(inputStr) {
         });
     }
 
-    // Download TMX Button
-    if (els.alignDownloadTmxBtn) {
-        els.alignDownloadTmxBtn.addEventListener('click', () => {
+    // Download Alignment Button (supporting format selection)
+    if (els.alignDownloadBtn) {
+        els.alignDownloadBtn.addEventListener('click', () => {
             const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
             if (!validPairs.length) return;
             
-            const tmxXml = generateTMXXML(
-                validPairs.map(p => ({ source: p.source, target: p.target })),
-                {
-                    creationid: 'MemoMemo Align',
-                    creationtool: 'MemoMemo',
-                    creationtoolversion: '1.0',
-                    creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
-                    srclang: 'en',
-                    adminlang: 'es',
-                    datatype: 'plaintext',
-                    segtype: 'sentence'
-                }
-            );
+            const format = els.alignExportFormat?.value || 'tmx';
+            let fileContent = "";
+            let mimeType = "text/plain;charset=utf-8;";
+            let fileExtension = "txt";
             
-            const blob = new Blob([tmxXml], { type: 'text/xml;charset=utf-8;' });
+            if (format === 'tmx') {
+                fileContent = generateTMXXML(
+                    validPairs.map(p => ({ source: p.source, target: p.target })),
+                    {
+                        creationid: 'MemoMemo Align',
+                        creationtool: 'MemoMemo',
+                        creationtoolversion: '1.0',
+                        creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
+                        srclang: 'en',
+                        adminlang: 'es',
+                        datatype: 'plaintext',
+                        segtype: 'sentence'
+                    }
+                );
+                mimeType = "text/xml;charset=utf-8;";
+                fileExtension = "tmx";
+            } else if (format === 'txt') {
+                // Tab-separated text
+                fileContent = validPairs.map(p => `${p.source}\t${p.target}`).join('\n');
+                mimeType = "text/plain;charset=utf-8;";
+                fileExtension = "txt";
+            } else if (format === 'csv') {
+                // Comma-separated values
+                const header = '"Source","Target"\n';
+                const rows = validPairs.map(p => {
+                    const srcEscaped = '"' + p.source.replace(/"/g, '""') + '"';
+                    const tgtEscaped = '"' + p.target.replace(/"/g, '""') + '"';
+                    return `${srcEscaped},${tgtEscaped}`;
+                }).join('\n');
+                fileContent = header + rows;
+                mimeType = "text/csv;charset=utf-8;";
+                fileExtension = "csv";
+            }
+            
+            const blob = new Blob([fileContent], { type: mimeType });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', 'aligned_translation_memory.tmx');
+            link.setAttribute('download', `aligned_translation_memory.${fileExtension}`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         });
+    }
+
+    // Back to configuration button click
+    if (els.alignBackBtn) {
+        els.alignBackBtn.addEventListener('click', () => {
+            if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
+            if (els.alignInputSection) els.alignInputSection.classList.remove('hidden');
+        });
+    }
+
+    // Clear alignment session buttons click
+    const triggerClearAlignment = () => {
+        if (confirm('¿Estás seguro de que deseas limpiar la alineación actual y todos los textos cargados para comenzar una nueva?')) {
+            resetAlignment();
+        }
+    };
+
+    if (els.alignClearBtn) {
+        els.alignClearBtn.addEventListener('click', triggerClearAlignment);
+    }
+    if (els.alignClearInputsBtn) {
+        els.alignClearInputsBtn.addEventListener('click', triggerClearAlignment);
     }
 
     restoreSession();

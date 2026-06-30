@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memo memo</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/media/memotmx.png">
+    <link class="icon" rel="icon" type="image/png" sizes="32x32" href="media/memotmx.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -15,38 +15,32 @@
                     colors: {
                         primary: '#3B82F6',
                         secondary: '#93C5FD',
-                    },
-                    animation: {
-                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
-                    },
-                    keyframes: {
-                        shake: {
-                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
-                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
-                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
-                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
-                        }
+                        darkBg: '#0F172A',
+                        darkCard: '#1E293B',
+                        accent: '#60A5FA'
                     }
                 }
             }
         }
     </script>
-</head>
-<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen">
-    <!-- Detect dark mode -->
-    <script>
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-    </script>
-
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #93C5FD;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #3B82F6;
+        }
+    </style>
+</head>
+<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen flex flex-col font-sans transition-colors duration-200">
     <div id="mainContent">
         <div class="container mx-auto px-4 py-3 max-w-5xl">
             <h1 class="text-2xl font-bold text-center mb-3 text-primary dark:text-primary flex items-center justify-center gap-2">
@@ -85,489 +79,11 @@
                 </button>
             </div>
 
-            <!-- Tab 1: Search & View Content -->
-            <div id="tabSearchContent">
-                <div class="flex flex-col gap-4">
-                    <!-- Upload Card -->
-                    <div id="uploadCard" class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                        <h2 class="text-lg font-semibold mb-3">Upload Translation Memory File</h2>
-                        <div class="flex flex-col gap-3">
-                            <label for="fileInput" id="dropZoneContainer" class="block">
-                                <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <span id="fileText" class="text-sm font-medium">Select or drop your file</span>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
-                                </div>
-                                <input type="file" id="fileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
-                            </label>
-                            
-                            <div id="fileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-3 rounded-lg border border-[#93C5FD] shadow-sm text-sm">
-                                <div class="flex items-center gap-2 truncate">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    <span id="fileName" class="font-medium truncate text-[#1F2937] max-w-[240px]"></span>
-                                    <span id="fileStats" class="text-xs text-gray-500 whitespace-nowrap"></span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span id="fileSize" class="text-xs text-gray-500 font-medium"></span>
-                                    <button type="button" id="changeFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Cambiar archivo</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stats Panel -->
-                    <div id="statsPanel" class="hidden bg-white rounded-lg shadow-md border border-[#93C5FD] overflow-hidden">
-                        <button id="statsToggle" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                            <span class="flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                                File Statistics
-                            </span>
-                            <svg id="statsChevron" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </button>
-                        <div id="statsBody" class="hidden px-4 pb-4">
-                            <!-- Metric cards row -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total segments</div>
-                                    <div id="statTotal" class="text-xl font-semibold text-primary">—</div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Unique segments</div>
-                                    <div id="statUnique" class="text-xl font-semibold text-primary">—</div>
-                                    <div id="statDupes" class="text-xs text-gray-400 mt-0.5"></div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Source words</div>
-                                    <div id="statSrcWords" class="text-xl font-semibold text-primary">—</div>
-                                    <div id="statSrcAvgWords" class="text-xs text-gray-400 mt-0.5"></div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Target words</div>
-                                    <div id="statTgtWords" class="text-xl font-semibold text-primary">—</div>
-                                    <div id="statTgtAvgWords" class="text-xs text-gray-400 mt-0.5"></div>
-                                </div>
-                            </div>
-                            <!-- Second row -->
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Empty source</div>
-                                    <div id="statEmptySrc" class="text-xl font-semibold text-primary">—</div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Empty target</div>
-                                    <div id="statEmptyTgt" class="text-xl font-semibold text-primary">—</div>
-                                </div>
-                                <div class="bg-white dark:bg-gray-700 rounded-lg p-3">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg src / tgt length</div>
-                                    <div id="statAvgChars" class="text-xl font-semibold text-primary">—</div>
-                                    <div class="text-xs text-gray-400 mt-0.5">characters</div>
-                                </div>
-                            </div>
-                            <!-- Histogram -->
-                            <div>
-                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Source segment length distribution (words)</div>
-                                <div id="statHistogram" class="flex items-end gap-1 h-16"></div>
-                                <div id="statHistogramLabels" class="flex gap-1 mt-1 text-xs text-gray-400"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Search Section & Results -->
-                    <div id="searchAndResultsContainer" class="hidden flex flex-col gap-4">
-                        <!-- Search Section -->
-                        <div id="searchSection">
-                            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                                <h2 class="text-lg font-semibold mb-3">Search Translation Memory</h2>
-                                <div class="flex flex-col md:flex-row gap-3 items-center">
-                                    <div class="w-full">
-                                        <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
-                                               class="w-full px-3 py-2 rounded-md border border-[#93C5FD] bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
-                                    </div>
-                                    <div class="flex flex-wrap items-center gap-3 text-sm">
-                                        <input type="checkbox" id="sourceOnly" class="hidden" />
-                                        <input type="checkbox" id="targetOnly" class="hidden" />
-                                        <div class="inline-flex rounded-md shadow-sm" role="group">
-                                            <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="px-3 py-1.5 text-xs font-medium rounded-l-md border border-gray-400 dark:border-gray-500 bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
-                                                Both
-                                            </button>
-                                            <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="px-3 py-1.5 text-xs font-medium border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
-                                                Source
-                                            </button>
-                                            <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="px-3 py-1.5 text-xs font-medium rounded-r-md border-t border-b border-r border-gray-400 dark:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-650 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
-                                                Target
-                                            </button>
-                                        </div>
-                                        <label class="inline-flex items-center cursor-pointer" title="Use regular expressions (e.g. \d+, colou?r, ^Start)">
-                                            <input type="checkbox" id="useRegex" aria-label="Use regular expression search" class="form-checkbox h-4 w-4 text-primary rounded border-gray-400 dark:border-gray-500 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
-                                            <span class="ml-1 font-mono text-xs tracking-tight">.*</span>
-                                            <span class="ml-1">Regex</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="mt-3 flex items-center justify-between gap-3">
-                                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                                        <span id="resultsCount">0 results</span>
-                                    </div>
-                                    <button id="downloadUpdatedTmxBtn" class="hidden bg-primary hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                        Download Updated TMX
-                                    </button>
-                                    <div id="regexError" class="hidden text-xs text-red-500 dark:text-red-400 font-mono"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Loading Indicator -->
-                        <div id="loadingIndicator" class="hidden">
-                            <div class="flex justify-center items-center py-12">
-                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                            </div>
-                        </div>
-
-                        <!-- Error Message -->
-                        <div id="errorMessage" class="hidden bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-4 rounded-lg">
-                            <div class="flex items-start gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                <div>
-                                    <div id="errorTitle" class="font-semibold text-sm"></div>
-                                    <div id="errorDetail" class="text-xs mt-1 opacity-80 font-mono whitespace-pre-wrap"></div>
-                                    <div id="errorHint" class="text-xs mt-2 text-red-600 dark:text-red-400 not-italic"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Results Section -->
-                        <div id="resultsSection" class="hidden">
-                            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] overflow-x-auto">
-                                <table class="min-w-full divide-y divide-[#93C5FD]">
-                                    <thead>
-                                        <tr>
-                                            <th class="px-4 py-3 text-left text-sm font-medium text-[#1F2937] dark:text-gray-300 uppercase tracking-wider w-1/2">
-                                                Source (<span id="sourceLanguage">--</span>)
-                                            </th>
-                                            <th class="px-4 py-3 text-left text-sm font-medium text-[#1F2937] dark:text-gray-300 uppercase tracking-wider w-1/2">
-                                                Target (<span id="targetLanguage">--</span>)
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="resultsTable" class="divide-y divide-[#93C5FD]">
-                                        <!-- Results will be inserted here -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div id="pagination" class="mt-6 flex justify-center space-x-2">
-                                <!-- Pagination will be inserted here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 2: Merge TMs Content -->
-            <div id="tabMergeContent" class="hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Column: Upload Area & Uploaded Files List -->
-                    <div class="lg:col-span-1 flex flex-col gap-4">
-                        <!-- Multi-upload Card -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <h2 class="text-lg font-semibold mb-3">Upload Memories to Merge</h2>
-                            <label for="mergeFileInput" class="block cursor-pointer">
-                                <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-5 text-center hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    <span class="text-sm font-medium">Select or drop multiple files</span>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
-                                </div>
-                                <input type="file" id="mergeFileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" multiple class="hidden" />
-                            </label>
-                        </div>
-
-                        <!-- Uploaded Files List Card -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <div class="flex justify-between items-center mb-3">
-                                <h2 class="text-lg font-semibold">Selected Files</h2>
-                                <span id="mergeFileCountBadge" class="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">0</span>
-                            </div>
-                            <div id="mergeFileList" class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
-                                <div class="text-sm text-gray-500 text-center py-6">No files uploaded yet.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Settings and Action Buttons -->
-                    <div class="lg:col-span-2 flex flex-col gap-4">
-                        <!-- Settings Card -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Merge Options
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                                <div>
-                                    <label for="mergeSrcLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Combined Source Language</label>
-                                    <input type="text" id="mergeSrcLang" placeholder="e.g. en-US" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label for="mergeTgtLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Combined Target Language</label>
-                                    <input type="text" id="mergeTgtLang" placeholder="e.g. es-ES" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label for="mergeAuthor" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Author (creationid)</label>
-                                    <input type="text" id="mergeAuthor" placeholder="MemoMemo Merger" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                </div>
-                                <div>
-                                    <label for="mergeTool" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Tool</label>
-                                    <input type="text" id="mergeTool" value="MemoMemo" class="w-full mt-1 px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                </div>
-                            </div>
-                            
-                            <div class="border-t border-gray-200 dark:border-gray-700 pt-3 mb-4">
-                                <label class="inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="mergeRemoveDuplicates" checked class="form-checkbox h-4 w-4 text-primary rounded border-gray-300 dark:border-gray-600 focus:ring-primary focus:ring-opacity-50" />
-                                    <span class="ml-2 text-sm">Remove duplicates (exclude exact matching source-target pairs)</span>
-                                </label>
-                            </div>
-                            
-                            <button id="executeMergeBtn" disabled class="w-full bg-primary disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-opacity-90 text-white font-medium py-2.5 px-4 rounded shadow transition text-sm flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                </svg>
-                                Merge & Download Unified TMX
-                            </button>
-                        </div>
-
-                        <!-- Merge Status Indicator -->
-                        <div id="mergeStatusContainer" class="hidden bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 p-4 rounded text-sm text-blue-700 dark:text-blue-200">
-                            <!-- Status message goes here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 3: Edit Metadata Content -->
-            <div id="tabMetaContent" class="hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Column: File Upload & Stats -->
-                    <div class="lg:col-span-1 flex flex-col gap-4">
-                        <!-- Upload Card for Metadata Editor -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <h2 class="text-lg font-semibold mb-3">Upload File to Edit Metadata</h2>
-                            <div class="flex flex-col gap-3">
-                                <label for="metaFileInput" id="metaDropZoneContainer" class="block">
-                                    <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <span id="metaFileText" class="text-sm font-medium font-semibold">Select or drop file</span>
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
-                                    </div>
-                                    <input type="file" id="metaFileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
-                                </label>
-                                
-                                <div id="metaFileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-3 rounded-lg border border-[#93C5FD] shadow-sm text-sm">
-                                    <div class="flex items-center gap-2 truncate">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        <span id="metaFileName" class="font-medium truncate text-[#1F2937] max-w-[240px]"></span>
-                                        <span id="metaFileStats" class="text-xs text-gray-500 whitespace-nowrap"></span>
-                                    </div>
-                                    <div class="flex items-center gap-3">
-                                        <span id="metaFileSize" class="text-xs text-gray-500 font-medium"></span>
-                                        <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Cambiar archivo</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Metadata Editor Card -->
-                    <div class="lg:col-span-2 flex flex-col gap-4">
-                        <!-- Metadata Card -->
-                        <div id="metadataCard" class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] hidden">
-                            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Edit TMX Metadata
-                            </h2>
-                            <div class="flex flex-col gap-3 text-sm">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="metaAuthor" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Author (creationid)</label>
-                                        <input type="text" id="metaAuthor" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Tool (read-only)</label>
-                                        <div id="metaToolDisplay" class="mt-1 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-500 select-none font-medium">
-                                            <!-- Creation tool value will go here -->
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="metaToolVersion" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Tool Version</label>
-                                        <input type="text" id="metaToolVersion" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                    <div>
-                                        <label for="metaCreationDate" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Date</label>
-                                        <input type="text" id="metaCreationDate" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" placeholder="e.g. 20260604T203000Z" />
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="metaSrcLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Source Lang</label>
-                                        <input type="text" id="metaSrcLang" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                    <div>
-                                        <label for="metaTgtLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Target Lang</label>
-                                        <input type="text" id="metaTgtLang" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="metaDatatype" class="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
-                                            Datatype
-                                            <span class="group relative cursor-help">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-primary transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded bg-gray-900 dark:bg-gray-950 p-2 text-center text-xs font-normal normal-case text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100">
-                                                    Specifies the format of text segments, e.g. 'plaintext', 'html', or 'xml'.
-                                                </span>
-                                            </span>
-                                        </label>
-                                        <input type="text" id="metaDatatype" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                    <div>
-                                        <label for="metaSegtype" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Seg Type</label>
-                                        <input type="text" id="metaSegtype" class="w-full mt-1 px-3 py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
-                                    </div>
-                                </div>
-                                
-                                <button id="exportMetadataBtn" class="mt-2 w-full bg-primary hover:bg-opacity-90 text-white font-medium py-2.5 px-4 rounded shadow transition text-sm flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Export & Download TMX with Updated Metadata
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Editor Error/Status message -->
-                        <div id="metaEditorStatus" class="hidden bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
-                            <!-- Message goes here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 4: Align Translations Content -->
-            <div id="tabAlignContent" class="hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Left Column: Source and Target Inputs -->
-                    <div class="lg:col-span-1 flex flex-col gap-4">
-                        <!-- Source Uploader Card -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <h2 class="text-lg font-semibold mb-2">1. Source Text (Origen)</h2>
-                            <div class="flex flex-col gap-2">
-                                <label for="alignSourceFileInput" id="alignSourceDropZone" class="block cursor-pointer">
-                                    <div class="border border-dashed border-[#93C5FD] rounded-lg p-3 text-center hover:bg-gray-50 transition">
-                                        <span class="text-xs font-semibold text-primary block">Upload Source File</span>
-                                        <span class="text-[10px] text-gray-500 block mt-0.5">.txt, .csv, .docx, .pptx</span>
-                                    </div>
-                                    <input type="file" id="alignSourceFileInput" accept=".txt,.csv,.docx,.pptx" class="hidden" />
-                                </label>
-                                <div id="alignSourceFileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-2 rounded border border-[#93C5FD] text-xs">
-                                    <span id="alignSourceFileName" class="font-medium truncate max-w-[180px]"></span>
-                                    <button type="button" id="changeAlignSourceBtn" class="text-[10px] font-semibold text-[#3B82F6] hover:underline">Change</button>
-                                </div>
-                                <div class="text-center text-[10px] text-gray-400 font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
-                                <textarea id="alignSourceText" placeholder="Paste source sentences here..." class="w-full h-32 p-2 text-xs border border-[#93C5FD] rounded bg-white focus:outline-none focus:ring-1 focus:ring-primary" rows="4"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Target Uploader Card -->
-                        <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                            <h2 class="text-lg font-semibold mb-2">2. Target Text (Meta)</h2>
-                            <div class="flex flex-col gap-2">
-                                <label for="alignTargetFileInput" id="alignTargetDropZone" class="block cursor-pointer">
-                                    <div class="border border-dashed border-[#93C5FD] rounded-lg p-3 text-center hover:bg-gray-50 transition">
-                                        <span class="text-xs font-semibold text-primary block">Upload Target File</span>
-                                        <span class="text-[10px] text-gray-500 block mt-0.5">.txt, .csv, .docx, .pptx</span>
-                                    </div>
-                                    <input type="file" id="alignTargetFileInput" accept=".txt,.csv,.docx,.pptx" class="hidden" />
-                                </label>
-                                <div id="alignTargetFileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-2 rounded border border-[#93C5FD] text-xs">
-                                    <span id="alignTargetFileName" class="font-medium truncate max-w-[180px]"></span>
-                                    <button type="button" id="changeAlignTargetBtn" class="text-[10px] font-semibold text-[#3B82F6] hover:underline">Change</button>
-                                </div>
-                                <div class="text-center text-[10px] text-gray-400 font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
-                                <textarea id="alignTargetText" placeholder="Paste target sentences here..." class="w-full h-32 p-2 text-xs border border-[#93C5FD] rounded bg-white focus:outline-none focus:ring-1 focus:ring-primary" rows="4"></textarea>
-                            </div>
-                        </div>
-
-                        <button id="startAlignBtn" class="w-full bg-primary hover:bg-opacity-90 text-white font-medium py-2.5 px-4 rounded shadow transition text-sm flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            Start Alignment
-                        </button>
-                    </div>
-
-                    <!-- Right Column: Alignment Preview Grid -->
-                    <div class="lg:col-span-2 flex flex-col gap-4">
-                        <div id="alignPreviewSection" class="hidden bg-white rounded-lg p-4 shadow-md border border-[#93C5FD] flex flex-col gap-4">
-                            <div class="flex justify-between items-center">
-                                <h2 class="text-lg font-semibold flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
-                                    Interactive Alignment Preview
-                                </h2>
-                                <div class="flex gap-2">
-                                    <button id="alignOpenInAppBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1">
-                                        Open in MemoMemo
-                                    </button>
-                                    <button id="alignDownloadTmxBtn" class="bg-primary hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1">
-                                        Export TMX
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="overflow-x-auto max-h-[500px]">
-                                <table class="min-w-full divide-y divide-[#93C5FD]">
-                                    <thead>
-                                        <tr>
-                                            <th class="px-2 py-2 text-left text-xs font-semibold text-[#1F2937] uppercase w-5/12">Source Segment</th>
-                                            <th class="px-2 py-2 text-left text-xs font-semibold text-[#1F2937] uppercase w-5/12">Target Segment</th>
-                                            <th class="px-2 py-2 text-right text-xs font-semibold text-[#1F2937] uppercase w-2/12">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="alignPreviewTable" class="divide-y divide-[#93C5FD] text-xs">
-                                        <!-- Aligned pairs will render here dynamically -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <div id="alignPlaceholder" class="bg-white rounded-lg p-6 text-center border border-[#93C5FD] text-gray-500 text-sm">
-                            Configure source/target texts on the left and click "Start Alignment" to begin.
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Tab Contents (Injected Dynamically via Components) -->
+            <div id="tabSearchContent"></div>
+            <div id="tabMetaContent" class="hidden"></div>
+            <div id="tabAlignContent" class="hidden"></div>
+            <div id="tabMergeContent" class="hidden"></div>
         </div>
     </div>
 
@@ -580,7 +96,3 @@
     </a>
 </footer>
 </html>
-
-
-
-
