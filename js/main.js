@@ -44,15 +44,13 @@ function loadSharedFile(parsedData, fileName, fileSize) {
     els.fileSize.textContent = fileSize;
     
     const dropZone = document.getElementById('dropZoneContainer');
-    const fUnits = document.getElementById('fileUnits');
     if (dropZone) dropZone.classList.add('hidden');
-    if (fUnits) fUnits.textContent = ` • ${parsedData.units.length} units`;
+    els.fileStats.textContent = ` • ${parsedData.units.length} units`;
     
     els.fileInfo.classList.remove('hidden');
     els.errorMessage.classList.add('hidden');
     els.searchAndResultsContainer.classList.remove('hidden');
     els.resultsSection.classList.remove('hidden');
-    els.fileStats.textContent = `${state.tmxData.units.length} translation units`;
     els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
     els.targetLanguage.textContent = state.tmxData.targetLanguage || '--';
     if (els.downloadUpdatedTmxBtn) {
@@ -68,14 +66,12 @@ function loadSharedFile(parsedData, fileName, fileSize) {
     els.metaFileSize.textContent = fileSize;
     
     const metaDropZone = document.getElementById('metaDropZoneContainer');
-    const mUnits = document.getElementById('metaFileUnits');
     if (metaDropZone) metaDropZone.classList.add('hidden');
-    if (mUnits) mUnits.textContent = ` • ${parsedData.units.length} units`;
+    els.metaFileStats.textContent = ` • ${parsedData.units.length} units`;
     
     els.metaFileInfo.classList.remove('hidden');
     els.metaEditorStatus.classList.add('hidden');
     els.metadataCard.classList.remove('hidden');
-    els.metaFileStats.textContent = `${state.metaEditorData.units.length} translation units found`;
     
     els.metaAuthor.value = state.metaEditorData.metadata.creationid || '';
     els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool || 'MemoMemo';
