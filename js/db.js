@@ -2,7 +2,10 @@ const _DB_NAME  = 'MemoMemo_DB';
 const _DB_VER   = 1;
 const _DB_STORE = 'sessions';
 
+let _db = null;
+
 function _openDB() {
+    if (_db) return Promise.resolve(_db);
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(_DB_NAME, _DB_VER);
         req.onupgradeneeded = e => {
@@ -10,9 +13,18 @@ function _openDB() {
             if (!db.objectStoreNames.contains(_DB_STORE))
                 db.createObjectStore(_DB_STORE);
         };
-        req.onsuccess = e => resolve(e.target.result);
+        req.onsuccess = e => {
+            _db = e.target.result;
+            _db.onclose = () => { _db = null; };
+            _db.onversionchange = () => { _db.close(); _db = null; };
+            resolve(_db);
+        };
         req.onerror  = e => reject(e.target.error);
     });
+}
+
+function _notifyError(msg) {
+    document.dispatchEvent(new CustomEvent('idb-error', { detail: msg }));
 }
 
 export async function idbSet(key, value) {
@@ -24,7 +36,10 @@ export async function idbSet(key, value) {
             tx.oncomplete = res;
             tx.onerror = e => rej(e.target.error);
         });
-    } catch(e) { console.warn('[IDB] write:', e); }
+    } catch(e) {
+        console.warn('[IDB] write:', e);
+        _notifyError('Could not save session. Local storage may be full or unavailable.');
+    }
 }
 
 export async function idbGet(key) {
@@ -48,7 +63,10 @@ export async function idbDelete(key) {
             tx.oncomplete = res;
             tx.onerror = e => rej(e.target.error);
         });
-    } catch(e) { console.warn('[IDB] delete:', e); }
+    } catch(e) {
+        console.warn('[IDB] delete:', e);
+        _notifyError('Could not clear session. Please try again.');
+    }
 }
 
 export function lsSet(key, value) {

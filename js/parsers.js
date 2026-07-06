@@ -39,6 +39,7 @@ export function parseTMXContent(content) {
     }
     
     // Process each translation unit
+    const srclang = parsedData.metadata.srclang;
     Array.from(tuElements).forEach(tu => {
         const tuvs = tu.getElementsByTagName('tuv');
         let sourceText = null;
@@ -46,7 +47,7 @@ export function parseTMXContent(content) {
         let sourceLang = null;
         let targetLang = null;
 
-        // Process each translation unit variant
+        // Determine source/target by xml:lang matching header srclang
         Array.from(tuvs).forEach(tuv => {
             const lang = tuv.getAttribute('xml:lang') || tuv.getAttribute('lang');
             const segElements = tuv.getElementsByTagName('seg');
@@ -54,15 +55,22 @@ export function parseTMXContent(content) {
             if (segElements.length > 0) {
                 const segText = segElements[0].textContent.trim();
                 
-                if (sourceText === null) {
+                if (lang === srclang) {
                     sourceText = segText;
                     sourceLang = lang;
-                } else {
+                } else if (targetText === null) {
                     targetText = segText;
                     targetLang = lang;
                 }
             }
         });
+
+        if (sourceText === null && targetText !== null) {
+            sourceText = targetText;
+            sourceLang = targetLang;
+            targetText = null;
+            targetLang = null;
+        }
 
         // Only add if we have both source and target
         if (sourceText !== null && targetText !== null) {
@@ -201,26 +209,31 @@ export function splitCSVRow(row, delimiter = ',') {
     for (let i = 0; i < row.length; i++) {
         const char = row[i];
         
-        if (char === '"') {
-            inQuotes = !inQuotes;
-        } else if (char === delimiter && !inQuotes) {
-            result.push(currentValue);
-            currentValue = '';
+        if (inQuotes) {
+            if (char === '"') {
+                if (i + 1 < row.length && row[i + 1] === '"') {
+                    currentValue += '"';
+                    i++;
+                } else {
+                    inQuotes = false;
+                }
+            } else {
+                currentValue += char;
+            }
         } else {
-            currentValue += char;
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === delimiter) {
+                result.push(currentValue);
+                currentValue = '';
+            } else {
+                currentValue += char;
+            }
         }
     }
     
-    // Add the last value
     result.push(currentValue);
-    
-    // Remove quotes from values
-    return result.map(value => {
-        if (value.startsWith('"') && value.endsWith('"')) {
-            return value.slice(1, -1).replace(/""/g, '"');
-        }
-        return value;
-    });
+    return result;
 }
 
 // Parse CSV file content
@@ -253,9 +266,15 @@ export function parseCSVContent(content) {
     const headerRow = splitCSVRow(firstLine, delimiter);
     
     if (headerRow.length === 2) {
-        parsedData.sourceLanguage = headerRow[0].trim() || 'Source';
-        parsedData.targetLanguage = headerRow[1].trim() || 'Target';
-        startIndex = 1;
+        const cell0 = headerRow[0].trim();
+        const cell1 = headerRow[1].trim();
+        // Treat as header only if cells look like language codes or common header labels
+        const looksLikeHeader = (v) => /^[a-z]{2,5}(-[a-z]{2,4})?$/i.test(v) || /^(source|target)s?\b/i.test(v);
+        if (looksLikeHeader(cell0) || looksLikeHeader(cell1) || (cell0.length < 6 && cell1.length < 6)) {
+            parsedData.sourceLanguage = cell0 || 'Source';
+            parsedData.targetLanguage = cell1 || 'Target';
+            startIndex = 1;
+        }
     }
     
     parsedData.metadata = {

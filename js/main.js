@@ -160,12 +160,12 @@ function handleFileSelect() {
                     const errText = pe.textContent.replace(/\s+/g, ' ').trim();
                     throw { title: 'XML parse error', detail: errText, hint: 'Check for unclosed tags, invalid characters, or encoding issues.' };
                 }
-                // TMX-specific: must have <tmx> root
-                if (ext === 'tmx' && !tempDoc.querySelector('tmx')) {
+                // TMX-specific: must have <tmx> root (check localName to handle namespaces)
+                if (ext === 'tmx' && tempDoc.documentElement.localName !== 'tmx') {
                     throw { title: 'Not a valid TMX file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <tmx>`, hint: 'Make sure the file is exported from a CAT tool as TMX 1.4.' };
                 }
                 // XLIFF-specific: must have <xliff> root
-                if (['xliff','xlf','sdlxliff'].includes(ext) && !tempDoc.querySelector('xliff')) {
+                if (['xliff','xlf','sdlxliff'].includes(ext) && tempDoc.documentElement.localName !== 'xliff') {
                     throw { title: 'Not a valid XLIFF file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <xliff>`, hint: 'SDLXLIFF and XLF files must have an <xliff> root element.' };
                 }
             }
@@ -274,52 +274,53 @@ function updateSearchFilters(e) {
     performSearch();
 }
 
-function processMergeFiles(filesList) {
+async function processMergeFiles(filesList) {
     const filesArray = Array.from(filesList);
-    
-    filesArray.forEach(file => {
+    const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
+
+    for (const file of filesArray) {
         const fileNameLower = file.name.toLowerCase();
         const ext = fileNameLower.split('.').pop();
-        const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
         if (!validExts.includes(ext)) {
             showMergeStatus(`Skipped unsupported file: ${file.name}`, 'error');
-            return;
+            continue;
         }
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const parsed = parseFileContent(file.name, e.target.result);
-                
-                // Add to mergeFiles list
-                const fileData = {
-                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                    name: file.name,
-                    size: file.size,
-                    units: parsed.units,
-                    sourceLanguage: parsed.sourceLanguage,
-                    targetLanguage: parsed.targetLanguage,
-                    metadata: parsed.metadata
-                };
-                
-                state.mergeFiles.push(fileData);
-                
-                // If it's the first file, pre-populate Combined languages
-                if (state.mergeFiles.length === 1) {
-                    els.mergeSrcLang.value = fileData.sourceLanguage;
-                    els.mergeTgtLang.value = fileData.targetLanguage;
-                }
-                
-                renderMergeFileList(state, removeMergeFile, moveMergeFile);
-                idbSet('mergeFiles', state.mergeFiles);
-                showMergeStatus(`Successfully uploaded ${file.name}`, 'info');
-            } catch (error) {
-                console.error("Error parsing merge file:", error);
-                showMergeStatus(`Error parsing ${file.name}: ${error.message}`, 'error');
+        try {
+            const text = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+
+            const parsed = parseFileContent(file.name, text);
+
+            const fileData = {
+                id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                name: file.name,
+                size: file.size,
+                units: parsed.units,
+                sourceLanguage: parsed.sourceLanguage,
+                targetLanguage: parsed.targetLanguage,
+                metadata: parsed.metadata
+            };
+
+            state.mergeFiles.push(fileData);
+
+            if (state.mergeFiles.length === 1) {
+                els.mergeSrcLang.value = fileData.sourceLanguage;
+                els.mergeTgtLang.value = fileData.targetLanguage;
             }
-        };
-        reader.readAsText(file);
-    });
+
+            renderMergeFileList(state, removeMergeFile, moveMergeFile);
+            idbSet('mergeFiles', state.mergeFiles);
+            showMergeStatus(`Successfully uploaded ${file.name}`, 'info');
+        } catch (error) {
+            console.error("Error parsing merge file:", error);
+            showMergeStatus(`Error parsing ${file.name}: ${error.message || error}`, 'error');
+        }
+    }
 }
 
 function removeMergeFile(id) {
@@ -417,7 +418,7 @@ function updateSearchScopeUI(scope) {
 }
 
 export async function clearSession() {
-    if (!confirm("¿Estás seguro de que deseas limpiar la sesión? Se borrarán de forma permanente todos los archivos cargados y modificaciones de traducción no descargadas.")) {
+    if (!confirm("Are you sure you want to clear the session? All loaded files and unsaved changes will be permanently deleted.")) {
         return;
     }
     await Promise.all([
@@ -486,7 +487,7 @@ export async function clearSession() {
     resetAlignment();
 
     document.getElementById('sessionBanner').classList.add('hidden');
-    showSessionBanner('🗑️ Sesión limpiada correctamente.', false);
+    showSessionBanner('🗑️ Session cleared successfully.', false);
 }
 
 async function restoreSession() {
@@ -607,10 +608,10 @@ async function restoreSession() {
 
     if (restored) {
         showSessionBanner(
-            `<span>✓ Sesión anterior restaurada automáticamente.</span>` +
+            `<span>✓ Previous session restored automatically.</span>` +
             `<button onclick="clearSession()" ` +
             `class="ml-4 px-3 py-1 rounded border border-current font-semibold text-xs hover:opacity-75 transition whitespace-nowrap">` +
-            `Limpiar sesión</button>`,
+            `Clear session</button>`,
             true
         );
     }
@@ -715,7 +716,7 @@ async function handleAlignFileUpload(file, isSource) {
         }
     } catch (err) {
         console.error('Failed to parse alignment file:', err);
-        alert(`Error al cargar el archivo de alineación: ${err.message}`);
+        alert(`Error loading alignment file: ${err.message}`);
     }
 }
 
@@ -788,6 +789,20 @@ function resetAlignment() {
     if (els.alignInputSection) els.alignInputSection.classList.remove('hidden');
 }
 
+function formatTmxDate(inputStr) {
+    if (!inputStr) {
+        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+    if (/^\d{8}T\d{6}Z$/.test(inputStr)) {
+        return inputStr;
+    }
+    const timestamp = Date.parse(inputStr);
+    if (isNaN(timestamp)) {
+        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+    return new Date(timestamp).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
 function init() {
     // Inject Tab Components HTML
     const tabSearchContent = document.getElementById('tabSearchContent');
@@ -801,6 +816,7 @@ function init() {
     if (tabMergeContent) tabMergeContent.innerHTML = renderMergeTab();
 
     window.addEventListener('keydown', handleGlobalKeydown);
+    document.addEventListener('idb-error', (e) => showSessionBanner(`⚠️ ${e.detail}`, false));
 
     // Search page event listeners
     els.fileInput.addEventListener('change', handleFileSelect);
@@ -835,6 +851,7 @@ function init() {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
         });
     }
     els.searchInput.addEventListener('input', debounce(performSearch, 300));
@@ -912,7 +929,8 @@ function init() {
         showMergeStatus('Merging translation memories...', 'info');
         els.executeMergeBtn.disabled = true;
 
-        setTimeout(() => {
+        // Yield to let the "Merging..." message paint before synchronous work
+        requestAnimationFrame(() => {
             try {
                 const removeDuplicates = els.mergeRemoveDuplicates.checked;
                 const combinedSrc = els.mergeSrcLang.value.trim() || 'en';
@@ -977,6 +995,7 @@ function init() {
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
 
                 showMergeStatus(`Successfully merged ${state.mergeFiles.length} files into ${downloadName}! Total units: ${totalCountAfter}${removeDuplicates ? ` (${duplicatesRemoved} duplicates removed)` : ''}. Download has started automatically.`, 'success');
             } catch (error) {
@@ -985,7 +1004,7 @@ function init() {
             } finally {
                 els.executeMergeBtn.disabled = false;
             }
-        }, 100);
+        });
     });
 
     // Metadata Editor event listeners
@@ -1015,20 +1034,6 @@ function init() {
         }
     });
 
-function formatTmxDate(inputStr) {
-    if (!inputStr) {
-        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    }
-    if (/^\d{8}T\d{6}Z$/.test(inputStr)) {
-        return inputStr;
-    }
-    const timestamp = Date.parse(inputStr);
-    if (isNaN(timestamp)) {
-        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    }
-    return new Date(timestamp).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-}
-
     els.exportMetadataBtn.addEventListener('click', () => {
         if (!state.metaEditorData.units.length) return;
 
@@ -1050,7 +1055,7 @@ function formatTmxDate(inputStr) {
         // Trigger file download
         const blob = new Blob([tmxXml], { type: 'text/xml;charset=utf-8;' });
         const link = document.createElement('a');
-        const originalName = els.metaFileInput.files[0]?.name || 'translation_memory.tmx';
+        const originalName = els.metaFileInput.files[0]?.name || lsGet('metaFileName') || 'translation_memory.tmx';
         const downloadName = originalName.toLowerCase().endsWith('.tmx') ? originalName : (originalName.split('.')[0] + '.tmx');
         
         link.href = URL.createObjectURL(blob);
@@ -1058,6 +1063,7 @@ function formatTmxDate(inputStr) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     });
 
     const changeFileBtn = document.getElementById('changeFileBtn');
@@ -1159,12 +1165,18 @@ function formatTmxDate(inputStr) {
             const tgtText = els.alignTargetText.value;
             
             if (!srcText.trim() || !tgtText.trim()) {
-                alert('Por favor introduce texto o carga archivos tanto en origen como en destino.');
+                alert('Please enter text or upload files for both source and target languages.');
                 return;
             }
             
             state.alignedPairs = alignTexts(srcText, tgtText);
             idbSet('alignedPairs', state.alignedPairs);
+
+            const emptySrc = state.alignedPairs.filter(p => !p.source.trim()).length;
+            const emptyTgt = state.alignedPairs.filter(p => !p.target.trim()).length;
+            if (emptySrc > state.alignedPairs.length * 0.2 || emptyTgt > state.alignedPairs.length * 0.2) {
+                showSessionBanner(`⚠️ The sentence counts differ significantly (source: ${state.alignedPairs.length - emptySrc}, target: ${state.alignedPairs.length - emptyTgt}). Use Merge, Shift, or Delete to fix the alignment.`, false);
+            }
             
             if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
             if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
@@ -1199,7 +1211,7 @@ function formatTmxDate(inputStr) {
             
             loadSharedFile(alignedData, 'aligned_translations.tmx', 'Dynamic');
             switchTab('search');
-            showSessionBanner('✓ Alineaciones cargadas correctamente en el buscador de MemoMemo.', true);
+            showSessionBanner('✓ Alignments loaded into MemoMemo successfully.', true);
         });
     }
 
@@ -1236,12 +1248,17 @@ function formatTmxDate(inputStr) {
                 mimeType = "text/plain;charset=utf-8;";
                 fileExtension = "txt";
             } else if (format === 'csv') {
-                // Comma-separated values
+                // Comma-separated values (prevent formula injection)
+                const sanitizeCSV = (v) => {
+                    const escaped = v.replace(/"/g, '""');
+                    if (/^[=+\-@]/.test(escaped)) return "'" + escaped;
+                    return escaped;
+                };
                 const header = '"Source","Target"\n';
                 const rows = validPairs.map(p => {
-                    const srcEscaped = '"' + p.source.replace(/"/g, '""') + '"';
-                    const tgtEscaped = '"' + p.target.replace(/"/g, '""') + '"';
-                    return `${srcEscaped},${tgtEscaped}`;
+                    const srcEscaped = sanitizeCSV(p.source);
+                    const tgtEscaped = sanitizeCSV(p.target);
+                    return `"${srcEscaped}","${tgtEscaped}"`;
                 }).join('\n');
                 fileContent = header + rows;
                 mimeType = "text/csv;charset=utf-8;";
@@ -1255,6 +1272,7 @@ function formatTmxDate(inputStr) {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
         });
     }
 
@@ -1268,7 +1286,7 @@ function formatTmxDate(inputStr) {
 
     // Clear alignment session buttons click
     const triggerClearAlignment = () => {
-        if (confirm('¿Estás seguro de que deseas limpiar la alineación actual y todos los textos cargados para comenzar una nueva?')) {
+        if (confirm('Are you sure you want to clear the current alignment and all loaded texts to start a new one?')) {
             resetAlignment();
         }
     };

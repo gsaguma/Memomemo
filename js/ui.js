@@ -1,5 +1,9 @@
 import { idbSet } from './db.js';
 
+let _prevTerm = '';
+let _prevUseRegex = false;
+let _cachedRegex = null;
+
 export const els = {
     // File upload
     get fileInput() { return document.getElementById('fileInput'); },
@@ -53,7 +57,7 @@ export const els = {
     get mergeRemoveDuplicates() { return document.getElementById('mergeRemoveDuplicates'); },
     get executeMergeBtn() { return document.getElementById('executeMergeBtn'); },
     get mergeStatusContainer() { return document.getElementById('mergeStatusContainer'); },
-    get mergeDropZone() { return document.querySelector('label[for="mergeFileInput"]'); },
+    get mergeDropZone() { return document.getElementById('mergeDropZoneContainer'); },
     
     // Metadata Editor
     get metaFileInput() { return document.getElementById('metaFileInput'); },
@@ -64,7 +68,7 @@ export const els = {
     get metaFileStats() { return document.getElementById('metaFileStats'); },
     get metadataCard() { return document.getElementById('metadataCard'); },
     get metaEditorStatus() { return document.getElementById('metaEditorStatus'); },
-    get metaDropZone() { return document.querySelector('label[for="metaFileInput"]'); },
+    get metaDropZone() { return document.getElementById('metaDropZoneContainer'); },
     get exportMetadataBtn() { return document.getElementById('exportMetadataBtn'); },
     get metaAuthor() { return document.getElementById('metaAuthor'); },
     get metaToolDisplay() { return document.getElementById('metaToolDisplay'); },
@@ -238,7 +242,7 @@ export function highlightText(text, regex, shouldHighlight) {
     return result;
 }
 
-export function copyTextToClipboard(e) {
+export function copyToClipboard(e) {
     const text = e.currentTarget.getAttribute('data-text');
     const button = e.currentTarget;
     const originalHTML = button.innerHTML;
@@ -285,20 +289,29 @@ export function updateResults(state) {
     // Clear previous results
     els.resultsTable.innerHTML = '';
     
-    // Build search regex for highlighting
+    // Build search regex for highlighting (cached)
     const rawTerm = els.searchInput.value.trim();
+    const useRegex = els.useRegex.checked;
     let highlightRegex = null;
     if (rawTerm) {
-        try {
-            if (els.useRegex.checked) {
-                highlightRegex = new RegExp(rawTerm, 'gi');
-            } else {
-                const escaped = rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                highlightRegex = new RegExp(escaped, 'gi');
+        if (rawTerm !== _prevTerm || useRegex !== _prevUseRegex) {
+            _prevTerm = rawTerm;
+            _prevUseRegex = useRegex;
+            try {
+                if (useRegex) {
+                    _cachedRegex = new RegExp(rawTerm, 'gi');
+                } else {
+                    const escaped = rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    _cachedRegex = new RegExp(escaped, 'gi');
+                }
+            } catch (e) {
+                _cachedRegex = null;
             }
-        } catch (e) {
-            highlightRegex = null;
         }
+        highlightRegex = _cachedRegex;
+    } else {
+        _prevTerm = '';
+        _cachedRegex = null;
     }
     
     currentUnits.forEach((unit, index) => {
@@ -328,7 +341,7 @@ export function updateResults(state) {
         sourceCopyBtn.title = 'Copy source text';
         sourceCopyBtn.setAttribute('aria-label', 'Copy source text for segment ' + (startIndex + index + 1));
         sourceCopyBtn.setAttribute('data-text', unit.source);
-        sourceCopyBtn.addEventListener('click', copyTextToClipboard);
+        sourceCopyBtn.addEventListener('click', copyToClipboard);
         
         // Add text and button to cell
         sourceCellContent.appendChild(sourceTextDiv);
@@ -363,7 +376,7 @@ export function updateResults(state) {
         targetCopyBtn.title = 'Copy target text';
         targetCopyBtn.setAttribute('aria-label', 'Copy target text for segment ' + (startIndex + index + 1));
         targetCopyBtn.setAttribute('data-text', unit.target);
-        targetCopyBtn.addEventListener('click', copyTextToClipboard);
+        targetCopyBtn.addEventListener('click', copyToClipboard);
 
         // Edit handlers
         const startEditing = () => {
@@ -551,7 +564,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
         
         const detailsSpan = document.createElement('div');
         detailsSpan.className = 'text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex gap-2';
-        detailsSpan.innerHTML = `<span>${file.units.length} units</span> &bull; <span>${formatFileSize(file.size)}</span> &bull; <span>${file.sourceLanguage} &rarr; ${file.targetLanguage}</span>`;
+        detailsSpan.innerHTML = `<span>${file.units.length} units</span> &bull; <span>${formatFileSize(file.size)}</span> &bull; <span>${escapeHtml(file.sourceLanguage)} &rarr; ${escapeHtml(file.targetLanguage)}</span>`;
         
         fileInfoDiv.appendChild(nameSpan);
         fileInfoDiv.appendChild(detailsSpan);

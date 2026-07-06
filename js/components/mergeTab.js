@@ -4,7 +4,7 @@ export function renderMergeTab() {
             <!-- Upload Card -->
             <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
                 <h2 class="text-lg font-semibold mb-3">Upload Memories to Merge</h2>
-                <label for="mergeFileInput" class="block cursor-pointer">
+                <label for="mergeFileInput" id="mergeDropZoneContainer" class="block cursor-pointer">
                     <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center justify-center gap-3 md:flex-col md:gap-0 md:p-5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-primary flex-shrink-0 md:mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
