@@ -130,7 +130,7 @@ function dpAlign(srcSents, tgtSents, c, s2, priors) {
         return alignCost(srcLen, tgtLen, c, s2, srcCount, tgtCount, priors[key]);
     };
 
-    const tryUpdate = (ni, nj, cost, step) => {
+    const tryUpdate = (i, j, ni, nj, cost, step) => {
         if (cost === Infinity) return;
         if (dp[i][j] + cost < dp[ni][nj]) {
             dp[ni][nj] = dp[i][j] + cost;
@@ -142,26 +142,26 @@ function dpAlign(srcSents, tgtSents, c, s2, priors) {
         for (let j = 0; j <= M; j++) {
             if (dp[i][j] === Infinity) continue;
 
-            if (i < N && j < M) tryUpdate(i + 1, j + 1, transitionCost(i, i + 1, j, j + 1), { di: 1, dj: 1 });
-            if (i < N) tryUpdate(i + 1, j, transitionCost(i, i + 1, j, j), { di: 1, dj: 0 });
-            if (j < M) tryUpdate(i, j + 1, transitionCost(i, i, j, j + 1), { di: 0, dj: 1 });
-            if (i + 1 < N && j < M) tryUpdate(i + 2, j + 1, transitionCost(i, i + 2, j, j + 1), { di: 2, dj: 1 });
-            if (i < N && j + 1 < M) tryUpdate(i + 1, j + 2, transitionCost(i, i + 1, j, j + 2), { di: 1, dj: 2 });
+            if (i < N && j < M) tryUpdate(i, j, i + 1, j + 1, transitionCost(i, i + 1, j, j + 1), { di: 1, dj: 1 });
+            if (i < N) tryUpdate(i, j, i + 1, j, transitionCost(i, i + 1, j, j), { di: 1, dj: 0 });
+            if (j < M) tryUpdate(i, j, i, j + 1, transitionCost(i, i, j, j + 1), { di: 0, dj: 1 });
+            if (i + 1 < N && j < M) tryUpdate(i, j, i + 2, j + 1, transitionCost(i, i + 2, j, j + 1), { di: 2, dj: 1 });
+            if (i < N && j + 1 < M) tryUpdate(i, j, i + 1, j + 2, transitionCost(i, i + 1, j, j + 2), { di: 1, dj: 2 });
         }
     }
 
     const pairs = [];
-    let i = N, j = M;
-    while (i > 0 || j > 0) {
-        const step = bt[i][j];
+    let pi = N, pj = M;
+    while (pi > 0 || pj > 0) {
+        const step = bt[pi][pj];
         if (!step) break;
         const srcIdxs = [];
-        for (let k = step.di; k > 0; k--) srcIdxs.push(i - k);
+        for (let k = step.di; k > 0; k--) srcIdxs.push(pi - k);
         const tgtIdxs = [];
-        for (let k = step.dj; k > 0; k--) tgtIdxs.push(j - k);
+        for (let k = step.dj; k > 0; k--) tgtIdxs.push(pj - k);
         pairs.unshift({ srcIdx: srcIdxs, tgtIdx: tgtIdxs });
-        i -= step.di;
-        j -= step.dj;
+        pi -= step.di;
+        pj -= step.dj;
     }
     return pairs;
 }
