@@ -1248,12 +1248,17 @@ function init() {
                 mimeType = "text/plain;charset=utf-8;";
                 fileExtension = "txt";
             } else if (format === 'csv') {
-                // Comma-separated values
+                // Comma-separated values (prevent formula injection)
+                const sanitizeCSV = (v) => {
+                    const escaped = v.replace(/"/g, '""');
+                    if (/^[=+\-@]/.test(escaped)) return "'" + escaped;
+                    return escaped;
+                };
                 const header = '"Source","Target"\n';
                 const rows = validPairs.map(p => {
-                    const srcEscaped = '"' + p.source.replace(/"/g, '""') + '"';
-                    const tgtEscaped = '"' + p.target.replace(/"/g, '""') + '"';
-                    return `${srcEscaped},${tgtEscaped}`;
+                    const srcEscaped = sanitizeCSV(p.source);
+                    const tgtEscaped = sanitizeCSV(p.target);
+                    return `"${srcEscaped}","${tgtEscaped}"`;
                 }).join('\n');
                 fileContent = header + rows;
                 mimeType = "text/csv;charset=utf-8;";
