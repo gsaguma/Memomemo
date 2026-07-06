@@ -43,7 +43,7 @@ async function parseAlignmentFile(file) {
     }
 }
 
-function handleAlignRowAction(action, index) {
+export function handleAlignRowAction(action, index) {
     if (action === 'merge') {
         if (index < state.alignedPairs.length - 1) {
             const current = state.alignedPairs[index];
