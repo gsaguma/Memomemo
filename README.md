@@ -286,7 +286,7 @@ All file processing happens **entirely inside your browser**. No file content, n
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0**. See [LICENSE](LICENSE) for full terms.
+This project is licensed under the **Apache-2.0 license**.
 
 ---
 
