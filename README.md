@@ -102,7 +102,7 @@ flowchart TD
         subgraph TAB_ALIGN["⚖️  alignTab.js — Alignment"]
             T4A["Source text input\n(.txt / .docx / .pptx)"]
             T4B["Target text input\n(.txt / .docx / .pptx)"]
-            T4C["alignTexts()\nsplitIntoSentences()\n(abbreviation-aware)"]
+            T4C["alignTexts()\nsplitSentences()\n(abbreviation-aware)"]
             T4D["Preview table\n(merge / shift / delete rows)"]
             T4E["Export: TMX · CSV · TXT\nor inject into Search tab"]
             T4A --> T4C

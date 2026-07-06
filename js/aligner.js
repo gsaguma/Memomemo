@@ -1,4 +1,4 @@
-export function splitIntoSentences(text) {
+export function splitSentences(text) {
     if (!text) return [];
     
     const paragraphs = text.split(/\r?\n/);
@@ -49,8 +49,8 @@ export function splitIntoSentences(text) {
 }
 
 export function alignTexts(sourceText, targetText) {
-    const sourceSentences = splitIntoSentences(sourceText);
-    const targetSentences = splitIntoSentences(targetText);
+    const sourceSentences = splitSentences(sourceText);
+    const targetSentences = splitSentences(targetText);
     
     const maxLen = Math.max(sourceSentences.length, targetSentences.length);
     const alignedPairs = [];

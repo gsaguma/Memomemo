@@ -25,7 +25,7 @@ export function renderAlignTab() {
                             </svg>
                             <span id="alignSourceFileName" class="font-medium truncate text-[#1F2937] max-w-[200px]"></span>
                         </div>
-                        <button type="button" id="changeAlignSourceBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Cambiar archivo</button>
+                        <button type="button" id="changeAlignSourceBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
                     </div>
                     <div class="text-center text-xs text-gray-400 font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
                     <textarea id="alignSourceText" placeholder="Paste source sentences here..." class="w-full flex-grow p-3 text-sm border border-[#93C5FD] rounded bg-white focus:outline-none focus:ring-1 focus:ring-primary resize-y" rows="6"></textarea>
@@ -53,7 +53,7 @@ export function renderAlignTab() {
                             </svg>
                             <span id="alignTargetFileName" class="font-medium truncate text-[#1F2937] max-w-[200px]"></span>
                         </div>
-                        <button type="button" id="changeAlignTargetBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Cambiar archivo</button>
+                        <button type="button" id="changeAlignTargetBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
                     </div>
                     <div class="text-center text-xs text-gray-400 font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
                     <textarea id="alignTargetText" placeholder="Paste target sentences here..." class="w-full flex-grow p-3 text-sm border border-[#93C5FD] rounded bg-white focus:outline-none focus:ring-1 focus:ring-primary resize-y" rows="6"></textarea>
@@ -65,13 +65,13 @@ export function renderAlignTab() {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Limpiar todo
+                    Clear All
                 </button>
                 <button id="startAlignBtn" class="flex-[2] md:flex-none md:w-2/3 bg-primary hover:bg-opacity-90 text-white font-medium py-3 px-4 rounded shadow transition text-sm flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 min-h-[48px]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    Iniciar Alineación (Start Alignment)
+                    Start Alignment
                 </button>
             </div>
         </div>
@@ -90,13 +90,13 @@ export function renderAlignTab() {
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Volver a configurar
+                        Back to Settings
                     </button>
                     <button id="alignClearBtn" class="min-h-[40px] bg-red-50 hover:bg-red-100 text-red-700 font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1 border border-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Limpiar alineación
+                        Clear Alignment
                     </button>
                     <button id="alignOpenInAppBtn" class="min-h-[40px] bg-green-600 hover:bg-green-700 text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-green-600">
                         Open in MemoMemo

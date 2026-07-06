@@ -26,7 +26,7 @@ export function renderSearchTab() {
                         </div>
                         <div class="flex items-center gap-3">
                             <span id="fileSize" class="text-xs text-gray-500 font-medium"></span>
-                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Cambiar archivo</button>
+                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none">Change file</button>
                         </div>
                     </div>
                 </div>
@@ -99,8 +99,8 @@ export function renderSearchTab() {
                             <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
                                    class="w-full px-3 py-2 rounded-md border border-[#93C5FD] bg-white text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800" />
                             <div class="flex flex-wrap items-center gap-3 text-sm">
-                                <input type="checkbox" id="sourceOnly" class="hidden" />
-                                <input type="checkbox" id="targetOnly" class="hidden" />
+                                <input type="checkbox" id="sourceOnly" class="sr-only" tabindex="-1" />
+                                <input type="checkbox" id="targetOnly" class="sr-only" tabindex="-1" />
                                 <div class="inline-flex rounded-md shadow-sm flex-grow md:flex-grow-0" role="group">
                                     <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-l-md border border-gray-400 dark:border-gray-500 bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition">
                                         Both
