@@ -210,9 +210,8 @@ export function renderStats(units) {
     });
 
     els.statsPanel.classList.remove('hidden');
-    // Keep stats panel closed by default
-    els.statsBody.classList.add('hidden');
-    els.statsChevron.style.transform = '';
+    els.statsBody.classList.remove('hidden');
+    els.statsChevron.style.transform = 'rotate(180deg)';
 }
 
 export function escapeHtml(text) {

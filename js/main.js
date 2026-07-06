@@ -429,7 +429,8 @@ export async function clearSession() {
     ]);
     ['searchQuery','sourceOnly','targetOnly','useRegex','currentPage','activeTab',
      'mergeSrcLang','mergeTgtLang','mergeAuthor','mergeTool','mergeRemoveDuplicates',
-     'fileName','fileSize','metaFileName','metaFileSize'].forEach(lsDel);
+     'fileName','fileSize','metaFileName','metaFileSize','darkMode'].forEach(lsDel);
+    document.documentElement.classList.remove('dark');
 
     // Reset in-memory state
     state.tmxData = { units: [], sourceLanguage: '', targetLanguage: '', metadata: {} };
@@ -531,9 +532,19 @@ async function restoreSession() {
         state.tmxData       = savedTmx;
         state.filteredUnits = [...state.tmxData.units];
 
-        const fn = lsGet('fileName', '');
-        const fs = lsGet('fileSize', '');
-        els.fileText.textContent = 'File loaded!';
+    // Restore dark mode
+    const savedDark = lsGet('darkMode', false);
+    if (savedDark) {
+        document.documentElement.classList.add('dark');
+        const sun = document.getElementById('darkModeSun');
+        const moon = document.getElementById('darkModeMoon');
+        if (sun) sun.classList.remove('hidden');
+        if (moon) moon.classList.add('hidden');
+    }
+
+    const fn = lsGet('fileName', '');
+    const fs = lsGet('fileSize', '');
+    els.fileText.textContent = 'File loaded!';
         if (fn) els.fileName.textContent = fn;
         if (fs) els.fileSize.textContent = fs;
         
@@ -714,10 +725,10 @@ async function handleAlignFileUpload(file, isSource) {
             els.alignTargetFileInfo.classList.remove('hidden');
             els.alignTargetFileName.textContent = file.name;
         }
-    } catch (err) {
-        console.error('Failed to parse alignment file:', err);
-        alert(`Error loading alignment file: ${err.message}`);
-    }
+        } catch (err) {
+            console.error('Failed to parse alignment file:', err);
+            showError('Error loading alignment file', err.message, 'Make sure the file is a supported format: .txt, .csv, .docx, .pptx');
+        }
 }
 
 async function parseAlignmentFile(file) {
@@ -1171,29 +1182,38 @@ function init() {
             const tgtText = els.alignTargetText.value;
             
             if (!srcText.trim() || !tgtText.trim()) {
-                alert('Please enter text or upload files for both source and target languages.');
+                showError('Missing text', 'Please enter text or upload files for both source and target languages.', 'Both source and target inputs must be non-empty.');
                 return;
             }
             
-            state.alignedPairs = alignTexts(srcText, tgtText);
-            idbSet('alignedPairs', state.alignedPairs);
+            const originalHTML = els.startAlignBtn.innerHTML;
+            els.startAlignBtn.innerHTML = '<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Aligning...';
+            els.startAlignBtn.disabled = true;
+            els.errorMessage.classList.add('hidden');
 
-            const lowConf = state.alignedPairs.filter(p => (p.confidence ?? 100) < 60).length;
-            const medConf = state.alignedPairs.filter(p => {
-                const c = p.confidence ?? 100;
-                return c >= 60 && c < 85;
-            }).length;
-            if (lowConf > 0) {
-                const pct = Math.round((lowConf / state.alignedPairs.length) * 100);
-                showSessionBanner(`⚠️ ${lowConf} of ${state.alignedPairs.length} pairs have low confidence (${pct}%). Low-confidence rows are marked with a red left border. Use Merge/Shift/Delete to fix alignment.`, false);
-            } else if (medConf > 0) {
-                const pct = Math.round((medConf / state.alignedPairs.length) * 100);
-                showSessionBanner(`ℹ️ ${medConf} of ${state.alignedPairs.length} pairs have medium confidence (${pct}%). Review yellow-bordered rows for accuracy.`, false);
-            }
-            
-            if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
-            if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
-            renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
+            requestAnimationFrame(() => {
+                state.alignedPairs = alignTexts(srcText, tgtText);
+                els.startAlignBtn.innerHTML = originalHTML;
+                els.startAlignBtn.disabled = false;
+                idbSet('alignedPairs', state.alignedPairs);
+
+                const lowConf = state.alignedPairs.filter(p => (p.confidence ?? 100) < 60).length;
+                const medConf = state.alignedPairs.filter(p => {
+                    const c = p.confidence ?? 100;
+                    return c >= 60 && c < 85;
+                }).length;
+                if (lowConf > 0) {
+                    const pct = Math.round((lowConf / state.alignedPairs.length) * 100);
+                    showSessionBanner(`⚠️ ${lowConf} of ${state.alignedPairs.length} pairs have low confidence (${pct}%). Low-confidence rows are marked with a red left border. Use Merge/Shift/Delete to fix alignment.`, false);
+                } else if (medConf > 0) {
+                    const pct = Math.round((medConf / state.alignedPairs.length) * 100);
+                    showSessionBanner(`ℹ️ ${medConf} of ${state.alignedPairs.length} pairs have medium confidence (${pct}%). Review yellow-bordered rows for accuracy.`, false);
+                }
+                
+                if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
+                if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
+                renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
+            });
         });
     }
 
@@ -1286,6 +1306,19 @@ function init() {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
+        });
+    }
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkModeToggle');
+    if (darkToggle) {
+        darkToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            lsSet('darkMode', isDark);
+            const sun = document.getElementById('darkModeSun');
+            const moon = document.getElementById('darkModeMoon');
+            if (sun) sun.classList.toggle('hidden', !isDark);
+            if (moon) moon.classList.toggle('hidden', isDark);
         });
     }
 

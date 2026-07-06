@@ -245,6 +245,11 @@ export function parseCSVContent(content) {
         metadata: {}
     };
     
+    // Strip BOM character if present
+    if (content.charCodeAt(0) === 0xFEFF) {
+        content = content.slice(1);
+    }
+    
     // Split content into lines
     const lines = content.split(/\r\n|\n|\r/).filter(line => line.trim() !== '');
     
