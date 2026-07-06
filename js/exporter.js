@@ -31,14 +31,23 @@ export function generateTMXXML(units, metadata) {
     
     units.forEach(unit => {
         const srcLang = unit.sourceLang || srclang;
-        const tgtLang = unit.targetLang || adminlang;
         xml += `    <tu>\n`;
         xml += `      <tuv xml:lang="${escapeXml(srcLang)}">\n`;
         xml += `        <seg>${escapeXml(unit.source)}</seg>\n`;
         xml += `      </tuv>\n`;
-        xml += `      <tuv xml:lang="${escapeXml(tgtLang)}">\n`;
-        xml += `        <seg>${escapeXml(unit.target)}</seg>\n`;
-        xml += `      </tuv>\n`;
+        if (unit.targets && unit.targets.length > 0) {
+            unit.targets.forEach(t => {
+                const tl = t.lang || adminlang;
+                xml += `      <tuv xml:lang="${escapeXml(tl)}">\n`;
+                xml += `        <seg>${escapeXml(t.text)}</seg>\n`;
+                xml += `      </tuv>\n`;
+            });
+        } else {
+            const tgtLang = unit.targetLang || adminlang;
+            xml += `      <tuv xml:lang="${escapeXml(tgtLang)}">\n`;
+            xml += `        <seg>${escapeXml(unit.target)}</seg>\n`;
+            xml += `      </tuv>\n`;
+        }
         xml += `    </tu>\n`;
     });
     

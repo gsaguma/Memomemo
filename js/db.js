@@ -54,6 +54,15 @@ export async function idbGet(key) {
     } catch(e) { console.warn('[IDB] read:', e); return null; }
 }
 
+const _debounceTimers = {};
+export function idbSetDebounced(key, value, delay = 400) {
+    clearTimeout(_debounceTimers[key]);
+    _debounceTimers[key] = setTimeout(() => {
+        idbSet(key, value);
+        delete _debounceTimers[key];
+    }, delay);
+}
+
 export async function idbDelete(key) {
     try {
         const db = await _openDB();

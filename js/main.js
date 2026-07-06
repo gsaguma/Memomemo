@@ -1,421 +1,22 @@
 import { state } from './state.js';
-import { idbSet, idbGet, idbDelete, lsSet, lsGet, lsDel } from './db.js';
-import { parseFileContent } from './parsers.js';
-import { generateTMXXML } from './exporter.js';
+import { idbGet, idbDelete, lsSet, lsGet, lsDel } from './db.js';
 import {
     els,
-    showError,
     showSessionBanner,
     renderStats,
     updateResults,
     renderMergeFileList,
-    showMergeStatus,
-    showMetaEditorStatus,
-    updateTabUI,
-    formatFileSize,
     renderAlignmentPreviewTable
 } from './ui.js';
-import { alignTexts, extractTextFromDocx, extractTextFromPptx } from './aligner.js';
 import { renderSearchTab } from './components/searchTab.js';
 import { renderMetaTab } from './components/metaTab.js';
 import { renderAlignTab } from './components/alignTab.js';
 import { renderMergeTab } from './components/mergeTab.js';
-
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
-
-function switchTab(tab) {
-    updateTabUI(tab);
-    lsSet('activeTab', tab);
-}
-
-function loadSharedFile(parsedData, fileName, fileSize) {
-    // Synchronize in-memory state
-    state.tmxData = parsedData;
-    state.metaEditorData = {
-        units: parsedData.units,
-        metadata: parsedData.metadata
-    };
-    state.filteredUnits = [...parsedData.units];
-    state.currentPage = 1;
-    
-    // Update Search UI
-    els.fileText.textContent = 'File loaded!';
-    els.fileName.textContent = fileName;
-    els.fileSize.textContent = fileSize;
-    
-    const dropZone = document.getElementById('dropZoneContainer');
-    if (dropZone) dropZone.classList.add('hidden');
-    els.fileStats.textContent = ` • ${parsedData.units.length} units`;
-    
-    els.fileInfo.classList.remove('hidden');
-    els.errorMessage.classList.add('hidden');
-    els.searchAndResultsContainer.classList.remove('hidden');
-    els.resultsSection.classList.remove('hidden');
-    els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
-    els.targetLanguage.textContent = state.tmxData.targetLanguage || '--';
-    if (els.downloadUpdatedTmxBtn) {
-        els.downloadUpdatedTmxBtn.classList.remove('hidden');
-    }
-    
-    updateResults(state);
-    renderStats(state.tmxData.units);
-    
-    // Update Metadata UI
-    els.metaFileText.textContent = 'File loaded!';
-    els.metaFileName.textContent = fileName;
-    els.metaFileSize.textContent = fileSize;
-    
-    const metaDropZone = document.getElementById('metaDropZoneContainer');
-    if (metaDropZone) metaDropZone.classList.add('hidden');
-    els.metaFileStats.textContent = ` • ${parsedData.units.length} units`;
-    
-    els.metaFileInfo.classList.remove('hidden');
-    els.metaEditorStatus.classList.add('hidden');
-    els.metadataCard.classList.remove('hidden');
-    
-    els.metaAuthor.value = state.metaEditorData.metadata.creationid || '';
-    els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool || 'MemoMemo';
-    els.metaToolVersion.value = state.metaEditorData.metadata.creationtoolversion || '';
-    els.metaCreationDate.value = state.metaEditorData.metadata.creationdate || '';
-    els.metaSrcLang.value = state.metaEditorData.metadata.srclang || '';
-    els.metaTgtLang.value = state.metaEditorData.metadata.adminlang || '';
-    els.metaDatatype.value = state.metaEditorData.metadata.datatype || '';
-    els.metaSegtype.value = state.metaEditorData.metadata.segtype || '';
-
-    // Persist to IndexedDB & localStorage
-    idbSet('tmxData', state.tmxData);
-    idbSet('metaEditorData', state.metaEditorData);
-    lsSet('fileName', fileName);
-    lsSet('fileSize', fileSize);
-    lsSet('metaFileName', fileName);
-    lsSet('metaFileSize', fileSize);
-    
-    savePreferences();
-}
-
-function handleFileSelect() {
-    if (els.fileInput.files.length === 0) return;
-
-    const file = els.fileInput.files[0];
-    const fileNameLower = file.name.toLowerCase();
-    const ext = fileNameLower.split('.').pop();
-
-    // --- Extension validation ---
-    const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
-    if (!validExts.includes(ext)) {
-        showError(
-            `Unsupported file type: .${ext}`,
-            '',
-            `Supported formats: ${validExts.map(e => '.'+e).join(', ')}`
-        );
-        els.searchAndResultsContainer.classList.add('hidden');
-        els.statsPanel.classList.add('hidden');
-        return;
-    }
-
-    // --- File size pre-check (warn over 20 MB) ---
-    const MB = 1024 * 1024;
-    if (file.size > 20 * MB) {
-        showError(
-            'File too large to process in the browser',
-            `File size: ${formatFileSize(file.size)} (limit ~20 MB)`,
-            'Consider splitting the file before uploading.'
-        );
-        els.searchAndResultsContainer.classList.add('hidden');
-        els.statsPanel.classList.add('hidden');
-        return;
-    }
-
-    // Update UI loading state
-    els.fileText.textContent = 'File selected!';
-    els.fileName.textContent = file.name;
-    els.fileSize.textContent = formatFileSize(file.size);
-    els.fileInfo.classList.remove('hidden');
-    els.errorMessage.classList.add('hidden');
-    els.statsPanel.classList.add('hidden');
-    els.loadingIndicator.classList.remove('hidden');
-    els.searchAndResultsContainer.classList.add('hidden');
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const raw = e.target.result;
-
-            // --- XML pre-validation for TMX / XLIFF ---
-            if (['tmx','xliff','xlf','sdlxliff'].includes(ext)) {
-                const trimmed = raw.trimStart();
-                if (!trimmed.startsWith('<?xml') && !trimmed.startsWith('<tmx') && !trimmed.startsWith('<xliff')) {
-                    throw { title: 'File does not appear to be valid XML', detail: `First characters: ${trimmed.slice(0,80)}`, hint: 'Make sure the file was not corrupted or saved in wrong format.' };
-                }
-                // Use DOMParser to get exact parse error location
-                const tempDoc = new DOMParser().parseFromString(raw, 'text/xml');
-                const pe = tempDoc.querySelector('parsererror');
-                if (pe) {
-                    const errText = pe.textContent.replace(/\s+/g, ' ').trim();
-                    throw { title: 'XML parse error', detail: errText, hint: 'Check for unclosed tags, invalid characters, or encoding issues.' };
-                }
-                // TMX-specific: must have <tmx> root (check localName to handle namespaces)
-                if (ext === 'tmx' && tempDoc.documentElement.localName !== 'tmx') {
-                    throw { title: 'Not a valid TMX file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <tmx>`, hint: 'Make sure the file is exported from a CAT tool as TMX 1.4.' };
-                }
-                // XLIFF-specific: must have <xliff> root
-                if (['xliff','xlf','sdlxliff'].includes(ext) && tempDoc.documentElement.localName !== 'xliff') {
-                    throw { title: 'Not a valid XLIFF file', detail: `Root element is <${tempDoc.documentElement.tagName}>, expected <xliff>`, hint: 'SDLXLIFF and XLF files must have an <xliff> root element.' };
-                }
-            }
-
-            // --- CSV pre-validation ---
-            if (ext === 'csv') {
-                const firstLines = raw.split(/\r?\n/).slice(0, 5);
-                const hasDelimiter = firstLines.some(l => l.includes(',') || l.includes(';') || l.includes('\t'));
-                if (!hasDelimiter) {
-                    throw { title: 'CSV format not detected', detail: `First line: ${firstLines[0]?.slice(0,100)}`, hint: 'The file must use comma (,), semicolon (;), or tab (\\t) as delimiter.' };
-                }
-            }
-
-            const parsedData = parseFileContent(file.name, raw);
-            els.loadingIndicator.classList.add('hidden');
-            loadSharedFile(parsedData, file.name, formatFileSize(file.size));
-
-        } catch (error) {
-            console.error('Error parsing file:', error);
-            els.loadingIndicator.classList.add('hidden');
-            els.statsPanel.classList.add('hidden');
-            if (error && error.title) {
-                showError(error.title, error.detail, error.hint);
-            } else {
-                const extUp = ext.toUpperCase();
-                const msg = error?.message || String(error);
-                showError(
-                    `Could not parse ${extUp} file`,
-                    msg,
-                    'Verify the file is a valid ' + extUp + ' exported from your CAT tool.'
-                );
-            }
-        }
-    };
-
-    reader.onerror = function() {
-        els.loadingIndicator.classList.add('hidden');
-        showError('Could not read the file', 'The browser failed to read the file from disk.', 'Try again or use a different browser.');
-    };
-
-    reader.readAsText(file);
-}
-
-function performSearch() {
-    const rawTerm = els.searchInput.value.trim();
-    const isRegex = els.useRegex.checked;
-
-    // Clear previous regex error
-    els.regexError.classList.add('hidden');
-    els.regexError.textContent = '';
-
-    if (rawTerm === '') {
-        state.filteredUnits = [...state.tmxData.units];
-        state.currentPage = 1;
-        updateResults(state);
-        return;
-    }
-
-    let searchRegex;
-    if (isRegex) {
-        try {
-            searchRegex = new RegExp(rawTerm, 'gi');
-        } catch (e) {
-            els.regexError.textContent = 'Invalid regex: ' + e.message;
-            els.regexError.classList.remove('hidden');
-            state.filteredUnits = [];
-            state.currentPage = 1;
-            updateResults(state);
-            return;
-        }
-    } else {
-        const escaped = rawTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        searchRegex = new RegExp(escaped, 'gi');
-    }
-
-    state.filteredUnits = state.tmxData.units.filter(unit => {
-        // Reset lastIndex between uses of the same regex object
-        searchRegex.lastIndex = 0;
-        const sourceMatch = searchRegex.test(unit.source);
-        searchRegex.lastIndex = 0;
-        const targetMatch = searchRegex.test(unit.target);
-
-        if (els.sourceOnly.checked && !els.targetOnly.checked) return sourceMatch;
-        if (els.targetOnly.checked && !els.sourceOnly.checked) return targetMatch;
-        return sourceMatch || targetMatch;
-    });
-
-    state.currentPage = 1;
-    updateResults(state);
-    savePreferences();
-}
-
-function updateSearchFilters(e) {
-    const sourceOnly = els.sourceOnly;
-    const targetOnly = els.targetOnly;
-    // Make sure both can't be checked simultaneously
-    if (sourceOnly.checked && targetOnly.checked) {
-        if (e.target === sourceOnly) {
-            targetOnly.checked = false;
-        } else {
-            sourceOnly.checked = false;
-        }
-    }
-    
-    // Re-run search with new filters
-    performSearch();
-}
-
-async function processMergeFiles(filesList) {
-    const filesArray = Array.from(filesList);
-    const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
-
-    for (const file of filesArray) {
-        const fileNameLower = file.name.toLowerCase();
-        const ext = fileNameLower.split('.').pop();
-        if (!validExts.includes(ext)) {
-            showMergeStatus(`Skipped unsupported file: ${file.name}`, 'error');
-            continue;
-        }
-
-        try {
-            const text = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsText(file);
-            });
-
-            const parsed = parseFileContent(file.name, text);
-
-            const fileData = {
-                id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                name: file.name,
-                size: file.size,
-                units: parsed.units,
-                sourceLanguage: parsed.sourceLanguage,
-                targetLanguage: parsed.targetLanguage,
-                metadata: parsed.metadata
-            };
-
-            state.mergeFiles.push(fileData);
-
-            if (state.mergeFiles.length === 1) {
-                els.mergeSrcLang.value = fileData.sourceLanguage;
-                els.mergeTgtLang.value = fileData.targetLanguage;
-            }
-
-            renderMergeFileList(state, removeMergeFile, moveMergeFile);
-            idbSet('mergeFiles', state.mergeFiles);
-            showMergeStatus(`Successfully uploaded ${file.name}`, 'info');
-        } catch (error) {
-            console.error("Error parsing merge file:", error);
-            showMergeStatus(`Error parsing ${file.name}: ${error.message || error}`, 'error');
-        }
-    }
-}
-
-function removeMergeFile(id) {
-    state.mergeFiles = state.mergeFiles.filter(f => f.id !== id);
-    renderMergeFileList(state, removeMergeFile, moveMergeFile);
-    idbSet('mergeFiles', state.mergeFiles);
-    showMergeStatus('File removed from list', 'info');
-}
-
-function moveMergeFile(id, direction) {
-    const idx = state.mergeFiles.findIndex(f => f.id === id);
-    if (idx === -1) return;
-    const targetIdx = idx + direction;
-    if (targetIdx < 0 || targetIdx >= state.mergeFiles.length) return;
-
-    // Swap indexes
-    const temp = state.mergeFiles[idx];
-    state.mergeFiles[idx] = state.mergeFiles[targetIdx];
-    state.mergeFiles[targetIdx] = temp;
-
-    renderMergeFileList(state, removeMergeFile, moveMergeFile);
-    idbSet('mergeFiles', state.mergeFiles);
-}
-
-function processMetaEditorFile(file) {
-    const fileNameLower = file.name.toLowerCase();
-    const ext = fileNameLower.split('.').pop();
-    const validExts = ['tmx','xliff','xlf','sdlxliff','csv'];
-    if (!validExts.includes(ext)) {
-        showMetaEditorStatus(`Unsupported file format: ${file.name}`, 'error');
-        els.metadataCard.classList.add('hidden');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const parsedData = parseFileContent(file.name, e.target.result);
-            loadSharedFile(parsedData, file.name, formatFileSize(file.size));
-        } catch (error) {
-            console.error("Error parsing meta editor file:", error);
-            showMetaEditorStatus(`Error parsing ${file.name}: ${error.message}`, 'error');
-            els.metadataCard.classList.add('hidden');
-        }
-    };
-    reader.readAsText(file);
-}
-
-function savePreferences() {
-    lsSet('searchQuery',          els.searchInput?.value || '');
-    lsSet('sourceOnly',           els.sourceOnly?.checked || false);
-    lsSet('targetOnly',           els.targetOnly?.checked || false);
-    lsSet('useRegex',             els.useRegex?.checked  || false);
-    lsSet('currentPage',          state.currentPage);
-    lsSet('mergeSrcLang',         els.mergeSrcLang?.value || '');
-    lsSet('mergeTgtLang',         els.mergeTgtLang?.value || '');
-    lsSet('mergeAuthor',          els.mergeAuthor?.value  || '');
-    lsSet('mergeTool',            els.mergeTool?.value    || '');
-    lsSet('mergeRemoveDuplicates',els.mergeRemoveDuplicates?.checked ?? true);
-}
-
-function updateSearchScopeUI(scope) {
-    const btnBoth = document.getElementById('searchScopeBoth');
-    const btnSrc = document.getElementById('searchScopeSource');
-    const btnTgt = document.getElementById('searchScopeTarget');
-    
-    const activeClasses = ['bg-primary', 'text-white'];
-    const inactiveClasses = ['bg-white', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-650'];
-    
-    [btnBoth, btnSrc, btnTgt].forEach(btn => {
-        if (!btn) return;
-        activeClasses.forEach(c => btn.classList.remove(c));
-        inactiveClasses.forEach(c => btn.classList.add(c));
-    });
-    
-    let activeBtn;
-    if (scope === 'both') {
-        activeBtn = btnBoth;
-        els.sourceOnly.checked = false;
-        els.targetOnly.checked = false;
-    } else if (scope === 'source') {
-        activeBtn = btnSrc;
-        els.sourceOnly.checked = true;
-        els.targetOnly.checked = false;
-    } else if (scope === 'target') {
-        activeBtn = btnTgt;
-        els.sourceOnly.checked = false;
-        els.targetOnly.checked = true;
-    }
-    
-    if (activeBtn) {
-        inactiveClasses.forEach(c => activeBtn.classList.remove(c));
-        activeClasses.forEach(c => activeBtn.classList.add(c));
-    }
-}
+import { switchTab, loadSharedFile, savePreferences } from './shared.js';
+import { initSearchController, updateSearchScopeUI } from './searchController.js';
+import { initMergeController, removeMergeFile, moveMergeFile } from './mergeController.js';
+import { initMetaController } from './metaController.js';
+import { initAlignController, resetAlignment, handleAlignRowAction } from './alignController.js';
 
 export async function clearSession() {
     if (!confirm("Are you sure you want to clear the session? All loaded files and unsaved changes will be permanently deleted.")) {
@@ -429,9 +30,9 @@ export async function clearSession() {
     ]);
     ['searchQuery','sourceOnly','targetOnly','useRegex','currentPage','activeTab',
      'mergeSrcLang','mergeTgtLang','mergeAuthor','mergeTool','mergeRemoveDuplicates',
-     'fileName','fileSize','metaFileName','metaFileSize'].forEach(lsDel);
+     'fileName','fileSize','metaFileName','metaFileSize','darkMode'].forEach(lsDel);
+    document.documentElement.classList.remove('dark');
 
-    // Reset in-memory state
     state.tmxData = { units: [], sourceLanguage: '', targetLanguage: '', metadata: {} };
     state.filteredUnits = [];
     state.mergeFiles = [];
@@ -439,11 +40,10 @@ export async function clearSession() {
     state.currentPage = 1;
     state.alignedPairs = [];
 
-    // Reset Search & View UI
     els.fileText.textContent = 'Select or drop your file';
     els.fileName.textContent = '';
     els.fileSize.textContent = '';
-    
+
     const dropZone = document.getElementById('dropZoneContainer');
     const fUnits = document.getElementById('fileUnits');
     if (dropZone) dropZone.classList.remove('hidden');
@@ -462,18 +62,16 @@ export async function clearSession() {
     }
     updateSearchScopeUI('both');
 
-    // Reset Merge UI
     renderMergeFileList(state, removeMergeFile, moveMergeFile);
     els.mergeSrcLang.value = '';
     els.mergeTgtLang.value = '';
-    els.mergeAuthor.value  = '';
-    els.mergeTool.value    = 'MemoMemo';
+    els.mergeAuthor.value = '';
+    els.mergeTool.value = 'MemoMemo';
 
-    // Reset Metadata UI
     els.metaFileText.textContent = 'Select or drop file';
     els.metaFileName.textContent = '';
     els.metaFileSize.textContent = '';
-    
+
     const metaDropZone = document.getElementById('metaDropZoneContainer');
     const mUnits = document.getElementById('metaFileUnits');
     if (metaDropZone) metaDropZone.classList.remove('hidden');
@@ -483,24 +81,22 @@ export async function clearSession() {
     els.metadataCard.classList.add('hidden');
     els.metaEditorStatus.classList.add('hidden');
 
-    // Reset Alignment UI
     resetAlignment();
 
     document.getElementById('sessionBanner').classList.add('hidden');
-    showSessionBanner('🗑️ Session cleared successfully.', false);
+    showSessionBanner('Session cleared successfully.', false);
 }
 
 async function restoreSession() {
-    // --- Lightweight prefs (localStorage) ---
     const savedTab = lsGet('activeTab', 'search');
 
-    const savedQuery  = lsGet('searchQuery', '');
-    const savedSrcO   = lsGet('sourceOnly', false);
-    const savedTgtO   = lsGet('targetOnly', false);
-    const savedRegex  = lsGet('useRegex', false);
+    const savedQuery = lsGet('searchQuery', '');
+    const savedSrcO = lsGet('sourceOnly', false);
+    const savedTgtO = lsGet('targetOnly', false);
+    const savedRegex = lsGet('useRegex', false);
 
-    if (savedQuery)  els.searchInput.value     = savedQuery;
-    if (savedRegex)  els.useRegex.checked       = true;
+    if (savedQuery) els.searchInput.value = savedQuery;
+    if (savedRegex) els.useRegex.checked = true;
     state.currentPage = lsGet('currentPage', 1);
 
     if (savedSrcO) {
@@ -511,13 +107,21 @@ async function restoreSession() {
         updateSearchScopeUI('both');
     }
 
-    const msl = lsGet('mergeSrcLang');          if (msl !== null) els.mergeSrcLang.value = msl;
-    const mtl = lsGet('mergeTgtLang');          if (mtl !== null) els.mergeTgtLang.value = mtl;
-    const ma  = lsGet('mergeAuthor');           if (ma  !== null) els.mergeAuthor.value  = ma;
-    const mt  = lsGet('mergeTool');             if (mt  !== null) els.mergeTool.value    = mt;
+    const msl = lsGet('mergeSrcLang'); if (msl !== null) els.mergeSrcLang.value = msl;
+    const mtl = lsGet('mergeTgtLang'); if (mtl !== null) els.mergeTgtLang.value = mtl;
+    const ma = lsGet('mergeAuthor'); if (ma !== null) els.mergeAuthor.value = ma;
+    const mt = lsGet('mergeTool'); if (mt !== null) els.mergeTool.value = mt;
     const mrd = lsGet('mergeRemoveDuplicates'); if (mrd !== null) els.mergeRemoveDuplicates.checked = mrd;
 
-    // --- Heavy data (IndexedDB) ---
+    const savedDark = lsGet('darkMode', false);
+    if (savedDark) {
+        document.documentElement.classList.add('dark');
+        const sun = document.getElementById('darkModeSun');
+        const moon = document.getElementById('darkModeMoon');
+        if (sun) sun.classList.remove('hidden');
+        if (moon) moon.classList.add('hidden');
+    }
+
     const [savedTmx, savedMerge, savedMeta] = await Promise.all([
         idbGet('tmxData'),
         idbGet('mergeFiles'),
@@ -526,9 +130,8 @@ async function restoreSession() {
 
     let restored = false;
 
-    // Restore Search & View
     if (savedTmx && savedTmx.units && savedTmx.units.length > 0) {
-        state.tmxData       = savedTmx;
+        state.tmxData = savedTmx;
         state.filteredUnits = [...state.tmxData.units];
 
         const fn = lsGet('fileName', '');
@@ -536,7 +139,7 @@ async function restoreSession() {
         els.fileText.textContent = 'File loaded!';
         if (fn) els.fileName.textContent = fn;
         if (fs) els.fileSize.textContent = fs;
-        
+
         const dropZone = document.getElementById('dropZoneContainer');
         const fUnits = document.getElementById('fileUnits');
         if (dropZone) dropZone.classList.add('hidden');
@@ -557,14 +160,12 @@ async function restoreSession() {
         restored = true;
     }
 
-    // Restore Merge TMs
     if (savedMerge && savedMerge.length > 0) {
         state.mergeFiles = savedMerge;
-        renderMergeFileList(state, removeMergeFile, moveMergeFile);
+    renderMergeFileList(state, removeMergeFile, moveMergeFile);
         restored = true;
     }
 
-    // Restore Edit Metadata
     if (savedMeta && savedMeta.units && savedMeta.units.length > 0) {
         state.metaEditorData = savedMeta;
         const mfn = lsGet('metaFileName', '');
@@ -572,7 +173,7 @@ async function restoreSession() {
         els.metaFileText.textContent = 'File loaded!';
         if (mfn) els.metaFileName.textContent = mfn;
         if (mfs) els.metaFileSize.textContent = mfs;
-        
+
         const metaDropZone = document.getElementById('metaDropZoneContainer');
         const mUnits = document.getElementById('metaFileUnits');
         if (metaDropZone) metaDropZone.classList.add('hidden');
@@ -581,19 +182,18 @@ async function restoreSession() {
         els.metaFileInfo.classList.remove('hidden');
         els.metaFileStats.textContent =
             `${state.metaEditorData.units.length} translation units found`;
-        els.metaAuthor.value        = state.metaEditorData.metadata.creationid          || '';
-        els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool   || 'MemoMemo';
-        els.metaToolVersion.value   = state.metaEditorData.metadata.creationtoolversion || '';
-        els.metaCreationDate.value  = state.metaEditorData.metadata.creationdate        || '';
-        els.metaSrcLang.value       = state.metaEditorData.metadata.srclang             || '';
-        els.metaTgtLang.value       = state.metaEditorData.metadata.adminlang           || '';
-        els.metaDatatype.value      = state.metaEditorData.metadata.datatype            || '';
-        els.metaSegtype.value       = state.metaEditorData.metadata.segtype             || '';
+        els.metaAuthor.value = state.metaEditorData.metadata.creationid || '';
+        els.metaToolDisplay.textContent = state.metaEditorData.metadata.creationtool || 'MemoMemo';
+        els.metaToolVersion.value = state.metaEditorData.metadata.creationtoolversion || '';
+        els.metaCreationDate.value = state.metaEditorData.metadata.creationdate || '';
+        els.metaSrcLang.value = state.metaEditorData.metadata.srclang || '';
+        els.metaTgtLang.value = state.metaEditorData.metadata.adminlang || '';
+        els.metaDatatype.value = state.metaEditorData.metadata.datatype || '';
+        els.metaSegtype.value = state.metaEditorData.metadata.segtype || '';
         els.metadataCard.classList.remove('hidden');
         restored = true;
     }
 
-    // Restore Alignment tab data
     const savedAlign = await idbGet('alignedPairs');
     if (savedAlign && savedAlign.length > 0) {
         state.alignedPairs = savedAlign;
@@ -603,7 +203,6 @@ async function restoreSession() {
         restored = true;
     }
 
-    // Switch to the last active tab
     switchTab(savedTab);
 
     if (restored) {
@@ -616,7 +215,6 @@ async function restoreSession() {
         );
     }
 
-    // Auto-save merge config on input
     [els.mergeSrcLang, els.mergeTgtLang, els.mergeAuthor, els.mergeTool].forEach(el =>
         el.addEventListener('input', savePreferences)
     );
@@ -624,7 +222,6 @@ async function restoreSession() {
 }
 
 function handleGlobalKeydown(e) {
-    // Focus search shortcut (Alt + S)
     if (e.altKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
         if (els.searchInput) {
@@ -638,32 +235,26 @@ function handleGlobalKeydown(e) {
     const activeTab = lsGet('activeTab', 'search');
     if (activeTab !== 'search') return;
 
-    // Check if user is typing in form inputs / edit textarea
     const isTyping = document.activeElement && (
-        document.activeElement.tagName === 'INPUT' || 
-        document.activeElement.tagName === 'TEXTAREA' || 
+        document.activeElement.tagName === 'INPUT' ||
+        document.activeElement.tagName === 'TEXTAREA' ||
         document.activeElement.isContentEditable
     );
 
-    // Row navigation & actions when a row is focused
-    const focusedRow = document.activeElement && 
-                       document.activeElement.tagName === 'TR' && 
-                       els.resultsTable && 
-                       els.resultsTable.contains(document.activeElement);
+    const focusedRow = document.activeElement &&
+        document.activeElement.tagName === 'TR' &&
+        els.resultsTable &&
+        els.resultsTable.contains(document.activeElement);
 
     if (focusedRow) {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             const next = document.activeElement.nextElementSibling;
-            if (next && next.tagName === 'TR') {
-                next.focus();
-            }
+            if (next && next.tagName === 'TR') next.focus();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             const prev = document.activeElement.previousElementSibling;
-            if (prev && prev.tagName === 'TR') {
-                prev.focus();
-            }
+            if (prev && prev.tagName === 'TR') prev.focus();
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (typeof document.activeElement.startEditing === 'function') {
@@ -681,141 +272,24 @@ function handleGlobalKeydown(e) {
         return;
     }
 
-    // Pagination shortcuts when NOT typing
     if (!isTyping && state.tmxData && state.tmxData.units.length > 0) {
         const pageCount = Math.ceil(state.filteredUnits.length / state.itemsPerPage);
         if (e.key === 'PageDown') {
             e.preventDefault();
-            if (state.currentPage < pageCount) {
-                state.currentPage++;
-                updateResults(state);
-            }
+            if (state.currentPage < pageCount) { state.currentPage++; updateResults(state); }
         } else if (e.key === 'PageUp') {
             e.preventDefault();
-            if (state.currentPage > 1) {
-                state.currentPage--;
-                updateResults(state);
-            }
+            if (state.currentPage > 1) { state.currentPage--; updateResults(state); }
         }
     }
-}
-
-async function handleAlignFileUpload(file, isSource) {
-    try {
-        const text = await parseAlignmentFile(file);
-        if (isSource) {
-            els.alignSourceText.value = text;
-            els.alignSourceDropZone.classList.add('hidden');
-            els.alignSourceFileInfo.classList.remove('hidden');
-            els.alignSourceFileName.textContent = file.name;
-        } else {
-            els.alignTargetText.value = text;
-            els.alignTargetDropZone.classList.add('hidden');
-            els.alignTargetFileInfo.classList.remove('hidden');
-            els.alignTargetFileName.textContent = file.name;
-        }
-    } catch (err) {
-        console.error('Failed to parse alignment file:', err);
-        alert(`Error loading alignment file: ${err.message}`);
-    }
-}
-
-async function parseAlignmentFile(file) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (ext === 'docx') {
-        const buffer = await file.arrayBuffer();
-        return await extractTextFromDocx(buffer);
-    } else if (ext === 'pptx') {
-        const buffer = await file.arrayBuffer();
-        return await extractTextFromPptx(buffer);
-    } else {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (err) => reject(err);
-            reader.readAsText(file);
-        });
-    }
-}
-
-function handleAlignRowAction(action, index) {
-    if (action === 'merge') {
-        if (index < state.alignedPairs.length - 1) {
-            const current = state.alignedPairs[index];
-            const next = state.alignedPairs[index + 1];
-            current.source = (current.source + ' ' + next.source).trim();
-            current.target = (current.target + ' ' + next.target).trim();
-            current.confidence = 100;
-            current.suggestion = '';
-            state.alignedPairs.splice(index + 1, 1);
-        }
-    } else if (action === 'shift') {
-        let prevTarget = "";
-        for (let i = index; i < state.alignedPairs.length; i++) {
-            const temp = state.alignedPairs[i].target;
-            state.alignedPairs[i].target = prevTarget;
-            state.alignedPairs[i].confidence = 100;
-            state.alignedPairs[i].suggestion = '';
-            prevTarget = temp;
-        }
-        if (prevTarget.trim()) {
-            state.alignedPairs.push({
-                id: 'align-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                source: '',
-                target: prevTarget,
-                confidence: 100,
-                suggestion: ''
-            });
-        }
-    } else if (action === 'delete') {
-        state.alignedPairs.splice(index, 1);
-    }
-    idbSet('alignedPairs', state.alignedPairs);
-    renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
-}
-
-function resetAlignment() {
-    state.alignedPairs = [];
-    idbDelete('alignedPairs');
-    
-    if (els.alignSourceFileInput) els.alignSourceFileInput.value = '';
-    if (els.alignSourceFileName) els.alignSourceFileName.textContent = '';
-    if (els.alignSourceFileInfo) els.alignSourceFileInfo.classList.add('hidden');
-    if (els.alignSourceDropZone) els.alignSourceDropZone.classList.remove('hidden');
-    if (els.alignSourceText) els.alignSourceText.value = '';
-    
-    if (els.alignTargetFileInput) els.alignTargetFileInput.value = '';
-    if (els.alignTargetFileName) els.alignTargetFileName.textContent = '';
-    if (els.alignTargetFileInfo) els.alignTargetFileInfo.classList.add('hidden');
-    if (els.alignTargetDropZone) els.alignTargetDropZone.classList.remove('hidden');
-    if (els.alignTargetText) els.alignTargetText.value = '';
-    
-    if (els.alignPreviewTable) els.alignPreviewTable.innerHTML = '';
-    if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
-    if (els.alignInputSection) els.alignInputSection.classList.remove('hidden');
-}
-
-function formatTmxDate(inputStr) {
-    if (!inputStr) {
-        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    }
-    if (/^\d{8}T\d{6}Z$/.test(inputStr)) {
-        return inputStr;
-    }
-    const timestamp = Date.parse(inputStr);
-    if (isNaN(timestamp)) {
-        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    }
-    return new Date(timestamp).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 }
 
 function init() {
-    // Inject Tab Components HTML
     const tabSearchContent = document.getElementById('tabSearchContent');
     const tabMetaContent = document.getElementById('tabMetaContent');
     const tabAlignContent = document.getElementById('tabAlignContent');
     const tabMergeContent = document.getElementById('tabMergeContent');
-    
+
     if (tabSearchContent) tabSearchContent.innerHTML = renderSearchTab();
     if (tabMetaContent) tabMetaContent.innerHTML = renderMetaTab();
     if (tabAlignContent) tabAlignContent.innerHTML = renderAlignTab();
@@ -824,491 +298,25 @@ function init() {
     window.addEventListener('keydown', handleGlobalKeydown);
     document.addEventListener('idb-error', (e) => showSessionBanner(`⚠️ ${e.detail}`, false));
 
-    // Search page event listeners
-    els.fileInput.addEventListener('change', handleFileSelect);
-
-    const btnBoth = document.getElementById('searchScopeBoth');
-    const btnSrc = document.getElementById('searchScopeSource');
-    const btnTgt = document.getElementById('searchScopeTarget');
-    
-    if (btnBoth && btnSrc && btnTgt) {
-        btnBoth.addEventListener('click', () => { updateSearchScopeUI('both'); performSearch(); });
-        btnSrc.addEventListener('click', () => { updateSearchScopeUI('source'); performSearch(); });
-        btnTgt.addEventListener('click', () => { updateSearchScopeUI('target'); performSearch(); });
-    }
-
-    if (els.downloadUpdatedTmxBtn) {
-        els.downloadUpdatedTmxBtn.addEventListener('click', () => {
-            if (!state.tmxData.units.length) return;
-
-            // Generate TMX content
-            const tmxXml = generateTMXXML(state.tmxData.units, state.tmxData.metadata);
-
-            // Trigger file download
-            const blob = new Blob([tmxXml], { type: 'text/xml;charset=utf-8;' });
-            const link = document.createElement('a');
-            
-            // Get original filename or default
-            const originalName = lsGet('fileName') || 'updated_translation_memory.tmx';
-            const downloadName = originalName.toLowerCase().endsWith('.tmx') ? originalName : (originalName.split('.')[0] + '.tmx');
-            
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', downloadName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        });
-    }
-    els.searchInput.addEventListener('input', debounce(performSearch, 300));
-    els.sourceOnly.addEventListener('change', updateSearchFilters);
-    els.targetOnly.addEventListener('change', updateSearchFilters);
-    els.useRegex.addEventListener('change', () => {
-        els.regexError.classList.add('hidden');
-        els.regexError.textContent = '';
-        performSearch();
-    });
-
-    els.statsToggle.addEventListener('click', () => {
-        const open = !els.statsBody.classList.contains('hidden');
-        els.statsBody.classList.toggle('hidden', open);
-        els.statsChevron.style.transform = open ? '' : 'rotate(180deg)';
-    });
-
-    // Setup drag and drop for Search Input
-    const dropZone = els.fileInput.closest('label');
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
-        });
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-        });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-            
-            if (e.dataTransfer.files.length) {
-                els.fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
-            }
-        });
-    }
-
-    // Tab Switching Logic
     els.tabSearchBtn.addEventListener('click', () => switchTab('search'));
     els.tabMergeBtn.addEventListener('click', () => switchTab('merge'));
     els.tabMetaBtn.addEventListener('click', () => switchTab('meta'));
 
-    // Merger event listeners
-    const mergeDropZone = els.mergeDropZone;
-    if (mergeDropZone) {
-        mergeDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            mergeDropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
+    initSearchController();
+    initMergeController();
+    initMetaController();
+    initAlignController();
+
+    const darkToggle = document.getElementById('darkModeToggle');
+    if (darkToggle) {
+        darkToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            lsSet('darkMode', isDark);
+            const sun = document.getElementById('darkModeSun');
+            const moon = document.getElementById('darkModeMoon');
+            if (sun) sun.classList.toggle('hidden', !isDark);
+            if (moon) moon.classList.toggle('hidden', isDark);
         });
-        mergeDropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            mergeDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-        });
-        mergeDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            mergeDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-            
-            if (e.dataTransfer.files.length) {
-                processMergeFiles(e.dataTransfer.files);
-            }
-        });
-    }
-
-    els.mergeFileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) {
-            processMergeFiles(e.target.files);
-        }
-    });
-
-    els.executeMergeBtn.addEventListener('click', () => {
-        if (state.mergeFiles.length === 0) return;
-
-        showMergeStatus('Merging translation memories...', 'info');
-        els.executeMergeBtn.disabled = true;
-
-        // Yield to let the "Merging..." message paint before synchronous work
-        requestAnimationFrame(() => {
-            try {
-                const removeDuplicates = els.mergeRemoveDuplicates.checked;
-                const combinedSrc = els.mergeSrcLang.value.trim() || 'en';
-                const combinedTgt = els.mergeTgtLang.value.trim() || 'es';
-                const author = els.mergeAuthor.value.trim() || 'MemoMemo Merger';
-                const tool = els.mergeTool.value.trim() || 'MemoMemo';
-                
-                let mergedUnits = [];
-                
-                // Combine all units
-                state.mergeFiles.forEach(file => {
-                    file.units.forEach(unit => {
-                        mergedUnits.push({
-                            source: unit.source,
-                            target: unit.target,
-                            sourceLang: combinedSrc,
-                            targetLang: combinedTgt
-                        });
-                    });
-                });
-
-                const totalCountBefore = mergedUnits.length;
-
-                // Deduplicate if checked
-                if (removeDuplicates) {
-                    const seen = new Set();
-                    mergedUnits = mergedUnits.filter(unit => {
-                        const key = `${unit.source.trim()}|||${unit.target.trim()}`;
-                        if (seen.has(key)) {
-                            return false;
-                        }
-                        seen.add(key);
-                        return true;
-                    });
-                }
-
-                const totalCountAfter = mergedUnits.length;
-                const duplicatesRemoved = totalCountBefore - totalCountAfter;
-
-                // Build metadata
-                const mergeMetadata = {
-                    creationtool: tool,
-                    creationtoolversion: '1.0',
-                    datatype: 'plaintext',
-                    segtype: 'sentence',
-                    adminlang: combinedTgt,
-                    srclang: combinedSrc,
-                    creationid: author,
-                    creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-                };
-
-                // Generate XML
-                const mergedTmxXml = generateTMXXML(mergedUnits, mergeMetadata);
-
-                // Download
-                const blob = new Blob([mergedTmxXml], { type: 'text/xml;charset=utf-8;' });
-                const link = document.createElement('a');
-                const downloadName = 'merged_translation_memory.tmx';
-                
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute('download', downloadName);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-
-                showMergeStatus(`Successfully merged ${state.mergeFiles.length} files into ${downloadName}! Total units: ${totalCountAfter}${removeDuplicates ? ` (${duplicatesRemoved} duplicates removed)` : ''}. Download has started automatically.`, 'success');
-            } catch (error) {
-                console.error("Error executing merge:", error);
-                showMergeStatus(`Failed to merge: ${error.message}`, 'error');
-            } finally {
-                els.executeMergeBtn.disabled = false;
-            }
-        });
-    });
-
-    // Metadata Editor event listeners
-    const metaDropZone = els.metaDropZone;
-    if (metaDropZone) {
-        metaDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            metaDropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
-        });
-        metaDropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            metaDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-        });
-        metaDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            metaDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-            
-            if (e.dataTransfer.files.length) {
-                processMetaEditorFile(e.dataTransfer.files[0]);
-            }
-        });
-    }
-
-    els.metaFileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) {
-            processMetaEditorFile(e.target.files[0]);
-        }
-    });
-
-    els.exportMetadataBtn.addEventListener('click', () => {
-        if (!state.metaEditorData.units.length) return;
-
-        const formattedDate = formatTmxDate(els.metaCreationDate.value.trim());
-        els.metaCreationDate.value = formattedDate;
-
-        // Gather values (Creation Tool remains unchanged/read-only)
-        state.metaEditorData.metadata.creationid = els.metaAuthor.value.trim();
-        state.metaEditorData.metadata.creationtoolversion = els.metaToolVersion.value.trim();
-        state.metaEditorData.metadata.creationdate = formattedDate;
-        state.metaEditorData.metadata.srclang = els.metaSrcLang.value.trim();
-        state.metaEditorData.metadata.adminlang = els.metaTgtLang.value.trim();
-        state.metaEditorData.metadata.datatype = els.metaDatatype.value.trim();
-        state.metaEditorData.metadata.segtype = els.metaSegtype.value.trim();
-
-        // Generate TMX content
-        const tmxXml = generateTMXXML(state.metaEditorData.units, state.metaEditorData.metadata);
-
-        // Trigger file download
-        const blob = new Blob([tmxXml], { type: 'text/xml;charset=utf-8;' });
-        const link = document.createElement('a');
-        const originalName = els.metaFileInput.files[0]?.name || lsGet('metaFileName') || 'translation_memory.tmx';
-        const downloadName = originalName.toLowerCase().endsWith('.tmx') ? originalName : (originalName.split('.')[0] + '.tmx');
-        
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', downloadName);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-    });
-
-    const changeFileBtn = document.getElementById('changeFileBtn');
-    if (changeFileBtn) {
-        changeFileBtn.addEventListener('click', () => {
-            els.fileInput.click();
-        });
-    }
-    const changeMetaFileBtn = document.getElementById('changeMetaFileBtn');
-    if (changeMetaFileBtn) {
-        changeMetaFileBtn.addEventListener('click', () => {
-            els.metaFileInput.click();
-        });
-    }
-
-    // --- Alignment Tab Setup ---
-    if (els.tabAlignBtn) {
-        els.tabAlignBtn.addEventListener('click', () => switchTab('align'));
-    }
-
-    // Source File Drag and Drop / Input change
-    if (els.alignSourceDropZone) {
-        els.alignSourceDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            els.alignSourceDropZone.classList.add('bg-gray-100');
-        });
-        els.alignSourceDropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            els.alignSourceDropZone.classList.remove('bg-gray-100');
-        });
-        els.alignSourceDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            els.alignSourceDropZone.classList.remove('bg-gray-100');
-            if (e.dataTransfer.files.length) {
-                handleAlignFileUpload(e.dataTransfer.files[0], true);
-            }
-        });
-    }
-
-    if (els.alignSourceFileInput) {
-        els.alignSourceFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleAlignFileUpload(e.target.files[0], true);
-            }
-        });
-    }
-
-    if (els.changeAlignSourceBtn) {
-        els.changeAlignSourceBtn.addEventListener('click', () => {
-            els.alignSourceFileInput.value = '';
-            els.alignSourceFileName.textContent = '';
-            els.alignSourceFileInfo.classList.add('hidden');
-            els.alignSourceDropZone.classList.remove('hidden');
-            els.alignSourceText.value = '';
-        });
-    }
-
-    // Target File Drag and Drop / Input change
-    if (els.alignTargetDropZone) {
-        els.alignTargetDropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            els.alignTargetDropZone.classList.add('bg-gray-100');
-        });
-        els.alignTargetDropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            els.alignTargetDropZone.classList.remove('bg-gray-100');
-        });
-        els.alignTargetDropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            els.alignTargetDropZone.classList.remove('bg-gray-100');
-            if (e.dataTransfer.files.length) {
-                handleAlignFileUpload(e.dataTransfer.files[0], false);
-            }
-        });
-    }
-
-    if (els.alignTargetFileInput) {
-        els.alignTargetFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleAlignFileUpload(e.target.files[0], false);
-            }
-        });
-    }
-
-    if (els.changeAlignTargetBtn) {
-        els.changeAlignTargetBtn.addEventListener('click', () => {
-            els.alignTargetFileInput.value = '';
-            els.alignTargetFileName.textContent = '';
-            els.alignTargetFileInfo.classList.add('hidden');
-            els.alignTargetDropZone.classList.remove('hidden');
-            els.alignTargetText.value = '';
-        });
-    }
-
-    // Start Alignment button click
-    if (els.startAlignBtn) {
-        els.startAlignBtn.addEventListener('click', () => {
-            const srcText = els.alignSourceText.value;
-            const tgtText = els.alignTargetText.value;
-            
-            if (!srcText.trim() || !tgtText.trim()) {
-                alert('Please enter text or upload files for both source and target languages.');
-                return;
-            }
-            
-            state.alignedPairs = alignTexts(srcText, tgtText);
-            idbSet('alignedPairs', state.alignedPairs);
-
-            const lowConf = state.alignedPairs.filter(p => (p.confidence ?? 100) < 60).length;
-            const medConf = state.alignedPairs.filter(p => {
-                const c = p.confidence ?? 100;
-                return c >= 60 && c < 85;
-            }).length;
-            if (lowConf > 0) {
-                const pct = Math.round((lowConf / state.alignedPairs.length) * 100);
-                showSessionBanner(`⚠️ ${lowConf} of ${state.alignedPairs.length} pairs have low confidence (${pct}%). Low-confidence rows are marked with a red left border. Use Merge/Shift/Delete to fix alignment.`, false);
-            } else if (medConf > 0) {
-                const pct = Math.round((medConf / state.alignedPairs.length) * 100);
-                showSessionBanner(`ℹ️ ${medConf} of ${state.alignedPairs.length} pairs have medium confidence (${pct}%). Review yellow-bordered rows for accuracy.`, false);
-            }
-            
-            if (els.alignInputSection) els.alignInputSection.classList.add('hidden');
-            if (els.alignPreviewSection) els.alignPreviewSection.classList.remove('hidden');
-            renderAlignmentPreviewTable(state.alignedPairs, handleAlignRowAction);
-        });
-    }
-
-    // Direct Injection to Workspace Button
-    if (els.alignOpenInAppBtn) {
-        els.alignOpenInAppBtn.addEventListener('click', () => {
-            const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
-            if (!validPairs.length) return;
-            
-            const alignedData = {
-                units: validPairs.map(p => ({
-                    source: p.source,
-                    target: p.target
-                })),
-                sourceLanguage: 'en',
-                targetLanguage: 'es',
-                metadata: {
-                    creationid: 'MemoMemo Align',
-                    creationtool: 'MemoMemo',
-                    creationtoolversion: '1.0',
-                    creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
-                    srclang: 'en',
-                    adminlang: 'es',
-                    datatype: 'plaintext',
-                    segtype: 'sentence'
-                }
-            };
-            
-            loadSharedFile(alignedData, 'aligned_translations.tmx', 'Dynamic');
-            switchTab('search');
-            showSessionBanner('✓ Alignments loaded into MemoMemo successfully.', true);
-        });
-    }
-
-    // Download Alignment Button (supporting format selection)
-    if (els.alignDownloadBtn) {
-        els.alignDownloadBtn.addEventListener('click', () => {
-            const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
-            if (!validPairs.length) return;
-            
-            const format = els.alignExportFormat?.value || 'tmx';
-            let fileContent = "";
-            let mimeType = "text/plain;charset=utf-8;";
-            let fileExtension = "txt";
-            
-            if (format === 'tmx') {
-                fileContent = generateTMXXML(
-                    validPairs.map(p => ({ source: p.source, target: p.target })),
-                    {
-                        creationid: 'MemoMemo Align',
-                        creationtool: 'MemoMemo',
-                        creationtoolversion: '1.0',
-                        creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
-                        srclang: 'en',
-                        adminlang: 'es',
-                        datatype: 'plaintext',
-                        segtype: 'sentence'
-                    }
-                );
-                mimeType = "text/xml;charset=utf-8;";
-                fileExtension = "tmx";
-            } else if (format === 'txt') {
-                // Tab-separated text
-                fileContent = validPairs.map(p => `${p.source}\t${p.target}`).join('\n');
-                mimeType = "text/plain;charset=utf-8;";
-                fileExtension = "txt";
-            } else if (format === 'csv') {
-                // Comma-separated values (prevent formula injection)
-                const sanitizeCSV = (v) => {
-                    const escaped = v.replace(/"/g, '""');
-                    if (/^[=+\-@]/.test(escaped)) return "'" + escaped;
-                    return escaped;
-                };
-                const header = '"Source","Target"\n';
-                const rows = validPairs.map(p => {
-                    const srcEscaped = sanitizeCSV(p.source);
-                    const tgtEscaped = sanitizeCSV(p.target);
-                    return `"${srcEscaped}","${tgtEscaped}"`;
-                }).join('\n');
-                fileContent = header + rows;
-                mimeType = "text/csv;charset=utf-8;";
-                fileExtension = "csv";
-            }
-            
-            const blob = new Blob([fileContent], { type: mimeType });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `aligned_translation_memory.${fileExtension}`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        });
-    }
-
-    // Back to configuration button click
-    if (els.alignBackBtn) {
-        els.alignBackBtn.addEventListener('click', () => {
-            if (els.alignPreviewSection) els.alignPreviewSection.classList.add('hidden');
-            if (els.alignInputSection) els.alignInputSection.classList.remove('hidden');
-        });
-    }
-
-    // Clear alignment session buttons click
-    const triggerClearAlignment = () => {
-        if (confirm('Are you sure you want to clear the current alignment and all loaded texts to start a new one?')) {
-            resetAlignment();
-        }
-    };
-
-    if (els.alignClearBtn) {
-        els.alignClearBtn.addEventListener('click', triggerClearAlignment);
-    }
-    if (els.alignClearInputsBtn) {
-        els.alignClearInputsBtn.addEventListener('click', triggerClearAlignment);
     }
 
     restoreSession();

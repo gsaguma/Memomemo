@@ -1,108 +1,25 @@
-import { idbSet } from './db.js';
+import { idbSetDebounced } from './db.js';
 
 let _prevTerm = '';
 let _prevUseRegex = false;
 let _cachedRegex = null;
 
-export const els = {
-    // File upload
-    get fileInput() { return document.getElementById('fileInput'); },
-    get fileText() { return document.getElementById('fileText'); },
-    get fileInfo() { return document.getElementById('fileInfo'); },
-    get fileName() { return document.getElementById('fileName'); },
-    get fileSize() { return document.getElementById('fileSize'); },
-    get fileStats() { return document.getElementById('fileStats'); },
-    get searchAndResultsContainer() { return document.getElementById('searchAndResultsContainer'); },
-    get searchSection() { return document.getElementById('searchSection'); },
-    get searchInput() { return document.getElementById('searchInput'); },
-    get sourceOnly() { return document.getElementById('sourceOnly'); },
-    get targetOnly() { return document.getElementById('targetOnly'); },
-    get useRegex() { return document.getElementById('useRegex'); },
-    get regexError() { return document.getElementById('regexError'); },
-    get resultsCount() { return document.getElementById('resultsCount'); },
-    get downloadUpdatedTmxBtn() { return document.getElementById('downloadUpdatedTmxBtn'); },
-    get loadingIndicator() { return document.getElementById('loadingIndicator'); },
-    get errorMessage() { return document.getElementById('errorMessage'); },
-    get errorTitle() { return document.getElementById('errorTitle'); },
-    get errorDetail() { return document.getElementById('errorDetail'); },
-    get errorHint() { return document.getElementById('errorHint'); },
-    get statsPanel() { return document.getElementById('statsPanel'); },
-    get statsToggle() { return document.getElementById('statsToggle'); },
-    get statsBody() { return document.getElementById('statsBody'); },
-    get statsChevron() { return document.getElementById('statsChevron'); },
-    get resultsSection() { return document.getElementById('resultsSection'); },
-    get sourceLanguage() { return document.getElementById('sourceLanguage'); },
-    get targetLanguage() { return document.getElementById('targetLanguage'); },
-    get resultsTable() { return document.getElementById('resultsTable'); },
-    get pagination() { return document.getElementById('pagination'); },
-    
-    // Tab switching
-    get tabSearchBtn() { return document.getElementById('tabSearchBtn'); },
-    get tabMergeBtn() { return document.getElementById('tabMergeBtn'); },
-    get tabMetaBtn() { return document.getElementById('tabMetaBtn'); },
-    get tabAlignBtn() { return document.getElementById('tabAlignBtn'); },
-    get tabSearchContent() { return document.getElementById('tabSearchContent'); },
-    get tabMergeContent() { return document.getElementById('tabMergeContent'); },
-    get tabMetaContent() { return document.getElementById('tabMetaContent'); },
-    get tabAlignContent() { return document.getElementById('tabAlignContent'); },
-    
-    // Merger
-    get mergeFileInput() { return document.getElementById('mergeFileInput'); },
-    get mergeFileList() { return document.getElementById('mergeFileList'); },
-    get mergeFileCountBadge() { return document.getElementById('mergeFileCountBadge'); },
-    get mergeSrcLang() { return document.getElementById('mergeSrcLang'); },
-    get mergeTgtLang() { return document.getElementById('mergeTgtLang'); },
-    get mergeAuthor() { return document.getElementById('mergeAuthor'); },
-    get mergeTool() { return document.getElementById('mergeTool'); },
-    get mergeRemoveDuplicates() { return document.getElementById('mergeRemoveDuplicates'); },
-    get executeMergeBtn() { return document.getElementById('executeMergeBtn'); },
-    get mergeStatusContainer() { return document.getElementById('mergeStatusContainer'); },
-    get mergeDropZone() { return document.getElementById('mergeDropZoneContainer'); },
-    
-    // Metadata Editor
-    get metaFileInput() { return document.getElementById('metaFileInput'); },
-    get metaFileText() { return document.getElementById('metaFileText'); },
-    get metaFileInfo() { return document.getElementById('metaFileInfo'); },
-    get metaFileName() { return document.getElementById('metaFileName'); },
-    get metaFileSize() { return document.getElementById('metaFileSize'); },
-    get metaFileStats() { return document.getElementById('metaFileStats'); },
-    get metadataCard() { return document.getElementById('metadataCard'); },
-    get metaEditorStatus() { return document.getElementById('metaEditorStatus'); },
-    get metaDropZone() { return document.getElementById('metaDropZoneContainer'); },
-    get exportMetadataBtn() { return document.getElementById('exportMetadataBtn'); },
-    get metaAuthor() { return document.getElementById('metaAuthor'); },
-    get metaToolDisplay() { return document.getElementById('metaToolDisplay'); },
-    get metaToolVersion() { return document.getElementById('metaToolVersion'); },
-    get metaCreationDate() { return document.getElementById('metaCreationDate'); },
-    get metaSrcLang() { return document.getElementById('metaSrcLang'); },
-    get metaTgtLang() { return document.getElementById('metaTgtLang'); },
-    get metaDatatype() { return document.getElementById('metaDatatype'); },
-    get metaSegtype() { return document.getElementById('metaSegtype'); },
- 
-    // Alignment Tab Elements
-    get alignSourceFileInput() { return document.getElementById('alignSourceFileInput'); },
-    get alignTargetFileInput() { return document.getElementById('alignTargetFileInput'); },
-    get alignSourceDropZone() { return document.getElementById('alignSourceDropZone'); },
-    get alignTargetDropZone() { return document.getElementById('alignTargetDropZone'); },
-    get alignSourceFileInfo() { return document.getElementById('alignSourceFileInfo'); },
-    get alignTargetFileInfo() { return document.getElementById('alignTargetFileInfo'); },
-    get alignSourceFileName() { return document.getElementById('alignSourceFileName'); },
-    get alignTargetFileName() { return document.getElementById('alignTargetFileName'); },
-    get changeAlignSourceBtn() { return document.getElementById('changeAlignSourceBtn'); },
-    get changeAlignTargetBtn() { return document.getElementById('changeAlignTargetBtn'); },
-    get alignSourceText() { return document.getElementById('alignSourceText'); },
-    get alignTargetText() { return document.getElementById('alignTargetText'); },
-    get startAlignBtn() { return document.getElementById('startAlignBtn'); },
-    get alignInputSection() { return document.getElementById('alignInputSection'); },
-    get alignPreviewSection() { return document.getElementById('alignPreviewSection'); },
-    get alignPreviewTable() { return document.getElementById('alignPreviewTable'); },
-    get alignBackBtn() { return document.getElementById('alignBackBtn'); },
-    get alignClearBtn() { return document.getElementById('alignClearBtn'); },
-    get alignClearInputsBtn() { return document.getElementById('alignClearInputsBtn'); },
-    get alignOpenInAppBtn() { return document.getElementById('alignOpenInAppBtn'); },
-    get alignExportFormat() { return document.getElementById('alignExportFormat'); },
-    get alignDownloadBtn() { return document.getElementById('alignDownloadBtn'); }
+const _elsCache = {};
+const _elsMap = {
+    mergeDropZone: 'mergeDropZoneContainer',
+    metaDropZone: 'metaDropZoneContainer'
 };
+
+export const els = new Proxy({}, {
+    get(_, prop) {
+        if (typeof prop !== 'string' || prop === 'inspect') return undefined;
+        if (!(prop in _elsCache)) {
+            const id = _elsMap[prop] || prop;
+            _elsCache[prop] = document.getElementById(id);
+        }
+        return _elsCache[prop];
+    }
+});
 
 export function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
@@ -210,9 +127,8 @@ export function renderStats(units) {
     });
 
     els.statsPanel.classList.remove('hidden');
-    // Keep stats panel closed by default
-    els.statsBody.classList.add('hidden');
-    els.statsChevron.style.transform = '';
+    els.statsBody.classList.remove('hidden');
+    els.statsChevron.style.transform = 'rotate(180deg)';
 }
 
 export function escapeHtml(text) {
@@ -422,7 +338,7 @@ export function updateResults(state) {
                 unit.target = newValue;
                 
                 // Persist changes to IndexedDB
-                idbSet('tmxData', state.tmxData);
+                idbSetDebounced('tmxData', state.tmxData);
                 
                 // Re-render
                 updateResults(state);
