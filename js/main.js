@@ -745,6 +745,8 @@ function handleAlignRowAction(action, index) {
             const next = state.alignedPairs[index + 1];
             current.source = (current.source + ' ' + next.source).trim();
             current.target = (current.target + ' ' + next.target).trim();
+            current.confidence = 100;
+            current.suggestion = '';
             state.alignedPairs.splice(index + 1, 1);
         }
     } else if (action === 'shift') {
@@ -752,13 +754,17 @@ function handleAlignRowAction(action, index) {
         for (let i = index; i < state.alignedPairs.length; i++) {
             const temp = state.alignedPairs[i].target;
             state.alignedPairs[i].target = prevTarget;
+            state.alignedPairs[i].confidence = 100;
+            state.alignedPairs[i].suggestion = '';
             prevTarget = temp;
         }
         if (prevTarget.trim()) {
             state.alignedPairs.push({
                 id: 'align-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
                 source: '',
-                target: prevTarget
+                target: prevTarget,
+                confidence: 100,
+                suggestion: ''
             });
         }
     } else if (action === 'delete') {
@@ -1172,10 +1178,17 @@ function init() {
             state.alignedPairs = alignTexts(srcText, tgtText);
             idbSet('alignedPairs', state.alignedPairs);
 
-            const emptySrc = state.alignedPairs.filter(p => !p.source.trim()).length;
-            const emptyTgt = state.alignedPairs.filter(p => !p.target.trim()).length;
-            if (emptySrc > state.alignedPairs.length * 0.2 || emptyTgt > state.alignedPairs.length * 0.2) {
-                showSessionBanner(`⚠️ The sentence counts differ significantly (source: ${state.alignedPairs.length - emptySrc}, target: ${state.alignedPairs.length - emptyTgt}). Use Merge, Shift, or Delete to fix the alignment.`, false);
+            const lowConf = state.alignedPairs.filter(p => (p.confidence ?? 100) < 60).length;
+            const medConf = state.alignedPairs.filter(p => {
+                const c = p.confidence ?? 100;
+                return c >= 60 && c < 85;
+            }).length;
+            if (lowConf > 0) {
+                const pct = Math.round((lowConf / state.alignedPairs.length) * 100);
+                showSessionBanner(`⚠️ ${lowConf} of ${state.alignedPairs.length} pairs have low confidence (${pct}%). Low-confidence rows are marked with a red left border. Use Merge/Shift/Delete to fix alignment.`, false);
+            } else if (medConf > 0) {
+                const pct = Math.round((medConf / state.alignedPairs.length) * 100);
+                showSessionBanner(`ℹ️ ${medConf} of ${state.alignedPairs.length} pairs have medium confidence (${pct}%). Review yellow-bordered rows for accuracy.`, false);
             }
             
             if (els.alignInputSection) els.alignInputSection.classList.add('hidden');

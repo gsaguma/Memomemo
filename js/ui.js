@@ -668,28 +668,29 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
     const tableBody = document.getElementById('alignPreviewTable');
     if (!tableBody) return;
     tableBody.innerHTML = '';
-    
+
     alignedPairs.forEach((pair, index) => {
+        const conf = pair.confidence ?? 100;
+        let borderColor, confBg, confLabel;
+        if (conf >= 85) {
+            borderColor = '#22c55e';
+            confBg = 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300';
+            confLabel = 'High';
+        } else if (conf >= 60) {
+            borderColor = '#eab308';
+            confBg = 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300';
+            confLabel = 'Med';
+        } else {
+            borderColor = '#ef4444';
+            confBg = 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300';
+            confLabel = 'Low';
+        }
+
         const row = document.createElement('tr');
         row.className = 'border-b border-[#93C5FD] hover:bg-gray-50 dark:hover:bg-gray-800 transition';
-        
-        // Calculate length ratio warning
-        const srcWords = pair.source.trim().split(/\s+/).filter(Boolean).length;
-        const tgtWords = pair.target.trim().split(/\s+/).filter(Boolean).length;
-        let skewClass = "";
-        let skewTitle = "";
-        
-        if (srcWords > 0 && tgtWords > 0) {
-            const ratio = srcWords / tgtWords;
-            if (ratio > 2.5 || ratio < 0.4) {
-                skewClass = " bg-yellow-50 dark:bg-yellow-900/20";
-                skewTitle = `Length ratio mismatch warning: ${srcWords} words source vs ${tgtWords} words target.`;
-            }
-        }
-        
-        if (skewClass) {
-            row.className += skewClass;
-            row.title = skewTitle;
+        row.style.borderLeft = `4px solid ${borderColor}`;
+        if (conf < 60) {
+            row.title = `Low confidence alignment (${conf}%). Review this pair carefully.`;
         }
 
         // Source Cell
@@ -719,7 +720,29 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
         // Actions Cell
         const actionsTd = document.createElement('td');
         actionsTd.className = 'px-2 py-2 w-2/12 text-right align-middle whitespace-nowrap';
-        
+
+        // Confidence badge
+        const confBadge = document.createElement('span');
+        confBadge.className = `inline-block text-xs font-semibold px-1.5 py-0.5 rounded ${confBg} mr-1`;
+        confBadge.textContent = `${conf}%`;
+        confBadge.title = `Confidence: ${confLabel} (${conf}%)`;
+        actionsTd.appendChild(confBadge);
+
+        // Suggestion icon
+        if (pair.suggestion === 'merge-down') {
+            const hintIcon = document.createElement('span');
+            hintIcon.className = 'inline-block text-xs text-amber-600 dark:text-amber-400 mr-1';
+            hintIcon.title = 'Source may be merged with the segment below';
+            hintIcon.textContent = '↓';
+            actionsTd.appendChild(hintIcon);
+        } else if (pair.suggestion === 'split-target') {
+            const hintIcon = document.createElement('span');
+            hintIcon.className = 'inline-block text-xs text-amber-600 dark:text-amber-400 mr-1';
+            hintIcon.title = 'Target may need to be split';
+            hintIcon.textContent = '→';
+            actionsTd.appendChild(hintIcon);
+        }
+
         // Merge Down Button (↓)
         const mergeBtn = document.createElement('button');
         mergeBtn.className = 'text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
@@ -743,7 +766,7 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
             if (onRowAction) onRowAction('shift', index);
         });
 
-        // Delete Button (🗑️)
+        // Delete Button
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 p-1 rounded focus:outline-none focus:ring-1 focus:ring-red-500';
         deleteBtn.title = 'Delete segment pair';
@@ -759,7 +782,7 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
         row.appendChild(srcTd);
         row.appendChild(tgtTd);
         row.appendChild(actionsTd);
-        
+
         tableBody.appendChild(row);
     });
 }
