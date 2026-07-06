@@ -17,8 +17,8 @@ export function parseTMXContent(content) {
         metadata: {}
     };
     
-    // Extract metadata from header
-    const headerElement = xmlDoc.querySelector('header');
+    // Extract metadata from header (use getElementsByTagName for namespace-agnostic query)
+    const headerElement = xmlDoc.getElementsByTagName('header')[0];
     parsedData.metadata = {
         creationtool: headerElement?.getAttribute('creationtool') || 'MemoMemo',
         creationtoolversion: headerElement?.getAttribute('creationtoolversion') || '1.0',
@@ -46,8 +46,8 @@ export function parseTMXContent(content) {
         let targetText = null;
         let sourceLang = null;
         let targetLang = null;
+        const targets = [];
 
-        // Determine source/target by xml:lang matching header srclang
         Array.from(tuvs).forEach(tuv => {
             const lang = tuv.getAttribute('xml:lang') || tuv.getAttribute('lang');
             const segElements = tuv.getElementsByTagName('seg');
@@ -58,27 +58,32 @@ export function parseTMXContent(content) {
                 if (lang === srclang) {
                     sourceText = segText;
                     sourceLang = lang;
-                } else if (targetText === null) {
-                    targetText = segText;
-                    targetLang = lang;
+                } else {
+                    targets.push({ text: segText, lang: lang });
                 }
             }
         });
+
+        if (targets.length > 0) {
+            targetText = targets[0].text;
+            targetLang = targets[0].lang;
+        }
 
         if (sourceText === null && targetText !== null) {
             sourceText = targetText;
             sourceLang = targetLang;
             targetText = null;
             targetLang = null;
+            targets.length = 0;
         }
 
-        // Only add if we have both source and target
         if (sourceText !== null && targetText !== null) {
             parsedData.units.push({
                 source: sourceText,
                 target: targetText,
                 sourceLang,
-                targetLang
+                targetLang,
+                targets
             });
         }
     });
