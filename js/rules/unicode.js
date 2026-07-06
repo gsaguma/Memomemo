@@ -12,7 +12,7 @@ const SUSPICIOUS = [
 ];
 
 export const unicode = {
-    meta: { name: 'Unicode', category: 'Quality', priority: 'warning' },
+    meta: { name: 'Unicode', category: 'Formatting', priority: 'warning' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

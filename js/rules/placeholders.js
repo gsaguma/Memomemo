@@ -19,7 +19,7 @@ function extractPlaceholders(text) {
 }
 
 export const placeholders = {
-    meta: { name: 'Placeholders', category: 'Quality', priority: 'error' },
+    meta: { name: 'Placeholders', category: 'Formatting', priority: 'error' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

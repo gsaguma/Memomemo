@@ -1,5 +1,5 @@
 export const length = {
-    meta: { name: 'Length', category: 'Quality', priority: 'info' },
+    meta: { name: 'Length', category: 'Formatting', priority: 'info' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

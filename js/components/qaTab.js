@@ -25,11 +25,11 @@ export function renderQaTab() {
                     </div>
                 </div>
 
-                <div id="qaRulesList" class="space-y-1 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+                <div id="qaRulesList" class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-0 max-h-80 overflow-y-auto custom-scrollbar pr-1">
                     <!-- Populated dynamically by controller -->
                 </div>
 
-                <div class="mt-4 flex gap-3">
+                <div class="mt-4 flex flex-wrap gap-3 items-center">
                     <button id="qaRunBtn" class="bg-primary hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded shadow transition text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -37,26 +37,13 @@ export function renderQaTab() {
                         </svg>
                         Run Selected Checks
                     </button>
-                    <button id="qaRunAllBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded shadow transition text-sm flex items-center gap-2">
+                    <button id="qaRunAllBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded shadow transition text-sm">
                         Run All
                     </button>
-                </div>
-            </div>
-
-            <!-- Glossary Editor -->
-            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-semibold">Terminology Glossary</h3>
-                    <span id="qaGlossaryCount" class="text-xs text-gray-400">0 entries</span>
-                </div>
-                <p class="text-xs text-gray-400 mb-3">Define term pairs to validate against. Runs when Terminology check is active.</p>
-                <div id="qaGlossaryList" class="space-y-1 max-h-32 overflow-y-auto custom-scrollbar mb-2">
-                    <div class="text-xs text-gray-400 text-center py-2">No glossary entries.</div>
-                </div>
-                <div class="flex gap-2">
-                    <input id="qaGlossarySrc" placeholder="Source term" class="flex-1 px-2 py-1 text-sm border rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-primary">
-                    <input id="qaGlossaryTgt" placeholder="Target term" class="flex-1 px-2 py-1 text-sm border rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-primary">
-                    <button id="qaGlossaryAddBtn" class="bg-primary hover:bg-opacity-90 text-white px-3 py-1 rounded text-sm font-medium whitespace-nowrap">Add</button>
+                    <div class="ml-auto flex gap-2">
+                        <input type="file" id="qaGlossaryFileInput" accept=".tmx,.csv,.xlsx,.xls" class="hidden">
+                        <button id="qaImportGlossaryBtn" class="text-xs text-primary hover:underline border border-primary rounded px-2 py-1">Import Glossary</button>
+                    </div>
                 </div>
             </div>
 

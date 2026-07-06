@@ -7,7 +7,7 @@ function isNumericOnly(s) {
 }
 
 export const quality = {
-    meta: { name: 'Quality Flags', category: 'Quality', priority: 'warning' },
+    meta: { name: 'Quality Flags', category: 'Formatting', priority: 'warning' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

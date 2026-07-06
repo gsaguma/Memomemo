@@ -38,13 +38,10 @@ function renderRuleCheckboxes() {
     const savedState = loadRuleToggleState();
 
     for (const [category, rules] of Object.entries(groups)) {
-        const catDiv = document.createElement('div');
-        catDiv.className = 'mb-2';
-
         const catTitle = document.createElement('div');
-        catTitle.className = 'text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1';
+        catTitle.className = 'col-span-1 md:col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-2 mb-0.5';
         catTitle.textContent = category;
-        catDiv.appendChild(catTitle);
+        list.appendChild(catTitle);
 
         for (const rule of rules) {
             const label = document.createElement('label');
@@ -61,10 +58,8 @@ function renderRuleCheckboxes() {
 
             label.appendChild(cb);
             label.appendChild(name);
-            catDiv.appendChild(label);
+            list.appendChild(label);
         }
-
-        list.appendChild(catDiv);
     }
 }
 
@@ -345,55 +340,51 @@ function selectAllRules(checked) {
     saveRuleToggleState();
 }
 
-function renderGlossary() {
-    const list = document.getElementById('qaGlossaryList');
-    const count = document.getElementById('qaGlossaryCount');
-    if (!list) return;
-    const entries = getGlossary();
-    count.textContent = entries.length + ' entr' + (entries.length === 1 ? 'y' : 'ies');
-    if (entries.length === 0) {
-        list.innerHTML = '<div class="text-xs text-gray-400 text-center py-2">No glossary entries.</div>';
-        return;
-    }
-    list.innerHTML = '';
-    entries.forEach((entry, idx) => {
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between gap-2 px-2 py-1 rounded bg-gray-50 dark:bg-gray-800 text-sm';
-        const label = document.createElement('span');
-        label.className = 'truncate';
-        label.textContent = entry.source + ' → ' + entry.target;
-        row.appendChild(label);
-        const del = document.createElement('button');
-        del.className = 'text-red-500 hover:text-red-700 text-xs font-medium whitespace-nowrap ml-2';
-        del.textContent = 'Delete';
-        del.addEventListener('click', () => {
-            const updated = getGlossary();
-            updated.splice(idx, 1);
-            setGlossary(updated);
-            renderGlossary();
-        });
-        row.appendChild(del);
-        list.appendChild(row);
-    });
-}
+function importGlossaryFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const raw = e.target.result;
+            const ext = file.name.split('.').pop().toLowerCase();
+            let pairs = [];
 
-function addGlossaryEntry() {
-    const srcInput = document.getElementById('qaGlossarySrc');
-    const tgtInput = document.getElementById('qaGlossaryTgt');
-    const src = srcInput.value.trim();
-    const tgt = tgtInput.value.trim();
-    if (!src || !tgt) return;
-    const entries = getGlossary();
-    entries.push({ source: src, target: tgt });
-    setGlossary(entries);
-    srcInput.value = '';
-    tgtInput.value = '';
-    renderGlossary();
+            if (ext === 'csv') {
+                const lines = raw.split(/\r?\n/).filter(l => l.trim());
+                for (const line of lines) {
+                    const parts = line.split(',');
+                    if (parts.length >= 2) pairs.push({ source: parts[0].trim(), target: parts[1].trim() });
+                }
+            } else if (['tmx', 'xlf', 'xliff', 'sdlxliff'].includes(ext)) {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(raw, 'text/xml');
+                const tus = xml.getElementsByTagName('tu');
+                for (const tu of tus) {
+                    const tuvs = tu.getElementsByTagName('tuv');
+                    const texts = [];
+                    for (const tuv of tuvs) {
+                        const seg = tuv.getElementsByTagName('seg')[0];
+                        if (seg) texts.push(seg.textContent.trim());
+                    }
+                    if (texts.length >= 2) pairs.push({ source: texts[0], target: texts[1] });
+                }
+            }
+
+            if (pairs.length > 0) {
+                const existing = getGlossary();
+                setGlossary([...existing, ...pairs]);
+                alert(`Imported ${pairs.length} glossary entr${pairs.length === 1 ? 'y' : 'ies'}.`);
+            } else {
+                alert('No valid term pairs found in the file.');
+            }
+        } catch (err) {
+            alert('Failed to parse glossary file: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
 }
 
 export function initQaController() {
     renderRuleCheckboxes();
-    renderGlossary();
 
     document.getElementById('qaSelectAllBtn').addEventListener('click', () => selectAllRules(true));
     document.getElementById('qaDeselectAllBtn').addEventListener('click', () => selectAllRules(false));
@@ -410,9 +401,15 @@ export function initQaController() {
 
     document.getElementById('qaRulesList').addEventListener('change', saveRuleToggleState);
 
-    document.getElementById('qaGlossaryAddBtn').addEventListener('click', addGlossaryEntry);
-    document.getElementById('qaGlossarySrc').addEventListener('keydown', e => { if (e.key === 'Enter') addGlossaryEntry(); });
-    document.getElementById('qaGlossaryTgt').addEventListener('keydown', e => { if (e.key === 'Enter') addGlossaryEntry(); });
+    const importBtn = document.getElementById('qaImportGlossaryBtn');
+    const fileInput = document.getElementById('qaGlossaryFileInput');
+    if (importBtn && fileInput) {
+        importBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) importGlossaryFromFile(fileInput.files[0]);
+            fileInput.value = '';
+        });
+    }
 
     setTimeout(updateFileInfo, 100);
 }

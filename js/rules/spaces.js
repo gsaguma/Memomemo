@@ -1,5 +1,5 @@
 export const spaces = {
-    meta: { name: 'Spaces', category: 'Quality', priority: 'info' },
+    meta: { name: 'Spaces', category: 'Formatting', priority: 'info' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

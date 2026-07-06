@@ -5,7 +5,7 @@ function extractNumbers(text) {
 }
 
 export const numbers = {
-    meta: { name: 'Numbers', category: 'Quality', priority: 'error' },
+    meta: { name: 'Numbers', category: 'Formatting', priority: 'error' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

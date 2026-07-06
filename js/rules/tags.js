@@ -14,7 +14,7 @@ function normalizeTag(t) {
 }
 
 export const tags = {
-    meta: { name: 'Tags', category: 'Quality', priority: 'warning' },
+    meta: { name: 'Tags', category: 'Formatting', priority: 'warning' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

@@ -3,7 +3,7 @@ const REPEATED_WORD = /\b(\p{L}{2,})\s+\1\s+\1\b/gu;
 const SUSPICIOUS_SEQ = /[×÷±∞≈≠≡≤≥√∛∜∑∏∫∂∇∆∏∐]/g;
 
 export const specialChars = {
-    meta: { name: 'Special Chars', category: 'Quality', priority: 'warning' },
+    meta: { name: 'Special Chars', category: 'Formatting', priority: 'warning' },
     check(units) {
         const issues = [];
         units.forEach((u, i) => {

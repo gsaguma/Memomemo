@@ -4,6 +4,7 @@ import { parseFileContent } from './parsers.js';
 import { generateTMXXML } from './exporter.js';
 import { els, showError, formatFileSize, updateResults } from './ui.js';
 import { loadSharedFile, savePreferences, debounce } from './shared.js';
+import { refreshQaFileInfo } from './qaController.js';
 
 function handleFileSelect() {
     if (els.fileInput.files.length === 0) return;
@@ -40,6 +41,7 @@ function handleFileSelect() {
     els.fileName.textContent = file.name;
     els.fileSize.textContent = formatFileSize(file.size);
     els.fileInfo.classList.remove('hidden');
+    refreshQaFileInfo();
     els.errorMessage.classList.add('hidden');
     els.statsPanel.classList.add('hidden');
     els.loadingIndicator.classList.remove('hidden');
