@@ -12,11 +12,13 @@ import { renderSearchTab } from './components/searchTab.js';
 import { renderMetaTab } from './components/metaTab.js';
 import { renderAlignTab } from './components/alignTab.js';
 import { renderMergeTab } from './components/mergeTab.js';
+import { renderQaTab } from './components/qaTab.js';
 import { switchTab, loadSharedFile, savePreferences } from './shared.js';
 import { initSearchController, updateSearchScopeUI } from './searchController.js';
 import { initMergeController, removeMergeFile, moveMergeFile } from './mergeController.js';
 import { initMetaController } from './metaController.js';
 import { initAlignController, resetAlignment, handleAlignRowAction } from './alignController.js';
+import { initQaController, clearQaState as resetQa, refreshQaFileInfo } from './qaController.js';
 
 export async function clearSession() {
     if (!confirm("Are you sure you want to clear the session? All loaded files and unsaved changes will be permanently deleted.")) {
@@ -30,7 +32,8 @@ export async function clearSession() {
     ]);
     ['searchQuery','sourceOnly','targetOnly','useRegex','currentPage','activeTab',
      'mergeSrcLang','mergeTgtLang','mergeAuthor','mergeTool','mergeRemoveDuplicates',
-     'fileName','fileSize','metaFileName','metaFileSize','darkMode'].forEach(lsDel);
+     'fileName','fileSize','metaFileName','metaFileSize','darkMode',
+     'mm_qaRuleToggles'].forEach(lsDel);
     document.documentElement.classList.remove('dark');
 
     state.tmxData = { units: [], sourceLanguage: '', targetLanguage: '', metadata: {} };
@@ -82,6 +85,7 @@ export async function clearSession() {
     els.metaEditorStatus.classList.add('hidden');
 
     resetAlignment();
+    resetQa();
 
     document.getElementById('sessionBanner').classList.add('hidden');
     showSessionBanner('Session cleared successfully.', false);
@@ -157,6 +161,7 @@ async function restoreSession() {
         }
         updateResults(state);
         renderStats(state.tmxData.units);
+        refreshQaFileInfo();
         restored = true;
     }
 
@@ -295,17 +300,22 @@ function init() {
     if (tabAlignContent) tabAlignContent.innerHTML = renderAlignTab();
     if (tabMergeContent) tabMergeContent.innerHTML = renderMergeTab();
 
+    const tabQaContent = document.getElementById('tabQaContent');
+    if (tabQaContent) tabQaContent.innerHTML = renderQaTab();
+
     window.addEventListener('keydown', handleGlobalKeydown);
     document.addEventListener('idb-error', (e) => showSessionBanner(`⚠️ ${e.detail}`, false));
 
     els.tabSearchBtn.addEventListener('click', () => switchTab('search'));
     els.tabMergeBtn.addEventListener('click', () => switchTab('merge'));
     els.tabMetaBtn.addEventListener('click', () => switchTab('meta'));
+    els.tabQaBtn.addEventListener('click', () => switchTab('qa'));
 
     initSearchController();
     initMergeController();
     initMetaController();
     initAlignController();
+    initQaController();
 
     const darkToggle = document.getElementById('darkModeToggle');
     if (darkToggle) {

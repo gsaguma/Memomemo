@@ -13,5 +13,7 @@ export const state = {
         metadata: {}
     },
     itemsPerPage: 30,
-    alignedPairs: []
+    alignedPairs: [],
+    qaIssues: [],
+    qaActiveRules: {}
 };

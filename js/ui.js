@@ -562,7 +562,8 @@ export function updateTabUI(tab) {
         search: { btn: els.tabSearchBtn, content: els.tabSearchContent },
         meta: { btn: els.tabMetaBtn, content: els.tabMetaContent },
         align: { btn: els.tabAlignBtn, content: els.tabAlignContent },
-        merge: { btn: els.tabMergeBtn, content: els.tabMergeContent }
+        merge: { btn: els.tabMergeBtn, content: els.tabMergeContent },
+        qa: { btn: els.tabQaBtn, content: els.tabQaContent }
     };
 
     Object.keys(tabs).forEach(k => {
