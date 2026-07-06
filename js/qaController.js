@@ -39,19 +39,19 @@ function renderRuleCheckboxes() {
 
     for (const [category, rules] of Object.entries(groups)) {
         const catTitle = document.createElement('div');
-        catTitle.className = 'col-span-1 md:col-span-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-2 mb-0.5';
+        catTitle.className = 'col-span-1 md:col-span-3 text-xs font-semibold text-muted uppercase tracking-wide mt-2 mb-0.5';
         catTitle.textContent = category;
         list.appendChild(catTitle);
 
         for (const rule of rules) {
             const label = document.createElement('label');
-            label.className = 'flex items-center gap-2 py-0.5 px-1 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-sm';
+            label.className = 'flex items-center gap-2 py-0.5 px-1 rounded hover:bg-surface-alt cursor-pointer text-sm';
 
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.id = 'qaRule-' + rule.id;
             cb.checked = savedState[rule.id] !== false;
-            cb.className = 'rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary';
+            cb.className = 'rounded border-default text-primary focus:ring-primary';
 
             const name = document.createElement('span');
             name.textContent = rule.name;
@@ -104,7 +104,7 @@ function renderResults(issues) {
     const filtered = currentFilter === 'all' ? issues : issues.filter(i => i.priority === currentFilter);
 
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="bg-white rounded-lg p-6 text-center text-gray-500 text-sm">No issues found for the selected filter.</div>';
+        container.innerHTML = '<div class="bg-surface rounded-lg p-6 text-center text-muted text-sm">No issues found for the selected filter.</div>';
         return;
     }
 
@@ -117,20 +117,20 @@ function renderResults(issues) {
 
     for (const [groupKey, group] of Object.entries(groups)) {
         const details = document.createElement('details');
-        details.className = 'bg-white rounded-lg shadow-md border border-[#93C5FD] overflow-hidden';
+        details.className = 'bg-surface rounded-lg shadow-md border border-default overflow-hidden';
         details.open = true;
 
         const summaryEl = document.createElement('summary');
-        summaryEl.className = 'flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750 text-sm font-medium';
+        summaryEl.className = 'flex items-center justify-between px-4 py-3 bg-surface-alt cursor-pointer hover:bg-surface-hover text-sm font-medium';
 
         const left = document.createElement('div');
         left.className = 'flex items-center gap-2';
         left.innerHTML = `
-            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-4 w-4 text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
             <span>${escapeHtml(group.category)}</span>
-            <span class="text-gray-400 font-normal">/</span>
+            <span class="text-faint font-normal">/</span>
             <span class="font-semibold">${escapeHtml(group.rule)}</span>
         `;
 
@@ -152,7 +152,7 @@ function renderResults(issues) {
 
         for (const issue of group.issues) {
             const row = document.createElement('div');
-            row.className = 'flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition text-sm';
+            row.className = 'flex items-start gap-3 px-4 py-3 hover:bg-surface-alt transition text-sm';
             row.setAttribute('data-tu-index', issue.tuIndex);
 
             const selTd = document.createElement('div');
@@ -160,7 +160,7 @@ function renderResults(issues) {
             const selCb = document.createElement('input');
             selCb.type = 'checkbox';
             selCb.checked = issue.selected;
-            selCb.className = 'rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary issue-select';
+            selCb.className = 'rounded border-default text-primary focus:ring-primary issue-select';
             selCb.addEventListener('change', () => {
                 issue.selected = selCb.checked;
                 updateDeleteBtn();
@@ -176,12 +176,12 @@ function renderResults(issues) {
             content.className = 'flex-grow min-w-0';
 
             const msg = document.createElement('div');
-            msg.className = 'text-gray-700 dark:text-gray-200';
+            msg.className = 'text-default';
             msg.textContent = issue.message;
 
             if (issue.source || issue.target) {
                 const preview = document.createElement('div');
-                preview.className = 'mt-1 text-xs text-gray-500 dark:text-gray-400 truncate';
+                preview.className = 'mt-1 text-xs text-muted truncate';
                 const s = (issue.source || '').length > 60 ? (issue.source || '').slice(0, 60) + '...' : (issue.source || '');
                 const t = (issue.target || '').length > 60 ? (issue.target || '').slice(0, 60) + '...' : (issue.target || '');
                 preview.textContent = `[${issue.tuIndex}] ${escapeHtml(s)} → ${escapeHtml(t)}`;
@@ -192,7 +192,7 @@ function renderResults(issues) {
             }
 
             const tuBadge = document.createElement('div');
-            tuBadge.className = 'text-xs text-gray-400 dark:text-gray-500 font-mono whitespace-nowrap pt-0.5';
+            tuBadge.className = 'text-xs text-faint font-mono whitespace-nowrap pt-0.5';
             tuBadge.textContent = `#${issue.tuIndex}`;
 
             row.appendChild(selTd);
@@ -328,7 +328,7 @@ function setFilter(priority) {
         btn.className = 'px-2 py-1 rounded text-xs ' + (
             btn.id === 'qaFilter' + priority.charAt(0).toUpperCase() + priority.slice(1)
                 ? 'bg-primary text-white'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                : 'bg-surface-alt hover:bg-surface-hover text-default'
         );
     });
 }

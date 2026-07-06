@@ -234,11 +234,11 @@ export function updateResults(state) {
         const row = document.createElement('tr');
         row.setAttribute('tabindex', '0');
         row.setAttribute('aria-label', 'Segment ' + (startIndex + index + 1));
-        row.className = 'group hover:bg-gray-50 dark:hover:bg-gray-750 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition cursor-pointer flex flex-col md:table-row bg-white dark:bg-gray-800 p-3 md:p-0 mb-4 md:mb-0 rounded-lg md:rounded-none shadow-sm md:shadow-none border border-[#93C5FD] md:border-0';
+        row.className = 'group hover:bg-surface-alt focus:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition cursor-pointer flex flex-col md:table-row bg-surface p-3 md:p-0 mb-4 md:mb-0 rounded-lg md:rounded-none shadow-sm md:shadow-none border border-default md:border-0';
         
         // Create source cell with copy button
         const sourceCell = document.createElement('td');
-        sourceCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm w-full md:w-1/2 block md:table-cell border-b md:border-b-0 border-gray-100 dark:border-gray-700 pb-3 md:pb-2';
+        sourceCell.className = 'px-3 py-2 whitespace-pre-wrap relative text-sm w-full md:w-1/2 block md:table-cell border-b md:border-b-0 border-default pb-3 md:pb-2';
         
         // Create wrapper div to position the text and button
         const sourceCellContent = document.createElement('div');
@@ -253,7 +253,7 @@ export function updateResults(state) {
         
         // Copy button for source
         const sourceCopyBtn = document.createElement('button');
-        sourceCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
+        sourceCopyBtn.className = 'ml-2 p-1 text-muted md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
         sourceCopyBtn.title = 'Copy source text';
         sourceCopyBtn.setAttribute('aria-label', 'Copy source text for segment ' + (startIndex + index + 1));
         sourceCopyBtn.setAttribute('data-text', unit.source);
@@ -282,13 +282,13 @@ export function updateResults(state) {
         
         // Edit button for target
         const targetEditBtn = document.createElement('button');
-        targetEditBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-10 top-3 transition-opacity';
+        targetEditBtn.className = 'ml-2 p-1 text-muted md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-10 top-3 transition-opacity';
         targetEditBtn.title = 'Edit target text';
         targetEditBtn.setAttribute('aria-label', 'Edit target text for segment ' + (startIndex + index + 1));
         
         // Copy button for target
         const targetCopyBtn = document.createElement('button');
-        targetCopyBtn.className = 'ml-2 p-1 text-gray-500 dark:text-gray-400 md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
+        targetCopyBtn.className = 'ml-2 p-1 text-muted md:opacity-0 opacity-100 group-hover:opacity-75 group-focus-within:opacity-75 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary rounded absolute right-4 top-3 transition-opacity';
         targetCopyBtn.title = 'Copy target text';
         targetCopyBtn.setAttribute('aria-label', 'Copy target text for segment ' + (startIndex + index + 1));
         targetCopyBtn.setAttribute('data-text', unit.target);
@@ -309,7 +309,7 @@ export function updateResults(state) {
             editWrapper.className = 'w-full flex flex-col gap-2 py-1';
             
             const textarea = document.createElement('textarea');
-            textarea.className = 'w-full px-2 py-1 text-sm border rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-400 dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800';
+            textarea.className = 'w-full px-2 py-1 text-sm border rounded bg-surface text-default border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface';
             textarea.value = unit.target;
             textarea.rows = Math.max(2, unit.target.split('\n').length);
             
@@ -317,11 +317,11 @@ export function updateResults(state) {
             btnContainer.className = 'flex gap-2 justify-end';
             
             const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition';
+            cancelBtn.className = 'px-2 py-0.5 text-xs bg-surface-hover hover:bg-surface-hover text-default rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition';
             cancelBtn.textContent = 'Cancel';
             
             const saveBtn = document.createElement('button');
-            saveBtn.className = 'px-2 py-0.5 text-xs bg-primary hover:bg-opacity-90 text-white rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-800 transition';
+            saveBtn.className = 'px-2 py-0.5 text-xs bg-primary hover:bg-opacity-90 text-white rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition';
             saveBtn.textContent = 'Save';
             
             btnContainer.appendChild(cancelBtn);
@@ -394,7 +394,7 @@ export function updateResults(state) {
         const noResults = document.createElement('tr');
         const cell = document.createElement('td');
         cell.colSpan = 2;
-        cell.className = 'px-4 py-6 text-center text-gray-500 dark:text-gray-400';
+        cell.className = 'px-4 py-6 text-center text-muted';
         cell.textContent = 'No matching translation units found';
         noResults.appendChild(cell);
         els.resultsTable.appendChild(noResults);
@@ -409,7 +409,7 @@ export function updatePagination(pageCount, state) {
     // Previous button
     const prevButton = document.createElement('button');
     prevButton.innerHTML = '&laquo;';
-    prevButton.className = `px-3 py-1 rounded ${state.currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+    prevButton.className = `px-3 py-1 rounded ${state.currentPage === 1 ? 'text-faint cursor-not-allowed' : 'text-primary hover:bg-surface-hover'}`;
     prevButton.disabled = state.currentPage === 1;
     prevButton.addEventListener('click', () => {
         if (state.currentPage > 1) {
@@ -432,7 +432,7 @@ export function updatePagination(pageCount, state) {
     for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
-        pageButton.className = `px-3 py-1 rounded ${i === state.currentPage ? 'bg-primary text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+        pageButton.className = `px-3 py-1 rounded ${i === state.currentPage ? 'bg-primary text-white' : 'text-default hover:bg-surface-hover'}`;
         pageButton.addEventListener('click', () => {
             state.currentPage = i;
             updateResults(state);
@@ -443,7 +443,7 @@ export function updatePagination(pageCount, state) {
     // Next button
     const nextButton = document.createElement('button');
     nextButton.innerHTML = '&raquo;';
-    nextButton.className = `px-3 py-1 rounded ${state.currentPage === pageCount ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+    nextButton.className = `px-3 py-1 rounded ${state.currentPage === pageCount ? 'text-faint cursor-not-allowed' : 'text-primary hover:bg-surface-hover'}`;
     nextButton.disabled = state.currentPage === pageCount;
     nextButton.addEventListener('click', () => {
         if (state.currentPage < pageCount) {
@@ -459,7 +459,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
     els.mergeFileCountBadge.textContent = state.mergeFiles.length;
 
     if (state.mergeFiles.length === 0) {
-        els.mergeFileList.innerHTML = '<div class="text-sm text-gray-500 text-center py-6">No files uploaded yet.</div>';
+        els.mergeFileList.innerHTML = '<div class="text-sm text-muted text-center py-6">No files uploaded yet.</div>';
         els.executeMergeBtn.disabled = true;
         return;
     }
@@ -469,17 +469,17 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
 
     state.mergeFiles.forEach((file, index) => {
         const item = document.createElement('div');
-        item.className = 'flex justify-between items-center bg-white dark:bg-gray-700 p-2.5 rounded border border-gray-200 dark:border-gray-600 shadow-sm text-sm';
+        item.className = 'flex justify-between items-center bg-surface p-2.5 rounded border border-default shadow-sm text-sm';
         
         const fileInfoDiv = document.createElement('div');
         fileInfoDiv.className = 'flex-grow truncate pr-2';
         
         const nameSpan = document.createElement('div');
-        nameSpan.className = 'font-medium truncate text-gray-900 dark:text-white';
+        nameSpan.className = 'font-medium truncate text-default';
         nameSpan.textContent = file.name;
         
         const detailsSpan = document.createElement('div');
-        detailsSpan.className = 'text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex gap-2';
+        detailsSpan.className = 'text-xs text-muted mt-0.5 flex gap-2';
         detailsSpan.innerHTML = `<span>${file.units.length} units</span> &bull; <span>${formatFileSize(file.size)}</span> &bull; <span>${escapeHtml(file.sourceLanguage)} &rarr; ${escapeHtml(file.targetLanguage)}</span>`;
         
         fileInfoDiv.appendChild(nameSpan);
@@ -490,7 +490,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
         
         // Up button
         const upBtn = document.createElement('button');
-        upBtn.className = 'text-gray-500 dark:text-gray-400 hover:text-primary focus:outline-none p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition';
+        upBtn.className = 'text-muted hover:text-primary focus:outline-none p-1 hover:bg-surface-hover rounded transition';
         upBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>';
         upBtn.title = 'Move up';
         upBtn.setAttribute('aria-label', `Move ${file.name} up`);
@@ -505,7 +505,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
         
         // Down button
         const downBtn = document.createElement('button');
-        downBtn.className = 'text-gray-500 dark:text-gray-400 hover:text-primary focus:outline-none p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded transition';
+        downBtn.className = 'text-muted hover:text-primary focus:outline-none p-1 hover:bg-surface-hover rounded transition';
         downBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>';
         downBtn.title = 'Move down';
         downBtn.setAttribute('aria-label', `Move ${file.name} down`);
@@ -519,7 +519,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
         }
         
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-gray-600 p-1.5 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-gray-700 transition';
+        deleteBtn.className = 'text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 dark:focus:ring-offset-surface-hover transition';
         deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
         deleteBtn.title = 'Remove file';
         deleteBtn.setAttribute('aria-label', `Remove ${file.name}`);
@@ -571,11 +571,11 @@ export function updateTabUI(tab) {
         if (!item.btn || !item.content) return;
         if (k === tab) {
             item.btn.classList.add('border-primary', 'text-primary');
-            item.btn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            item.btn.classList.remove('border-transparent', 'text-muted');
             item.content.classList.remove('hidden');
         } else {
             item.btn.classList.remove('border-primary', 'text-primary');
-            item.btn.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+            item.btn.classList.add('border-transparent', 'text-muted');
             item.content.classList.add('hidden');
         }
     });
@@ -604,7 +604,7 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
         }
 
         const row = document.createElement('tr');
-        row.className = 'border-b border-[#93C5FD] hover:bg-gray-50 dark:hover:bg-gray-800 transition';
+        row.className = 'border-b border-default hover:bg-surface-alt transition';
         row.style.borderLeft = `4px solid ${borderColor}`;
         if (conf < 60) {
             row.title = `Low confidence alignment (${conf}%). Review this pair carefully.`;
@@ -662,7 +662,7 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
 
         // Merge Down Button (↓)
         const mergeBtn = document.createElement('button');
-        mergeBtn.className = 'text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
+        mergeBtn.className = 'text-primary hover:bg-surface-hover p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
         mergeBtn.title = 'Merge with segment below';
         mergeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7" /></svg>`;
         if (index === alignedPairs.length - 1) {
@@ -676,7 +676,7 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
 
         // Shift Down Button (▼)
         const shiftBtn = document.createElement('button');
-        shiftBtn.className = 'text-primary hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
+        shiftBtn.className = 'text-primary hover:bg-surface-hover p-1 rounded focus:outline-none focus:ring-1 focus:ring-primary mr-1';
         shiftBtn.title = 'Insert blank space in target here';
         shiftBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
         shiftBtn.addEventListener('click', () => {

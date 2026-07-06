@@ -2,7 +2,7 @@ export function renderQaTab() {
     return `
         <div class="flex flex-col gap-4">
             <!-- File Info -->
-            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
+            <div class="bg-surface rounded-lg p-4 shadow-md border border-default">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -10,18 +10,18 @@ export function renderQaTab() {
                         </svg>
                         Quality Check
                     </h2>
-                    <span id="qaFileInfo" class="text-sm text-gray-500">No file loaded</span>
+                    <span id="qaFileInfo" class="text-sm text-muted">No file loaded</span>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Runs on the file loaded in Search &amp; View tab.</p>
+                <p class="text-xs text-faint mt-1">Runs on the file loaded in Search &amp; View tab.</p>
             </div>
 
             <!-- Rule Categories -->
-            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
+            <div class="bg-surface rounded-lg p-4 shadow-md border border-default">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-semibold">Checks to execute</h3>
                     <div class="flex gap-2">
                         <button id="qaSelectAllBtn" class="text-xs text-primary hover:underline">Select all</button>
-                        <button id="qaDeselectAllBtn" class="text-xs text-gray-500 hover:underline">Deselect all</button>
+                        <button id="qaDeselectAllBtn" class="text-xs text-muted hover:underline">Deselect all</button>
                     </div>
                 </div>
 
@@ -37,7 +37,7 @@ export function renderQaTab() {
                         </svg>
                         Run Selected Checks
                     </button>
-                    <button id="qaRunAllBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded shadow transition text-sm">
+                    <button id="qaRunAllBtn" class="bg-surface-alt hover:bg-surface-hover text-default font-medium py-2 px-4 rounded shadow transition text-sm">
                         Run All
                     </button>
                     <div class="ml-auto flex gap-2">
@@ -48,15 +48,15 @@ export function renderQaTab() {
             </div>
 
             <!-- Loading -->
-            <div id="qaLoading" class="hidden bg-white rounded-lg p-6 shadow-md border border-[#93C5FD]">
-                <div class="flex items-center justify-center gap-3 text-sm text-gray-500">
+            <div id="qaLoading" class="hidden bg-surface rounded-lg p-6 shadow-md border border-default">
+                <div class="flex items-center justify-center gap-3 text-sm text-muted">
                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
                     <span id="qaLoadingText">Running checks...</span>
                 </div>
             </div>
 
             <!-- Results Summary -->
-            <div id="qaSummary" class="hidden bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
+            <div id="qaSummary" class="hidden bg-surface rounded-lg p-4 shadow-md border border-default">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-semibold">Results</h3>
                     <div class="flex gap-3 text-xs">
@@ -67,9 +67,9 @@ export function renderQaTab() {
                 </div>
                 <div id="qaFilters" class="flex flex-wrap gap-2 mb-3 text-xs">
                     <button id="qaFilterAll" class="px-2 py-1 rounded bg-primary text-white">All</button>
-                    <button id="qaFilterError" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">Errors</button>
-                    <button id="qaFilterWarning" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">Warnings</button>
-                    <button id="qaFilterInfo" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700">Info</button>
+                    <button id="qaFilterError" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Errors</button>
+                    <button id="qaFilterWarning" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Warnings</button>
+                    <button id="qaFilterInfo" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Info</button>
                 </div>
             </div>
 
@@ -79,7 +79,7 @@ export function renderQaTab() {
             </div>
 
             <!-- Actions Bar -->
-            <div id="qaActions" class="hidden bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
+            <div id="qaActions" class="hidden bg-surface rounded-lg p-4 shadow-md border border-default">
                 <div class="flex gap-3">
                     <button id="qaDeleteSelectedBtn" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded shadow transition text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         Delete Selected

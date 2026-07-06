@@ -175,7 +175,7 @@ export function updateSearchScopeUI(scope) {
     const btnTgt = document.getElementById('searchScopeTarget');
 
     const activeClasses = ['bg-primary', 'text-white'];
-    const inactiveClasses = ['bg-white', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-650'];
+    const inactiveClasses = ['bg-surface-alt', 'hover:bg-surface-hover', 'text-default'];
 
     [btnBoth, btnSrc, btnTgt].forEach(btn => {
         if (!btn) return;

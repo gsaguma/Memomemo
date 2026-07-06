@@ -2,41 +2,41 @@ export function renderMetaTab() {
     return `
         <div class="flex flex-col gap-4">
             <!-- Upload Card for Metadata Editor -->
-            <div class="bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
+            <div class="bg-surface rounded-lg p-4 shadow-md border border-default">
                 <h2 class="text-lg font-semibold mb-3">Upload File to Edit Metadata</h2>
                 <div class="flex flex-col gap-3">
                     <label for="metaFileInput" id="metaDropZoneContainer" class="block">
-                        <div class="border-2 border-dashed border-primary dark:border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium flex items-center justify-center gap-3 md:flex-col md:gap-0 md:p-4">
+                        <div class="border-2 border-dashed border-primary rounded-lg p-3 text-center cursor-pointer hover:bg-surface-hover transition font-medium flex items-center justify-center gap-3 md:flex-col md:gap-0 md:p-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary md:mb-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
                             <div>
                                 <span id="metaFileText" class="text-sm font-medium font-semibold">Select or drop file</span>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
+                                <p class="text-xs text-muted mt-0.5">.tmx, .xliff, .xlf, .sdlxliff, .csv</p>
                             </div>
                         </div>
                         <input type="file" id="metaFileInput" accept=".tmx,.xliff,.xlf,.sdlxliff,.csv" class="hidden" />
                     </label>
                     
-                    <div id="metaFileInfo" class="hidden flex items-center justify-between bg-[#F0F9FF] p-3 rounded-lg border border-[#93C5FD] shadow-sm text-sm flex-wrap gap-2">
+                    <div id="metaFileInfo" class="hidden flex items-center justify-between bg-surface-alt p-3 rounded-lg border border-default shadow-sm text-sm flex-wrap gap-2">
                         <div class="flex items-center gap-2 truncate">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span id="metaFileName" class="font-medium truncate text-[#1F2937] max-w-[200px] md:max-w-[240px]"></span>
-                            <span id="metaFileStats" class="text-xs text-gray-500 whitespace-nowrap"></span>
+                            <span id="metaFileName" class="font-medium truncate text-default max-w-[200px] md:max-w-[240px]"></span>
+                            <span id="metaFileStats" class="text-xs text-muted whitespace-nowrap"></span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span id="metaFileSize" class="text-xs text-gray-500 font-medium"></span>
-                            <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-[#3B82F6] hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
+                            <span id="metaFileSize" class="text-xs text-muted font-medium"></span>
+                            <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-primary hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Metadata Card: Spans full width when visible -->
-            <div id="metadataCard" class="hidden bg-white rounded-lg p-4 shadow-md border border-[#93C5FD]">
-                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-[#1F2937]">
+            <div id="metadataCard" class="hidden bg-surface rounded-lg p-4 shadow-md border border-default">
+                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-default">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -45,36 +45,36 @@ export function renderMetaTab() {
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
                     <div>
-                        <label for="metaAuthor" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Author (creationid)</label>
-                        <input type="text" id="metaAuthor" placeholder="e.g. John Doe" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaAuthor" class="block text-xs font-semibold text-muted uppercase">Author (creationid)</label>
+                        <input type="text" id="metaAuthor" placeholder="e.g. John Doe" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Tool</label>
-                        <div id="metaToolDisplay" class="mt-2.5 font-semibold text-sm text-[#1F2937] dark:text-gray-300">MemoMemo</div>
+                        <label class="block text-xs font-semibold text-muted uppercase">Creation Tool</label>
+                        <div id="metaToolDisplay" class="mt-2.5 font-semibold text-sm text-default">MemoMemo</div>
                     </div>
                     <div>
-                        <label for="metaToolVersion" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Tool Version</label>
-                        <input type="text" id="metaToolVersion" placeholder="e.g. 1.0" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaToolVersion" class="block text-xs font-semibold text-muted uppercase">Tool Version</label>
+                        <input type="text" id="metaToolVersion" placeholder="e.g. 1.0" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label for="metaCreationDate" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Creation Date (YYYYMMDDTHHMMSSZ)</label>
-                        <input type="text" id="metaCreationDate" placeholder="e.g. 20231024T143000Z" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaCreationDate" class="block text-xs font-semibold text-muted uppercase">Creation Date (YYYYMMDDTHHMMSSZ)</label>
+                        <input type="text" id="metaCreationDate" placeholder="e.g. 20231024T143000Z" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label for="metaSrcLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Source Language</label>
-                        <input type="text" id="metaSrcLang" placeholder="e.g. en-US" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaSrcLang" class="block text-xs font-semibold text-muted uppercase">Source Language</label>
+                        <input type="text" id="metaSrcLang" placeholder="e.g. en-US" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label for="metaTgtLang" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Target Language (adminlang)</label>
-                        <input type="text" id="metaTgtLang" placeholder="e.g. es-ES" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaTgtLang" class="block text-xs font-semibold text-muted uppercase">Target Language (adminlang)</label>
+                        <input type="text" id="metaTgtLang" placeholder="e.g. es-ES" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label for="metaDatatype" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Datatype</label>
-                        <input type="text" id="metaDatatype" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaDatatype" class="block text-xs font-semibold text-muted uppercase">Datatype</label>
+                        <input type="text" id="metaDatatype" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                     <div>
-                        <label for="metaSegtype" class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Seg Type</label>
-                        <input type="text" id="metaSegtype" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-[#93C5FD] bg-white text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
+                        <label for="metaSegtype" class="block text-xs font-semibold text-muted uppercase">Seg Type</label>
+                        <input type="text" id="metaSegtype" class="w-full mt-1 px-3 py-2 md:py-1.5 rounded border border-default bg-surface text-sm focus:ring-1 focus:ring-primary focus:outline-none" />
                     </div>
                 </div>
                 
@@ -87,7 +87,7 @@ export function renderMetaTab() {
             </div>
 
             <!-- Editor Error/Status message -->
-            <div id="metaEditorStatus" class="hidden bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
+            <div id="metaEditorStatus" class="hidden bg-red-100 text-red-700 p-4 rounded-lg">
                 <!-- Message goes here -->
             </div>
         </div>

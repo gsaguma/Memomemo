@@ -18,17 +18,68 @@
     <meta name="twitter:description" content="100% client-side translation memory toolkit. TMX, XLIFF and CSV. Your files never leave your browser." />
     <meta name="twitter:image" content="https://memotmx.vercel.app/media/og-image.png" />
     <link class="icon" rel="icon" type="image/png" sizes="32x32" href="media/memotmx.png">
+    <style>
+        :root {
+            --c-primary: #4285F4;
+            --c-primary-hover: #5C97F5;
+            --c-bg: #F0F8FE;
+            --c-surface: #FFFFFF;
+            --c-surface-alt: #F8FBFF;
+            --c-surface-hover: #EAF2FC;
+            --c-border: #D8E1EC;
+            --c-border-light: #EAF2FC;
+            --c-text: #1F2937;
+            --c-text-muted: #6B7280;
+            --c-text-faint: #9CA3AF;
+            --c-success: #22C55E;
+            --c-warning: #F59E0B;
+            --c-danger: #EF4444;
+        }
+        .dark {
+            --c-primary: #60A5FA;
+            --c-primary-hover: #3B82F6;
+            --c-primary-active: #2563EB;
+            --c-bg: #0F172A;
+            --c-bg-alt: #111827;
+            --c-surface: #1E293B;
+            --c-surface-hover: #273449;
+            --c-border: #334155;
+            --c-border-hover: #475569;
+            --c-text: #F8FAFC;
+            --c-text-muted: #CBD5E1;
+            --c-text-faint: #94A3B8;
+            --c-success: #22C55E;
+            --c-warning: #F59E0B;
+            --c-danger: #EF4444;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--c-primary); }
+    </style>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3B82F6',
-                        secondary: '#93C5FD',
-                        darkBg: '#0F172A',
-                        darkCard: '#1E293B',
-                        accent: '#60A5FA'
+                        primary: 'var(--c-primary)',
+                        'primary-hover': 'var(--c-primary-hover)',
+                        'primary-active': 'var(--c-primary-active)',
+                        'bg-body': 'var(--c-bg)',
+                        'bg-alt': 'var(--c-bg-alt)',
+                        surface: 'var(--c-surface)',
+                        'surface-alt': 'var(--c-surface-alt)',
+                        'surface-hover': 'var(--c-surface-hover)',
+                        border: 'var(--c-border)',
+                        'border-light': 'var(--c-border-light)',
+                        'border-hover': 'var(--c-border-hover)',
+                        'text-default': 'var(--c-text)',
+                        'text-muted': 'var(--c-text-muted)',
+                        'text-faint': 'var(--c-text-faint)',
+                        success: 'var(--c-success)',
+                        warning: 'var(--c-warning)',
+                        danger: 'var(--c-danger)',
                     }
                 }
             }
@@ -36,24 +87,8 @@
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #93C5FD;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #3B82F6;
-        }
-    </style>
 </head>
-<body class="bg-[#F0F9FF] text-[#1F2937] min-h-screen flex flex-col font-sans transition-colors duration-200 pb-16 md:pb-0">
+<body class="bg-bg-body text-default min-h-screen flex flex-col font-sans transition-colors duration-200 pb-16 md:pb-0">
     <div id="mainContent">
         <div class="container mx-auto px-4 py-3 max-w-5xl">
             <div class="flex items-center justify-center gap-2 mb-3 relative">
@@ -61,7 +96,7 @@
                     <img src="media/memotmx.png" alt="Memo TMX Logo" class="h-6 w-auto object-contain" />
                     <span>Memo Memo</span>
                 </h1>
-                <button id="darkModeToggle" type="button" aria-label="Toggle dark mode" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary transition">
+                <button id="darkModeToggle" type="button" aria-label="Toggle dark mode" class="absolute right-0 top-1/2 -translate-y-1/2 p-2 rounded-lg text-muted hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-primary transition">
                     <svg id="darkModeSun" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -75,32 +110,32 @@
             <div id="sessionBanner" class="hidden flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm mb-4"></div>
 
             <!-- Tab Navigation -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6 md:static fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1E293B] border-t md:border-t-0 p-2 md:p-0 md:mb-6 mb-0 shadow-lg md:shadow-none justify-around md:justify-start">
-                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+            <div class="flex border-b border-default mb-6 md:static fixed bottom-0 left-0 right-0 z-50 bg-surface border-t md:border-t-0 p-2 md:p-0 md:mb-6 mb-0 shadow-lg md:shadow-none justify-around md:justify-start">
+                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     Search & View
                 </button>
-                <button id="tabMetaBtn" aria-label="Edit Metadata" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabMetaBtn" aria-label="Edit Metadata" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-default hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Metadata
                 </button>
-                <button id="tabAlignBtn" aria-label="Align Translations" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabAlignBtn" aria-label="Align Translations" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-default hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                     Align Translations
                 </button>
-                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-default hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
                     Merge TMs
                 </button>
-                <button id="tabQaBtn" aria-label="Quality Check" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-gray-900 rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabQaBtn" aria-label="Quality Check" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-default hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -118,9 +153,9 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
-    <footer class="text-center py-4 text-sm text-primary dark:text-secondary">
+    <footer class="text-center py-4 text-sm text-muted">
         <a href="https://www.linkedin.com/in/gsaguma" target="_blank" 
-           class="hover:text-accent dark:hover:text-accent transition-colors">
+           class="hover:text-primary transition-colors">
            Created with ♥ by Gabriel Saguma
         </a>
     </footer>
