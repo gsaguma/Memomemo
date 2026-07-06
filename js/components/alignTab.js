@@ -114,13 +114,20 @@ export function renderAlignTab() {
                 </div>
             </div>
 
+            <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400 px-1">
+                <span><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>High (&ge;85%)</span>
+                <span><span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>Medium (60&ndash;84%)</span>
+                <span><span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span>Low (&lt;60%)</span>
+                <span title="Source may need merging" class="text-amber-600">↓ Merge suggestion</span>
+                <span title="Target may need splitting" class="text-amber-600">→ Split suggestion</span>
+            </div>
             <div class="overflow-x-auto max-h-[600px] border border-[#93C5FD] rounded-lg">
                 <table class="min-w-full divide-y divide-[#93C5FD]">
                     <thead>
                         <tr class="bg-[#F0F9FF]">
                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-[#1F2937] uppercase w-5/12">Source Segment</th>
                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-[#1F2937] uppercase w-5/12">Target Segment</th>
-                            <th class="px-3 py-2.5 text-right text-xs font-semibold text-[#1F2937] uppercase w-2/12">Actions</th>
+                            <th class="px-3 py-2.5 text-right text-xs font-semibold text-[#1F2937] uppercase w-2/12">Conf / Actions</th>
                         </tr>
                     </thead>
                     <tbody id="alignPreviewTable" class="divide-y divide-[#93C5FD] text-xs">
