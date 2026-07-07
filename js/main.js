@@ -150,7 +150,22 @@ async function restoreSession() {
         if (fUnits) fUnits.textContent = ` • ${state.tmxData.units.length} units`;
 
         els.fileInfo.classList.remove('hidden');
-        els.fileStats.textContent = `${state.tmxData.units.length} translation units`;
+        const units = state.tmxData.units;
+        const srcLang = state.tmxData.sourceLanguage || '?';
+        const tgtLang = state.tmxData.targetLanguage || '?';
+        let srcChars = 0, tgtChars = 0, srcWords = 0, tgtWords = 0, emptyTgt = 0, srcEqTgt = 0;
+        for (const u of units) {
+            const s = u.source || '';
+            const t = u.target || '';
+            srcChars += s.length;
+            tgtChars += t.length;
+            srcWords += s.split(/\s+/).filter(Boolean).length;
+            tgtWords += t.split(/\s+/).filter(Boolean).length;
+            if (!t.trim()) emptyTgt++;
+            if (s === t) srcEqTgt++;
+        }
+        const fmt = n => n.toLocaleString('en-US');
+        els.fileStats.textContent = ` • ${units.length} units · ${srcLang}→${tgtLang} · ${fmt(units.length)} segments · ${fmt(srcChars)} src chars · ${fmt(tgtChars)} tgt chars · ${fmt(srcWords)} src words · ${fmt(tgtWords)} tgt words · ${emptyTgt} empty · ${srcEqTgt} src=tgt`;
         els.sourceLanguage.textContent = state.tmxData.sourceLanguage || '--';
         els.targetLanguage.textContent = state.tmxData.targetLanguage || '--';
         els.errorMessage.classList.add('hidden');
