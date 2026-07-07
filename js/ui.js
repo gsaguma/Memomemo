@@ -309,7 +309,7 @@ export function updateResults(state) {
             editWrapper.className = 'w-full flex flex-col gap-2 py-1';
             
             const textarea = document.createElement('textarea');
-            textarea.className = 'w-full px-2 py-1 text-sm border rounded bg-surface text-default border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface';
+            textarea.className = 'w-full px-2 py-1 text-sm border rounded bg-surface text-body border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface';
             textarea.value = unit.target;
             textarea.rows = Math.max(2, unit.target.split('\n').length);
             
@@ -317,7 +317,7 @@ export function updateResults(state) {
             btnContainer.className = 'flex gap-2 justify-end';
             
             const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'px-2 py-0.5 text-xs bg-surface-hover hover:bg-surface-hover text-default rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition';
+            cancelBtn.className = 'px-2 py-0.5 text-xs bg-surface-hover hover:bg-surface-hover text-body rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition';
             cancelBtn.textContent = 'Cancel';
             
             const saveBtn = document.createElement('button');
@@ -432,7 +432,7 @@ export function updatePagination(pageCount, state) {
     for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
-        pageButton.className = `px-3 py-1 rounded ${i === state.currentPage ? 'bg-primary text-white' : 'text-default hover:bg-surface-hover'}`;
+        pageButton.className = `px-3 py-1 rounded ${i === state.currentPage ? 'bg-primary text-white' : 'text-body hover:bg-surface-hover'}`;
         pageButton.addEventListener('click', () => {
             state.currentPage = i;
             updateResults(state);
@@ -475,7 +475,7 @@ export function renderMergeFileList(state, removeMergeCallback, moveMergeCallbac
         fileInfoDiv.className = 'flex-grow truncate pr-2';
         
         const nameSpan = document.createElement('div');
-        nameSpan.className = 'font-medium truncate text-default';
+        nameSpan.className = 'font-medium truncate text-body';
         nameSpan.textContent = file.name;
         
         const detailsSpan = document.createElement('div');
@@ -648,13 +648,13 @@ export function renderAlignmentPreviewTable(alignedPairs, onRowAction) {
         // Suggestion icon
         if (pair.suggestion === 'merge-down') {
             const hintIcon = document.createElement('span');
-            hintIcon.className = 'inline-block text-xs text-amber-600 dark:text-amber-400 mr-1';
+            hintIcon.className = 'inline-block text-xs text-warning mr-1';
             hintIcon.title = 'Source may be merged with the segment below';
             hintIcon.textContent = '↓';
             actionsTd.appendChild(hintIcon);
         } else if (pair.suggestion === 'split-target') {
             const hintIcon = document.createElement('span');
-            hintIcon.className = 'inline-block text-xs text-amber-600 dark:text-amber-400 mr-1';
+            hintIcon.className = 'inline-block text-xs text-warning mr-1';
             hintIcon.title = 'Target may need to be split';
             hintIcon.textContent = '→';
             actionsTd.appendChild(hintIcon);

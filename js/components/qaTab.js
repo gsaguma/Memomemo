@@ -37,7 +37,7 @@ export function renderQaTab() {
                         </svg>
                         Run Selected Checks
                     </button>
-                    <button id="qaRunAllBtn" class="bg-surface-alt hover:bg-surface-hover text-default font-medium py-2 px-4 rounded shadow transition text-sm">
+                    <button id="qaRunAllBtn" class="bg-surface-alt hover:bg-surface-hover text-body font-medium py-2 px-4 rounded shadow transition text-sm">
                         Run All
                     </button>
                     <div class="ml-auto flex gap-2">
@@ -67,9 +67,9 @@ export function renderQaTab() {
                 </div>
                 <div id="qaFilters" class="flex flex-wrap gap-2 mb-3 text-xs">
                     <button id="qaFilterAll" class="px-2 py-1 rounded bg-primary text-white">All</button>
-                    <button id="qaFilterError" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Errors</button>
-                    <button id="qaFilterWarning" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Warnings</button>
-                    <button id="qaFilterInfo" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-default">Info</button>
+                    <button id="qaFilterError" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-body">Errors</button>
+                    <button id="qaFilterWarning" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-body">Warnings</button>
+                    <button id="qaFilterInfo" class="px-2 py-1 rounded bg-surface-alt hover:bg-surface-hover text-body">Info</button>
                 </div>
             </div>
 

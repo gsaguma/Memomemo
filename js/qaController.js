@@ -176,7 +176,7 @@ function renderResults(issues) {
             content.className = 'flex-grow min-w-0';
 
             const msg = document.createElement('div');
-            msg.className = 'text-default';
+            msg.className = 'text-body';
             msg.textContent = issue.message;
 
             if (issue.source || issue.target) {
@@ -328,7 +328,7 @@ function setFilter(priority) {
         btn.className = 'px-2 py-1 rounded text-xs ' + (
             btn.id === 'qaFilter' + priority.charAt(0).toUpperCase() + priority.slice(1)
                 ? 'bg-primary text-white'
-                : 'bg-surface-alt hover:bg-surface-hover text-default'
+                : 'bg-surface-alt hover:bg-surface-hover text-body'
         );
     });
 }

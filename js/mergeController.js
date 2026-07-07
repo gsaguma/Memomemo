@@ -80,15 +80,15 @@ export function initMergeController() {
     if (mergeDropZone) {
         mergeDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            mergeDropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
+            mergeDropZone.classList.add('bg-surface-hover');
         });
         mergeDropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            mergeDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            mergeDropZone.classList.remove('bg-surface-hover');
         });
         mergeDropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            mergeDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            mergeDropZone.classList.remove('bg-surface-hover');
             if (e.dataTransfer.files.length) {
                 processMergeFiles(e.dataTransfer.files);
             }

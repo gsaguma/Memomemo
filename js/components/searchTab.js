@@ -21,7 +21,7 @@ export function renderSearchTab() {
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span id="fileName" class="font-medium truncate text-default max-w-[240px]"></span>
+                            <span id="fileName" class="font-medium truncate text-body max-w-[240px]"></span>
                             <span id="fileStats" class="text-xs text-muted whitespace-nowrap"></span>
                         </div>
                         <div class="flex items-center gap-3">
@@ -105,10 +105,10 @@ export function renderSearchTab() {
                                     <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-l-md border border-default bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
                                         Both
                                     </button>
-                                    <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium border-t border-b border-r border-default bg-surface text-default hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
+                                    <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
                                         Source
                                     </button>
-                                    <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-r-md border-t border-b border-r border-default bg-surface text-default hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
+                                    <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-r-md border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
                                         Target
                                     </button>
                                 </div>
@@ -159,10 +159,10 @@ export function renderSearchTab() {
                         <table class="min-w-full divide-y divide-default">
                             <thead class="hidden md:table-header-group">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-default uppercase tracking-wider w-1/2">
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-body uppercase tracking-wider w-1/2">
                                         Source (<span id="sourceLanguage">--</span>)
                                     </th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-default uppercase tracking-wider w-1/2">
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-body uppercase tracking-wider w-1/2">
                                         Target (<span id="targetLanguage">--</span>)
                                     </th>
                                 </tr>

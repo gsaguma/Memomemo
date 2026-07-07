@@ -23,7 +23,7 @@ export function renderMetaTab() {
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span id="metaFileName" class="font-medium truncate text-default max-w-[200px] md:max-w-[240px]"></span>
+                            <span id="metaFileName" class="font-medium truncate text-body max-w-[200px] md:max-w-[240px]"></span>
                             <span id="metaFileStats" class="text-xs text-muted whitespace-nowrap"></span>
                         </div>
                         <div class="flex items-center gap-3">
@@ -36,7 +36,7 @@ export function renderMetaTab() {
 
             <!-- Metadata Card: Spans full width when visible -->
             <div id="metadataCard" class="hidden bg-surface rounded-lg p-4 shadow-md border border-default">
-                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-default">
+                <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-body">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -50,7 +50,7 @@ export function renderMetaTab() {
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-muted uppercase">Creation Tool</label>
-                        <div id="metaToolDisplay" class="mt-2.5 font-semibold text-sm text-default">MemoMemo</div>
+                        <div id="metaToolDisplay" class="mt-2.5 font-semibold text-sm text-body">MemoMemo</div>
                     </div>
                     <div>
                         <label for="metaToolVersion" class="block text-xs font-semibold text-muted uppercase">Tool Version</label>

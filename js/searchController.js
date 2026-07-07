@@ -175,7 +175,7 @@ export function updateSearchScopeUI(scope) {
     const btnTgt = document.getElementById('searchScopeTarget');
 
     const activeClasses = ['bg-primary', 'text-white'];
-    const inactiveClasses = ['bg-surface-alt', 'hover:bg-surface-hover', 'text-default'];
+    const inactiveClasses = ['bg-surface-alt', 'hover:bg-surface-hover', 'text-body'];
 
     [btnBoth, btnSrc, btnTgt].forEach(btn => {
         if (!btn) return;
@@ -253,15 +253,15 @@ export function initSearchController() {
     if (dropZone) {
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
+            dropZone.classList.add('bg-surface-hover');
         });
         dropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            dropZone.classList.remove('bg-surface-hover');
         });
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            dropZone.classList.remove('bg-surface-hover');
             if (e.dataTransfer.files.length) {
                 els.fileInput.files = e.dataTransfer.files;
                 handleFileSelect();

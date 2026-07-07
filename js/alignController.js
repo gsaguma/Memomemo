@@ -108,15 +108,15 @@ export function initAlignController() {
     if (els.alignSourceDropZone) {
         els.alignSourceDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            els.alignSourceDropZone.classList.add('bg-gray-100');
+            els.alignSourceDropZone.classList.add('bg-surface-alt');
         });
         els.alignSourceDropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            els.alignSourceDropZone.classList.remove('bg-gray-100');
+            els.alignSourceDropZone.classList.remove('bg-surface-alt');
         });
         els.alignSourceDropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            els.alignSourceDropZone.classList.remove('bg-gray-100');
+            els.alignSourceDropZone.classList.remove('bg-surface-alt');
             if (e.dataTransfer.files.length) {
                 handleAlignFileUpload(e.dataTransfer.files[0], true);
             }
@@ -144,15 +144,15 @@ export function initAlignController() {
     if (els.alignTargetDropZone) {
         els.alignTargetDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            els.alignTargetDropZone.classList.add('bg-gray-100');
+            els.alignTargetDropZone.classList.add('bg-surface-alt');
         });
         els.alignTargetDropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            els.alignTargetDropZone.classList.remove('bg-gray-100');
+            els.alignTargetDropZone.classList.remove('bg-surface-alt');
         });
         els.alignTargetDropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            els.alignTargetDropZone.classList.remove('bg-gray-100');
+            els.alignTargetDropZone.classList.remove('bg-surface-alt');
             if (e.dataTransfer.files.length) {
                 handleAlignFileUpload(e.dataTransfer.files[0], false);
             }

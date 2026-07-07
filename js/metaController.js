@@ -34,15 +34,15 @@ export function initMetaController() {
     if (metaDropZone) {
         metaDropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            metaDropZone.classList.add('bg-gray-200', 'dark:bg-gray-700');
+            metaDropZone.classList.add('bg-surface-hover');
         });
         metaDropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            metaDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            metaDropZone.classList.remove('bg-surface-hover');
         });
         metaDropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            metaDropZone.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+            metaDropZone.classList.remove('bg-surface-hover');
             if (e.dataTransfer.files.length) {
                 processMetaEditorFile(e.dataTransfer.files[0]);
             }
