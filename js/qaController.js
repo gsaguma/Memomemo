@@ -9,6 +9,8 @@ import { preloadSpelling } from './rules/spelling.js';
 let currentIssues = [];
 let currentFilter = 'all';
 let _lastRunRuleIds = null;
+const _PAGE_SIZE = 200;
+let _currentPage = 1;
 
 function getFileInfo() {
     const fn = document.getElementById('fileName');
@@ -86,6 +88,40 @@ function getActiveRuleIds() {
     return ids;
 }
 
+function renderPagination(totalItems, totalPages, currentPage) {
+    const el = document.getElementById('qaPagination');
+    if (!el) return;
+    el.innerHTML = '';
+    if (totalPages <= 1) { el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+
+    const nav = document.createElement('div');
+    nav.className = 'flex items-center justify-center gap-2 text-sm';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Prev';
+    prevBtn.disabled = currentPage <= 1;
+    prevBtn.className = 'px-3 py-1 rounded text-xs ' + (currentPage <= 1 ? 'text-faint cursor-default' : 'text-primary hover:underline');
+    prevBtn.addEventListener('click', () => { if (currentPage > 1) { _currentPage = currentPage - 1; renderResults(currentIssues); window.scrollTo(0, 0); } });
+    nav.appendChild(prevBtn);
+
+    const span = document.createElement('span');
+    span.className = 'text-xs text-muted px-2';
+    const start = (currentPage - 1) * _PAGE_SIZE + 1;
+    const end = Math.min(currentPage * _PAGE_SIZE, totalItems);
+    span.textContent = `${start}–${end} of ${totalItems}`;
+    nav.appendChild(span);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.className = 'px-3 py-1 rounded text-xs ' + (currentPage >= totalPages ? 'text-faint cursor-default' : 'text-primary hover:underline');
+    nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { _currentPage = currentPage + 1; renderResults(currentIssues); window.scrollTo(0, 0); } });
+    nav.appendChild(nextBtn);
+
+    el.appendChild(nav);
+}
+
 function renderResults(issues) {
     const container = document.getElementById('qaResults');
     const summary = document.getElementById('qaSummary');
@@ -108,8 +144,13 @@ function renderResults(issues) {
         return;
     }
 
+    const totalPages = Math.ceil(filtered.length / _PAGE_SIZE) || 1;
+    if (_currentPage > totalPages) _currentPage = totalPages;
+    const start = (_currentPage - 1) * _PAGE_SIZE;
+    const pageSlice = filtered.slice(start, start + _PAGE_SIZE);
+
     const groups = {};
-    for (const issue of filtered) {
+    for (const issue of pageSlice) {
         const key = issue.category + ' / ' + issue.ruleName;
         if (!groups[key]) groups[key] = { category: issue.category, rule: issue.ruleName, issues: [] };
         groups[key].issues.push(issue);
@@ -118,7 +159,6 @@ function renderResults(issues) {
     for (const [groupKey, group] of Object.entries(groups)) {
         const details = document.createElement('details');
         details.className = 'bg-surface rounded-lg shadow-md border border-default overflow-hidden';
-        details.open = true;
 
         const summaryEl = document.createElement('summary');
         summaryEl.className = 'flex items-center justify-between px-4 py-3 bg-surface-alt cursor-pointer hover:bg-surface-hover text-sm font-medium';
@@ -216,6 +256,7 @@ function renderResults(issues) {
         container.appendChild(details);
     }
 
+    renderPagination(filtered.length, totalPages, _currentPage);
     updateDeleteBtn();
 }
 
@@ -237,6 +278,7 @@ function reRunWithLastRules() {
     const result = runChecks(units, _lastRunRuleIds);
     currentIssues = result.issues;
     currentFilter = 'all';
+    _currentPage = 1;
     renderResults(currentIssues);
 }
 
@@ -283,6 +325,7 @@ function runAllChecks() {
             const result = runChecks(units, _lastRunRuleIds);
             currentIssues = result.issues;
             currentFilter = 'all';
+            _currentPage = 1;
             document.getElementById('qaLoading').classList.add('hidden');
             renderResults(currentIssues);
         }, 50);
@@ -314,6 +357,7 @@ function runSelectedChecks() {
             const result = runChecks(units, _lastRunRuleIds);
             currentIssues = result.issues;
             currentFilter = 'all';
+            _currentPage = 1;
             document.getElementById('qaLoading').classList.add('hidden');
             renderResults(currentIssues);
         }, 50);
@@ -322,6 +366,7 @@ function runSelectedChecks() {
 
 function setFilter(priority) {
     currentFilter = priority;
+    _currentPage = 1;
     renderResults(currentIssues);
 
     document.querySelectorAll('#qaFilters button').forEach(btn => {
@@ -422,11 +467,14 @@ export function clearQaState() {
     currentIssues = [];
     currentFilter = 'all';
     _lastRunRuleIds = null;
+    _currentPage = 1;
     const container = document.getElementById('qaResults');
     if (container) { container.innerHTML = ''; container.classList.add('hidden'); }
     const summary = document.getElementById('qaSummary');
     if (summary) summary.classList.add('hidden');
     const actions = document.getElementById('qaActions');
     if (actions) actions.classList.add('hidden');
+    const pagination = document.getElementById('qaPagination');
+    if (pagination) { pagination.innerHTML = ''; pagination.classList.add('hidden'); }
     updateFileInfo();
 }

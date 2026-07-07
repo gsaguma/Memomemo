@@ -73,6 +73,10 @@ export function renderQaTab() {
                 </div>
             </div>
 
+            <!-- Pagination -->
+            <div id="qaPagination" class="hidden">
+            </div>
+
             <!-- Results List -->
             <div id="qaResults" class="hidden flex flex-col gap-4">
                 <!-- Populated dynamically by controller -->
