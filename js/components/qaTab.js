@@ -47,6 +47,26 @@ export function renderQaTab() {
                 </div>
             </div>
 
+            <!-- Glossary CRUD -->
+            <details id="qaGlossarySection" class="bg-surface rounded-lg shadow-md border border-default overflow-hidden">
+                <summary class="flex items-center justify-between px-4 py-3 bg-surface-alt cursor-pointer hover:bg-surface-hover text-sm font-medium">
+                    <span class="flex items-center gap-2">
+                        <svg class="h-4 w-4 text-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Glossary — <span id="qaGlossaryCount">0</span> entries
+                    </span>
+                    <div class="flex gap-2">
+                        <button type="button" id="qaGlossaryAddBtn" class="text-xs bg-primary text-white font-medium px-2 py-1 rounded hover:bg-opacity-90 transition">+ Add Entry</button>
+                        <button type="button" id="qaGlossaryImportBtn" class="text-xs text-primary hover:underline border border-primary rounded px-2 py-1">Import</button>
+                    </div>
+                </summary>
+                <div class="p-3">
+                    <div id="qaGlossaryTable" class="divide-y divide-default text-sm"></div>
+                    <div id="qaGlossaryPagination" class="flex items-center justify-center gap-2 mt-2 text-xs"></div>
+                </div>
+            </details>
+
             <!-- Loading -->
             <div id="qaLoading" class="hidden bg-surface rounded-lg p-6 shadow-md border border-default">
                 <div class="flex items-center justify-center gap-3 text-sm text-muted">
