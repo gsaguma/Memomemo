@@ -119,6 +119,26 @@ export function renderSearchTab() {
                                 </label>
                             </div>
                         </div>
+                        <!-- Find & Replace -->
+                        <div class="bg-surface rounded-lg p-3 border border-default mt-3">
+                            <div class="flex flex-wrap gap-2 items-end">
+                                <div class="flex-1 min-w-[120px]">
+                                    <label for="findReplaceFind" class="block text-xs text-muted mb-0.5">Find (target)</label>
+                                    <input type="text" id="findReplaceFind" placeholder="Text or /regex/" class="w-full px-2 py-1.5 text-sm border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary">
+                                </div>
+                                <div class="flex-1 min-w-[120px]">
+                                    <label for="findReplaceReplace" class="block text-xs text-muted mb-0.5">Replace</label>
+                                    <input type="text" id="findReplaceReplace" placeholder="Replacement text" class="w-full px-2 py-1.5 text-sm border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary">
+                                </div>
+                                <div class="flex items-center gap-2 pb-1">
+                                    <label class="text-xs text-muted flex items-center gap-1 cursor-pointer">
+                                        <input type="checkbox" id="findReplaceRegex" class="rounded border-default text-primary focus:ring-primary">
+                                        Regex
+                                    </label>
+                                    <button id="findReplaceBtn" class="bg-primary hover:bg-opacity-90 text-white text-xs font-medium px-3 py-1.5 rounded transition">Replace All</button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="mt-3 flex items-center justify-between gap-3">
                             <div class="text-sm text-muted">
                                 <span id="resultsCount">0 results</span>
