@@ -428,6 +428,109 @@ function importGlossaryFromFile(file) {
     reader.readAsText(file);
 }
 
+const _GLOSSARY_PAGE_SIZE = 100;
+let _glossaryCurrentPage = 1;
+
+function renderGlossary() {
+    const table = document.getElementById('qaGlossaryTable');
+    const count = document.getElementById('qaGlossaryCount');
+    const pagination = document.getElementById('qaGlossaryPagination');
+    if (!table) return;
+
+    const entries = getGlossary();
+    count.textContent = entries.length;
+
+    const totalPages = Math.ceil(entries.length / _GLOSSARY_PAGE_SIZE) || 1;
+    if (_glossaryCurrentPage > totalPages) _glossaryCurrentPage = totalPages;
+    const start = (_glossaryCurrentPage - 1) * _GLOSSARY_PAGE_SIZE;
+    const page = entries.slice(start, start + _GLOSSARY_PAGE_SIZE);
+
+    table.innerHTML = '';
+    if (entries.length === 0) {
+        table.innerHTML = '<div class="py-4 text-center text-xs text-muted">No glossary entries. Add one above or import a file.</div>';
+        pagination.innerHTML = '';
+        return;
+    }
+
+    for (const [idx, entry] of page.entries()) {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 py-1.5';
+
+        const sourceInput = document.createElement('input');
+        sourceInput.type = 'text';
+        sourceInput.value = entry.source;
+        sourceInput.className = 'flex-1 min-w-0 px-2 py-1 text-xs border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary';
+
+        const arrow = document.createElement('span');
+        arrow.className = 'text-faint text-xs';
+        arrow.textContent = '→';
+
+        const targetInput = document.createElement('input');
+        targetInput.type = 'text';
+        targetInput.value = entry.target;
+        targetInput.className = 'flex-1 min-w-0 px-2 py-1 text-xs border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary';
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'text-red-500 hover:text-red-700 text-xs font-medium px-1';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Delete entry';
+        delBtn.addEventListener('click', () => {
+            const all = getGlossary();
+            const realIdx = start + idx;
+            all.splice(realIdx, 1);
+            setGlossary(all);
+            if (_glossaryCurrentPage > Math.ceil(all.length / _GLOSSARY_PAGE_SIZE)) _glossaryCurrentPage = Math.max(1, Math.ceil(all.length / _GLOSSARY_PAGE_SIZE));
+            renderGlossary();
+        });
+
+        sourceInput.addEventListener('change', () => {
+            const all = getGlossary();
+            const realIdx = start + idx;
+            all[realIdx].source = sourceInput.value;
+            setGlossary(all);
+        });
+        targetInput.addEventListener('change', () => {
+            const all = getGlossary();
+            const realIdx = start + idx;
+            all[realIdx].target = targetInput.value;
+            setGlossary(all);
+        });
+
+        row.appendChild(sourceInput);
+        row.appendChild(arrow);
+        row.appendChild(targetInput);
+        row.appendChild(delBtn);
+        table.appendChild(row);
+    }
+
+    pagination.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '← Prev';
+    prevBtn.disabled = _glossaryCurrentPage <= 1;
+    prevBtn.className = 'px-2 py-1 rounded text-xs ' + (_glossaryCurrentPage <= 1 ? 'text-faint cursor-default' : 'text-primary hover:underline');
+    prevBtn.addEventListener('click', () => {
+        if (_glossaryCurrentPage > 1) { _glossaryCurrentPage--; renderGlossary(); }
+    });
+    pagination.appendChild(prevBtn);
+
+    const span = document.createElement('span');
+    span.className = 'text-xs text-muted px-2';
+    const end = Math.min(_glossaryCurrentPage * _GLOSSARY_PAGE_SIZE, entries.length);
+    span.textContent = `${start + 1}–${end} of ${entries.length}`;
+    pagination.appendChild(span);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = _glossaryCurrentPage >= totalPages;
+    nextBtn.className = 'px-2 py-1 rounded text-xs ' + (_glossaryCurrentPage >= totalPages ? 'text-faint cursor-default' : 'text-primary hover:underline');
+    nextBtn.addEventListener('click', () => {
+        if (_glossaryCurrentPage < totalPages) { _glossaryCurrentPage++; renderGlossary(); }
+    });
+    pagination.appendChild(nextBtn);
+}
+
 export function initQaController() {
     renderRuleCheckboxes();
 
@@ -451,10 +554,29 @@ export function initQaController() {
     if (importBtn && fileInput) {
         importBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) importGlossaryFromFile(fileInput.files[0]);
+            if (fileInput.files.length > 0) { importGlossaryFromFile(fileInput.files[0]); renderGlossary(); }
             fileInput.value = '';
         });
     }
+
+    document.getElementById('qaGlossaryAddBtn').addEventListener('click', () => {
+        const all = getGlossary();
+        all.unshift({ source: '', target: '' });
+        setGlossary(all);
+        _glossaryCurrentPage = 1;
+        renderGlossary();
+        setTimeout(() => {
+            const firstInput = document.querySelector('#qaGlossaryTable input');
+            if (firstInput) firstInput.focus();
+        }, 50);
+    });
+
+    document.getElementById('qaGlossaryImportBtn').addEventListener('click', () => {
+        const input = document.getElementById('qaGlossaryFileInput');
+        if (input) input.click();
+    });
+
+    renderGlossary();
 
     setTimeout(updateFileInfo, 100);
 }
