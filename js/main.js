@@ -306,6 +306,61 @@ function init() {
     window.addEventListener('keydown', handleGlobalKeydown);
     document.addEventListener('idb-error', (e) => showSessionBanner(`⚠️ ${e.detail}`, false));
 
+    document.addEventListener('keydown', (e) => {
+        const activeTab = document.querySelector('#tabSearchContent:not(.hidden), #tabMetaContent:not(.hidden), #tabAlignContent:not(.hidden), #tabMergeContent:not(.hidden), #tabQaContent:not(.hidden)');
+        if (!activeTab) return;
+        const isQa = activeTab.id === 'tabQaContent';
+        const isMeta = activeTab.id === 'tabMetaContent';
+        const isMerge = activeTab.id === 'tabMergeContent';
+        const isAlign = activeTab.id === 'tabAlignContent';
+        const tag = document.activeElement && document.activeElement.tagName;
+        const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+        if (e.key === 'F5' && isQa) {
+            e.preventDefault();
+            const btn = document.getElementById('qaRunAllBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
+            e.preventDefault();
+            const btn = document.getElementById('qaRunBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
+            e.preventDefault();
+            const btn = document.getElementById('qaRunAllBtn');
+            if (btn) btn.click();
+            return;
+        }
+
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+            switch (e.key.toLowerCase()) {
+                case 's':
+                    if (isMeta) { e.preventDefault(); const btn = document.getElementById('saveMetaBtn'); if (btn) btn.click(); }
+                    break;
+                case 'm':
+                    if (isMerge) { e.preventDefault(); const btn = document.getElementById('startMergeBtn'); if (btn) btn.click(); }
+                    break;
+                case 'e':
+                    if (isAlign) { e.preventDefault(); const btn = document.getElementById('alignDownloadBtn'); if (btn) btn.click(); }
+                    break;
+                case 'g':
+                    if (isQa) { e.preventDefault(); const btn = document.getElementById('qaImportGlossaryBtn'); if (btn) btn.click(); }
+                    break;
+            }
+            return;
+        }
+
+        if (e.key === 'Delete' && isQa && !inInput) {
+            const btn = document.getElementById('qaDeleteSelectedBtn');
+            if (btn && !btn.disabled) btn.click();
+        }
+    });
+
     els.tabSearchBtn.addEventListener('click', () => switchTab('search'));
     els.tabMergeBtn.addEventListener('click', () => switchTab('merge'));
     els.tabMetaBtn.addEventListener('click', () => switchTab('meta'));
