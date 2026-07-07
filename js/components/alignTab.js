@@ -60,6 +60,38 @@ export function renderAlignTab() {
                 </div>
             </div>
 
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="alignSourceLang" class="text-xs text-muted block mb-1">Source Language</label>
+                    <select id="alignSourceLang" class="w-full text-sm border border-default rounded bg-surface p-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                        <option value="en">English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="nl">Dutch</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ru">Russian</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="alignTargetLang" class="text-xs text-muted block mb-1">Target Language</label>
+                    <select id="alignTargetLang" class="w-full text-sm border border-default rounded bg-surface p-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                        <option value="es">Spanish</option>
+                        <option value="en">English</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="nl">Dutch</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh">Chinese</option>
+                        <option value="ru">Russian</option>
+                    </select>
+                </div>
+            </div>
             <div class="flex gap-3">
                 <button id="alignClearInputsBtn" type="button" class="flex-1 md:w-1/3 md:flex-none bg-surface-alt hover:bg-surface-hover text-body font-medium py-3 px-4 rounded shadow transition text-sm flex items-center justify-center gap-2 border border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 min-h-[48px]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">

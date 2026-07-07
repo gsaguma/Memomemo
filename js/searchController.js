@@ -53,10 +53,6 @@ function handleFileSelect() {
             const raw = e.target.result;
 
             if (['tmx', 'xliff', 'xlf', 'sdlxliff'].includes(ext)) {
-                const trimmed = raw.trimStart();
-                if (!trimmed.startsWith('<?xml') && !trimmed.startsWith('<tmx') && !trimmed.startsWith('<xliff')) {
-                    throw { title: 'File does not appear to be valid XML', detail: `First characters: ${trimmed.slice(0, 80)}`, hint: 'Make sure the file was not corrupted or saved in wrong format.' };
-                }
                 const tempDoc = new DOMParser().parseFromString(raw, 'text/xml');
                 const pe = tempDoc.querySelector('parsererror');
                 if (pe) {

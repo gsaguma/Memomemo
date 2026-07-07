@@ -41,7 +41,7 @@ export function renderQaTab() {
                         Run All
                     </button>
                     <div class="ml-auto flex gap-2">
-                        <input type="file" id="qaGlossaryFileInput" accept=".tmx,.csv,.xlsx,.xls" class="hidden">
+                        <input type="file" id="qaGlossaryFileInput" accept=".tmx,.csv" class="hidden">
                         <button id="qaImportGlossaryBtn" class="text-xs text-primary hover:underline border border-primary rounded px-2 py-1">Import Glossary</button>
                     </div>
                 </div>

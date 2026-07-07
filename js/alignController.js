@@ -223,20 +223,23 @@ export function initAlignController() {
             const validPairs = state.alignedPairs.filter(p => p.source.trim() || p.target.trim());
             if (!validPairs.length) return;
 
+            const srcLang = (els.alignSourceLang?.value || 'en').slice(0, 20);
+            const tgtLang = (els.alignTargetLang?.value || 'es').slice(0, 20);
+
             const alignedData = {
                 units: validPairs.map(p => ({
                     source: p.source,
                     target: p.target
                 })),
-                sourceLanguage: 'en',
-                targetLanguage: 'es',
+                sourceLanguage: srcLang,
+                targetLanguage: tgtLang,
                 metadata: {
                     creationid: 'MemoMemo Align',
                     creationtool: 'MemoMemo',
                     creationtoolversion: '1.0',
                     creationdate: new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
-                    srclang: 'en',
-                    adminlang: 'es',
+                    srclang: srcLang,
+                    adminlang: tgtLang,
                     datatype: 'plaintext',
                     segtype: 'sentence'
                 }

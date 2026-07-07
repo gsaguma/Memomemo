@@ -184,7 +184,7 @@ function renderResults(issues) {
                 preview.className = 'mt-1 text-xs text-muted truncate';
                 const s = (issue.source || '').length > 60 ? (issue.source || '').slice(0, 60) + '...' : (issue.source || '');
                 const t = (issue.target || '').length > 60 ? (issue.target || '').slice(0, 60) + '...' : (issue.target || '');
-                preview.textContent = `[${issue.tuIndex}] ${escapeHtml(s)} → ${escapeHtml(t)}`;
+                preview.textContent = `[${issue.tuIndex}] ${s} → ${t}`;
                 content.appendChild(msg);
                 content.appendChild(preview);
             } else {
