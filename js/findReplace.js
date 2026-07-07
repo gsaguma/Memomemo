@@ -2,6 +2,15 @@ import { state } from './state.js';
 import { idbSet } from './db.js';
 import { updateResults } from './ui.js';
 
+function parseFindPattern(findText) {
+    const match = findText.match(/^\/(.+)\/([gimsu]*)$/);
+    if (match) {
+        const flags = 'g' + (match[2] || '').replace(/g/g, '');
+        return new RegExp(match[1], flags);
+    }
+    return new RegExp(findText, 'g');
+}
+
 export function findAndReplace(findText, replaceText, useRegex) {
     if (!findText) { alert('Enter text to find.'); return; }
     const units = state.tmxData.units;
@@ -13,12 +22,7 @@ export function findAndReplace(findText, replaceText, useRegex) {
             const t = unit.target || '';
             let newTarget;
             if (useRegex) {
-                const flags = findText.startsWith('/') && findText.endsWith('/')
-                    ? findText.slice(1, -1)
-                    : findText;
-                const pattern = findText.startsWith('/') && findText.endsWith('/')
-                    ? new RegExp(flags, 'g')
-                    : new RegExp(findText, 'g');
+                const pattern = parseFindPattern(findText);
                 newTarget = t.replace(pattern, replaceText);
             } else {
                 newTarget = t.split(findText).join(replaceText);
@@ -50,12 +54,7 @@ export function findAndReplace(findText, replaceText, useRegex) {
 function countMatches(text, findText, useRegex) {
     try {
         if (useRegex) {
-            const flags = findText.startsWith('/') && findText.endsWith('/')
-                ? findText.slice(1, -1)
-                : findText;
-            const pattern = findText.startsWith('/') && findText.endsWith('/')
-                ? new RegExp(flags, 'g')
-                : new RegExp(findText, 'g');
+            const pattern = parseFindPattern(findText);
             return (text.match(pattern) || []).length;
         }
         return text.split(findText).length - 1;

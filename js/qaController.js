@@ -483,17 +483,13 @@ function renderGlossary() {
             renderGlossary();
         });
 
-        sourceInput.addEventListener('change', () => {
-            const all = getGlossary();
-            const realIdx = start + idx;
-            all[realIdx].source = sourceInput.value;
-            setGlossary(all);
+        sourceInput.addEventListener('input', () => {
+            entry.source = sourceInput.value;
+            setGlossary(entries);
         });
-        targetInput.addEventListener('change', () => {
-            const all = getGlossary();
-            const realIdx = start + idx;
-            all[realIdx].target = targetInput.value;
-            setGlossary(all);
+        targetInput.addEventListener('input', () => {
+            entry.target = targetInput.value;
+            setGlossary(entries);
         });
 
         row.appendChild(sourceInput);
