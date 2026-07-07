@@ -4,6 +4,7 @@ import { parseFileContent } from './parsers.js';
 import { generateTMXXML } from './exporter.js';
 import { els, showError, formatFileSize, updateResults } from './ui.js';
 import { loadSharedFile, savePreferences, debounce } from './shared.js';
+import { findAndReplace } from './findReplace.js';
 import { refreshQaFileInfo } from './qaController.js';
 
 function handleFileSelect() {
@@ -269,6 +270,16 @@ export function initSearchController() {
     if (changeFileBtn) {
         changeFileBtn.addEventListener('click', () => {
             els.fileInput.click();
+        });
+    }
+
+    const findReplaceBtn = document.getElementById('findReplaceBtn');
+    if (findReplaceBtn) {
+        findReplaceBtn.addEventListener('click', () => {
+            const find = document.getElementById('findReplaceFind').value;
+            const replace = document.getElementById('findReplaceReplace').value;
+            const regex = document.getElementById('findReplaceRegex').checked;
+            findAndReplace(find, replace, regex);
         });
     }
 }
