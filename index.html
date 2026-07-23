@@ -20,18 +20,20 @@
     <link class="icon" rel="icon" type="image/png" sizes="32x32" href="media/memotmx.png">
     <style>
         :root {
-            --c-primary: #4285F4;
-            --c-primary-hover: #5C97F5;
-            --c-primary-active: #2563EB;
-            --c-bg: #F0F8FE;
-            --c-bg-alt: #F0F4FA;
-            --c-surface: #FFFFFF;
-            --c-surface-alt: #F8FBFF;
-            --c-surface-hover: #EAF2FC;
-            --c-border: #D8E1EC;
-            --c-border-light: #EAF2FC;
-            --c-border-hover: #C4D2E0;
-            --c-text: #1F2937;
+            --bg-surface: #ffffff;
+            --bg-surface-alt: #f4f6f7;
+            --text-body: #111827;
+            --border-default: #E4E4E4;
+            --color-primary: #1C7C85;
+            --color-primary-hover: #16636a;
+            --accent-mint: #D6ECE5;
+            --accent-sky: #9FD4E6;
+
+            --c-bg: #f4f8fa;
+            --c-bg-alt: #eef2f4;
+            --c-surface-hover: #eaf0f1;
+            --c-border-light: #edf0f1;
+            --c-border-hover: #d0d6d8;
             --c-text-muted: #6B7280;
             --c-text-faint: #9CA3AF;
             --c-success: #22C55E;
@@ -39,18 +41,18 @@
             --c-danger: #EF4444;
         }
         .dark {
-            --c-primary: #60A5FA;
-            --c-primary-hover: #3B82F6;
-            --c-primary-active: #2563EB;
-            --c-bg: #0F172A;
-            --c-bg-alt: #111827;
-            --c-surface: #1E293B;
-            --c-surface-alt: #243145;
-            --c-surface-hover: #273449;
-            --c-border: #334155;
-            --c-border-light: #2D3A4F;
-            --c-border-hover: #475569;
-            --c-text: #F8FAFC;
+            --bg-surface: #0f172a;
+            --bg-surface-alt: #1e293b;
+            --text-body: #f8fafc;
+            --border-default: #334155;
+            --color-primary: #9FD4E6;
+            --color-primary-hover: #D6ECE5;
+
+            --c-bg: #0b1322;
+            --c-bg-alt: #162032;
+            --c-surface-hover: #243049;
+            --c-border-light: #2a364a;
+            --c-border-hover: #3d4a60;
             --c-text-muted: #CBD5E1;
             --c-text-faint: #94A3B8;
             --c-success: #22C55E;
@@ -59,8 +61,8 @@
         }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--c-primary); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
     </style>
     <script>
         tailwind.config = {
@@ -68,20 +70,19 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: 'var(--c-primary)',
-                        'primary-hover': 'var(--c-primary-hover)',
-                        'primary-active': 'var(--c-primary-active)',
-                        'bg-body': 'var(--c-bg)',
-                        'bg-alt': 'var(--c-bg-alt)',
-                        surface: 'var(--c-surface)',
-                        'surface-alt': 'var(--c-surface-alt)',
+                        primary: 'var(--color-primary)',
+                        'primary-hover': 'var(--color-primary-hover)',
+                        surface: 'var(--bg-surface)',
+                        'surface-alt': 'var(--bg-surface-alt)',
                         'surface-hover': 'var(--c-surface-hover)',
-                        default: 'var(--c-border)',
-                        'border-light': 'var(--c-border-light)',
-                        'border-hover': 'var(--c-border-hover)',
-                        body: 'var(--c-text)',
+                        default: 'var(--border-default)',
+                        body: 'var(--text-body)',
                         muted: 'var(--c-text-muted)',
                         faint: 'var(--c-text-faint)',
+                        'bg-body': 'var(--c-bg)',
+                        'bg-alt': 'var(--c-bg-alt)',
+                        'border-light': 'var(--c-border-light)',
+                        'border-hover': 'var(--c-border-hover)',
                         success: 'var(--c-success)',
                         warning: 'var(--c-warning)',
                         danger: 'var(--c-danger)',
