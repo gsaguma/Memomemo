@@ -338,14 +338,14 @@ function init() {
             return;
         }
 
-        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
+        if (!inInput && (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
             e.preventDefault();
             const btn = document.getElementById('qaRunBtn');
             if (btn) btn.click();
             return;
         }
 
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
+        if (!inInput && (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'enter' && isQa) {
             e.preventDefault();
             const btn = document.getElementById('qaRunAllBtn');
             if (btn) btn.click();
@@ -364,7 +364,7 @@ function init() {
                     if (isAlign) { e.preventDefault(); const btn = document.getElementById('alignDownloadBtn'); if (btn) btn.click(); }
                     break;
                 case 'g':
-                    if (isQa) { e.preventDefault(); const btn = document.getElementById('qaImportGlossaryBtn'); if (btn) btn.click(); }
+                    if (isQa) { e.preventDefault(); const btn = document.getElementById('qaGlossaryImportBtn'); if (btn) btn.click(); }
                     break;
             }
             return;
