@@ -570,12 +570,14 @@ export function updateTabUI(tab) {
         const item = tabs[k];
         if (!item.btn || !item.content) return;
         if (k === tab) {
-            item.btn.classList.add('border-primary', 'text-primary');
+            item.btn.classList.add('border-primary', 'text-navy');
             item.btn.classList.remove('border-transparent', 'text-muted');
             item.content.classList.remove('hidden');
         } else {
-            item.btn.classList.remove('border-primary', 'text-primary');
-            item.btn.classList.add('border-transparent', 'text-muted');
+            item.btn.classList.remove('border-primary');
+            item.btn.classList.add('border-transparent');
+            item.btn.classList.remove('text-muted');
+            item.btn.classList.add('text-navy');
             item.content.classList.add('hidden');
         }
     });

@@ -37,6 +37,8 @@
             --c-border-hover: #d0d6d8;
             --c-text-muted: #6B7280;
             --c-text-faint: #9CA3AF;
+            --color-navy: #1E40AF;
+            --color-navy-dark: #1E3A8A;
             --c-success: #22C55E;
             --c-warning: #F59E0B;
             --c-danger: #EF4444;
@@ -57,6 +59,8 @@
             --c-border-hover: #3d4a60;
             --c-text-muted: #CBD5E1;
             --c-text-faint: #94A3B8;
+            --color-navy: #93C5FD;
+            --color-navy-dark: #60A5FA;
             --c-success: #22C55E;
             --c-warning: #F59E0B;
             --c-danger: #EF4444;
@@ -89,6 +93,8 @@
                         success: 'var(--c-success)',
                         warning: 'var(--c-warning)',
                         danger: 'var(--c-danger)',
+                        navy: 'var(--color-navy)',
+                        'navy-dark': 'var(--color-navy-dark)',
                     }
                 }
             }
@@ -101,7 +107,7 @@
     <div id="mainContent">
         <div class="container mx-auto px-4 py-3 max-w-5xl">
             <div class="flex items-center justify-center gap-2 mb-3 relative">
-                <h1 class="text-2xl font-bold text-primary flex items-center gap-2">
+                <h1 class="text-2xl font-bold text-navy flex items-center gap-2">
                     <img src="media/memotmx.png" alt="Memo TMX Logo" class="h-6 w-auto object-contain" />
                     <span>Memo Memo</span>
                 </h1>
@@ -120,31 +126,31 @@
 
             <!-- Tab Navigation -->
             <div class="flex border-b border-default mb-6 md:static fixed bottom-0 left-0 right-0 z-50 bg-surface border-t md:border-t-0 p-2 md:p-0 md:mb-6 mb-0 shadow-lg md:shadow-none justify-around md:justify-start">
-                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabSearchBtn" aria-label="Search and View Translation Memory" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-primary text-navy focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     Search & View
                 </button>
-                <button id="tabMetaBtn" aria-label="Edit Metadata" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-body hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabMetaBtn" aria-label="Edit Metadata" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-navy hover:text-navy-dark hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Metadata
                 </button>
-                <button id="tabAlignBtn" aria-label="Align Translations" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-body hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabAlignBtn" aria-label="Align Translations" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-navy hover:text-navy-dark hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                     Align Translations
                 </button>
-                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-body hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabMergeBtn" aria-label="Merge Translation Memories" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-navy hover:text-navy-dark hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
                     Merge TMs
                 </button>
-                <button id="tabQaBtn" aria-label="Quality Check" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-muted hover:text-body hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                <button id="tabQaBtn" aria-label="Quality Check" class="flex-1 md:flex-initial py-1 md:py-2 px-2 md:px-4 text-[10px] md:text-sm font-medium border-t-2 border-b-0 md:border-t-0 md:border-b-2 border-transparent text-navy hover:text-navy-dark hover:border-default focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-bg-alt rounded-t flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
