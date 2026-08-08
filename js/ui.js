@@ -127,8 +127,8 @@ export function renderStats(units) {
     });
 
     els.statsPanel.classList.remove('hidden');
-    els.statsBody.classList.remove('hidden');
-    els.statsChevron.style.transform = 'rotate(180deg)';
+    els.statsBody.classList.add('hidden');
+    els.statsChevron.style.transform = 'rotate(0deg)';
 }
 
 export function escapeHtml(text) {
@@ -321,7 +321,7 @@ export function updateResults(state) {
             cancelBtn.textContent = 'Cancel';
             
             const saveBtn = document.createElement('button');
-            saveBtn.className = 'px-2 py-0.5 text-xs bg-primary hover:bg-opacity-90 text-white rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition';
+            saveBtn.className = 'px-2 py-0.5 text-xs bg-navy hover:bg-navy-dark text-white rounded focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-1 dark:focus:ring-offset-surface transition';
             saveBtn.textContent = 'Save';
             
             btnContainer.appendChild(cancelBtn);

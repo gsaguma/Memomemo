@@ -30,19 +30,19 @@ export function renderQaTab() {
                 </div>
 
                 <div class="mt-4 flex flex-wrap gap-3 items-center">
-                    <button id="qaRunBtn" class="bg-primary hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded shadow transition text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button id="qaRunBtn" class="bg-navy hover:bg-navy-dark text-white font-medium py-2 px-4 rounded shadow transition text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Run Selected Checks
                     </button>
-                    <button id="qaRunAllBtn" class="bg-surface-alt hover:bg-surface-hover text-body font-medium py-2 px-4 rounded shadow transition text-sm">
+                    <button id="qaRunAllBtn" class="bg-navy hover:bg-navy-dark text-white font-medium py-2 px-4 rounded shadow transition text-sm">
                         Run All
                     </button>
                     <div class="ml-auto flex gap-2">
                         <input type="file" id="qaGlossaryFileInput" accept=".tmx,.csv" class="hidden">
-                        <button id="qaImportGlossaryBtn" class="text-xs text-primary hover:underline border border-primary rounded px-2 py-1">Import Glossary</button>
+                        <button id="qaImportGlossaryBtn" class="text-xs text-white bg-navy hover:bg-navy-dark border border-navy rounded px-2 py-1">Import Glossary</button>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@ export function renderQaTab() {
                     </span>
                     <div class="flex gap-2">
                         <button type="button" id="qaGlossaryAddBtn" class="text-xs bg-primary text-white font-medium px-2 py-1 rounded hover:bg-opacity-90 transition">+ Add Entry</button>
-                        <button type="button" id="qaGlossaryImportBtn" class="text-xs text-primary hover:underline border border-primary rounded px-2 py-1">Import</button>
+                        <button type="button" id="qaGlossaryImportBtn" class="text-xs text-white bg-navy hover:bg-navy-dark border border-navy rounded px-2 py-1">Import</button>
                     </div>
                 </summary>
                 <div class="p-3">

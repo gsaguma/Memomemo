@@ -26,7 +26,7 @@ export function renderSearchTab() {
                         </div>
                         <div class="flex items-center gap-3">
                             <span id="fileSize" class="text-xs text-muted font-medium"></span>
-                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-white bg-black hover:bg-gray-800 px-3 py-1 rounded-md focus:outline-none transition">Change file</button>
+                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-white bg-navy hover:bg-navy-dark px-3 py-1 rounded-md focus:outline-none transition">Change file</button>
                         </div>
                     </div>
                 </div>
@@ -96,27 +96,29 @@ export function renderSearchTab() {
                     <div class="bg-surface rounded-lg p-4 shadow-md border border-default">
                         <h2 class="text-lg font-semibold mb-3">Search Translation Memory</h2>
                         <div class="flex flex-col gap-3">
-                            <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
-                                   class="w-full px-3 py-2 rounded-md border border-default bg-surface text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface" />
-                            <div class="flex flex-wrap items-center gap-3 text-sm">
-                                <input type="checkbox" id="sourceOnly" class="sr-only" tabindex="-1" />
-                                <input type="checkbox" id="targetOnly" class="sr-only" tabindex="-1" />
-                                <div class="inline-flex rounded-md shadow-sm flex-grow md:flex-grow-0" role="group">
-                                    <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-l-md border border-default bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
-                                        Both
-                                    </button>
-                                    <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
-                                        Source
-                                    </button>
-                                    <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-r-md border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
-                                        Target
-                                    </button>
+                            <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+                                <input type="text" id="searchInput" placeholder="Search in source or target text..." aria-label="Search term in translation memory"
+                                       class="flex-1 w-full px-3 py-2 rounded-md border border-default bg-surface text-base focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface" />
+                                <div class="flex flex-wrap items-center gap-3 text-sm">
+                                    <input type="checkbox" id="sourceOnly" class="sr-only" tabindex="-1" />
+                                    <input type="checkbox" id="targetOnly" class="sr-only" tabindex="-1" />
+                                    <div class="inline-flex rounded-md shadow-sm flex-grow md:flex-grow-0" role="group">
+                                        <button type="button" id="searchScopeBoth" aria-label="Search in source and target columns" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-l-md border border-default bg-primary text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
+                                            Both
+                                        </button>
+                                        <button type="button" id="searchScopeSource" aria-label="Search in source column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
+                                            Source
+                                        </button>
+                                        <button type="button" id="searchScopeTarget" aria-label="Search in target column only" class="flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 py-2 md:py-1.5 text-sm md:text-xs font-medium rounded-r-md border-t border-b border-r border-default bg-surface text-body hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface transition">
+                                            Target
+                                        </button>
+                                    </div>
+                                    <label class="inline-flex items-center cursor-pointer min-h-[44px] md:min-h-0" title="Use regular expressions (e.g. \\d+, colou?r, ^Start)">
+                                        <input type="checkbox" id="useRegex" aria-label="Use regular expression search" class="form-checkbox h-4 w-4 text-primary rounded border-default focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface" />
+                                        <span class="ml-1 font-mono text-xs tracking-tight">.*</span>
+                                        <span class="ml-1">Regex</span>
+                                    </label>
                                 </div>
-                                <label class="inline-flex items-center cursor-pointer min-h-[44px] md:min-h-0" title="Use regular expressions (e.g. \\d+, colou?r, ^Start)">
-                                    <input type="checkbox" id="useRegex" aria-label="Use regular expression search" class="form-checkbox h-4 w-4 text-primary rounded border-default focus:ring-primary focus:ring-offset-1 dark:focus:ring-offset-surface" />
-                                    <span class="ml-1 font-mono text-xs tracking-tight">.*</span>
-                                    <span class="ml-1">Regex</span>
-                                </label>
                             </div>
                         </div>
                         <!-- Find & Replace -->
@@ -135,7 +137,7 @@ export function renderSearchTab() {
                                         <input type="checkbox" id="findReplaceRegex" class="rounded border-default text-primary focus:ring-primary">
                                         Regex
                                     </label>
-                                    <button id="findReplaceBtn" class="bg-primary hover:bg-opacity-90 text-white text-xs font-medium px-3 py-1.5 rounded transition">Replace All</button>
+                                    <button id="findReplaceBtn" class="bg-navy hover:bg-navy-dark text-white text-xs font-medium px-3 py-1.5 rounded transition">Replace All</button>
                                 </div>
                             </div>
                         </div>
@@ -143,7 +145,7 @@ export function renderSearchTab() {
                             <div class="text-sm text-muted">
                                 <span id="resultsCount">0 results</span>
                             </div>
-                            <button id="downloadUpdatedTmxBtn" class="hidden bg-primary hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1">
+                            <button id="downloadUpdatedTmxBtn" class="hidden bg-navy hover:bg-navy-dark text-white font-medium py-1.5 px-3 rounded shadow transition text-xs flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>

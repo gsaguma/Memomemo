@@ -25,7 +25,7 @@ export function renderAlignTab() {
                             </svg>
                             <span id="alignSourceFileName" class="font-medium truncate text-body max-w-[200px]"></span>
                         </div>
-                        <button type="button" id="changeAlignSourceBtn" class="text-xs font-semibold text-primary hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
+                        <button type="button" id="changeAlignSourceBtn" class="text-xs font-semibold text-white bg-navy hover:bg-navy-dark rounded px-2 py-1 focus:outline-none min-h-[44px] md:min-h-0">Change file</button>
                     </div>
                     <div class="text-center text-xs text-faint font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
                     <textarea id="alignSourceText" placeholder="Paste source sentences here..." class="w-full flex-grow p-3 text-sm border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary resize-y" rows="6"></textarea>
@@ -53,7 +53,7 @@ export function renderAlignTab() {
                             </svg>
                             <span id="alignTargetFileName" class="font-medium truncate text-body max-w-[200px]"></span>
                         </div>
-                        <button type="button" id="changeAlignTargetBtn" class="text-xs font-semibold text-primary hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
+                        <button type="button" id="changeAlignTargetBtn" class="text-xs font-semibold text-white bg-navy hover:bg-navy-dark rounded px-2 py-1 focus:outline-none min-h-[44px] md:min-h-0">Change file</button>
                     </div>
                     <div class="text-center text-xs text-faint font-semibold my-1">&mdash; OR PASTE TEXT &mdash;</div>
                     <textarea id="alignTargetText" placeholder="Paste target sentences here..." class="w-full flex-grow p-3 text-sm border border-default rounded bg-surface focus:outline-none focus:ring-1 focus:ring-primary resize-y" rows="6"></textarea>

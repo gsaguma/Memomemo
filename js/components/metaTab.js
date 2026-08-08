@@ -28,7 +28,7 @@ export function renderMetaTab() {
                         </div>
                         <div class="flex items-center gap-3">
                             <span id="metaFileSize" class="text-xs text-muted font-medium"></span>
-                            <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-primary hover:underline focus:outline-none min-h-[44px] md:min-h-0 px-2">Change file</button>
+                            <button type="button" id="changeMetaFileBtn" class="text-xs font-semibold text-white bg-navy hover:bg-navy-dark rounded px-2 py-1 focus:outline-none min-h-[44px] md:min-h-0">Change file</button>
                         </div>
                     </div>
                 </div>
