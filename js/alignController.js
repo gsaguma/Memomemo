@@ -193,7 +193,9 @@ export function initAlignController() {
             els.errorMessage.classList.add('hidden');
 
             requestAnimationFrame(() => {
-                state.alignedPairs = alignTexts(srcText, tgtText);
+                const srcLocale = els.alignSourceLang?.value || undefined;
+                const tgtLocale = els.alignTargetLang?.value || undefined;
+                state.alignedPairs = alignTexts(srcText, tgtText, srcLocale, tgtLocale);
                 els.startAlignBtn.innerHTML = originalHTML;
                 els.startAlignBtn.disabled = false;
                 idbSet('alignedPairs', state.alignedPairs);

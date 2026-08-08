@@ -17,12 +17,17 @@ export function findAndReplace(findText, replaceText, useRegex) {
     let totalReplaced = 0;
     let totalUnits = 0;
 
+let pattern;
+    if (useRegex) {
+        try { pattern = parseFindPattern(findText); }
+        catch (err) { alert('Invalid regex: ' + err.message); return; }
+    }
+
     try {
         for (const unit of units) {
             const t = unit.target || '';
             let newTarget;
             if (useRegex) {
-                const pattern = parseFindPattern(findText);
                 newTarget = t.replace(pattern, replaceText);
             } else {
                 newTarget = t.split(findText).join(replaceText);
