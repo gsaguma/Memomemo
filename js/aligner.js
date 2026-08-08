@@ -1,8 +1,13 @@
-export function splitSentences(text) {
+export function splitSentences(text, locale) {
     if (!text) return [];
 
     if (typeof Intl.Segmenter === 'function') {
-        const segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+        let segmenter;
+        if (typeof locale === 'string' && locale.trim() && (typeof Intl.Locale === 'function' ? (() => { try { new Intl.Locale(locale); return true; } catch { return false; } })() : true)) {
+            segmenter = new Intl.Segmenter(locale, { granularity: 'sentence' });
+        } else {
+            segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+        }
         return Array.from(segmenter.segment(text), s => s.segment.trim()).filter(Boolean);
     }
 
@@ -18,7 +23,7 @@ export function splitSentences(text) {
         const trimmed = para.trim();
         if (!trimmed) return;
 
-        const rawSplits = trimmed.split(/([.!?]\s+)/);
+        const rawSplits = trimmed.split(/([.!?。！？…]\s*)/);
         let temp = '';
 
         for (let i = 0; i < rawSplits.length; i++) {
@@ -257,9 +262,9 @@ function galeChurchAlign(sourceSents, targetSents) {
     return result;
 }
 
-export function alignTexts(sourceText, targetText) {
-    const sourceSentences = splitSentences(sourceText);
-    const targetSentences = splitSentences(targetText);
+export function alignTexts(sourceText, targetText, sourceLocale, targetLocale) {
+    const sourceSentences = splitSentences(sourceText, sourceLocale);
+    const targetSentences = splitSentences(targetText, targetLocale);
     return galeChurchAlign(sourceSentences, targetSentences);
 }
 
