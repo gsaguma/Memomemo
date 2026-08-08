@@ -26,7 +26,7 @@ export function renderSearchTab() {
                         </div>
                         <div class="flex items-center gap-3">
                             <span id="fileSize" class="text-xs text-muted font-medium"></span>
-                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-primary hover:underline focus:outline-none">Change file</button>
+                            <button type="button" id="changeFileBtn" class="text-xs font-semibold text-white bg-black hover:bg-gray-800 px-3 py-1 rounded-md focus:outline-none transition">Change file</button>
                         </div>
                     </div>
                 </div>
