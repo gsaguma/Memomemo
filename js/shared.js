@@ -59,24 +59,7 @@ export function loadSharedFile(parsedData, fileName, fileSize) {
 
     const dropZone = document.getElementById('dropZoneContainer');
     if (dropZone) dropZone.classList.add('hidden');
-    els.fileStats.textContent = ` • ${parsedData.units.length} units`;
-
-    const units = parsedData.units;
-    const srcLang = parsedData.sourceLanguage || '?';
-    const tgtLang = parsedData.targetLanguage || '?';
-    let srcChars = 0, tgtChars = 0, srcWords = 0, tgtWords = 0, emptyTgt = 0, srcEqTgt = 0;
-    for (const u of units) {
-        const s = u.source || '';
-        const t = u.target || '';
-        srcChars += s.length;
-        tgtChars += t.length;
-        srcWords += s.split(/\s+/).filter(Boolean).length;
-        tgtWords += t.split(/\s+/).filter(Boolean).length;
-        if (!t.trim()) emptyTgt++;
-        if (s === t) srcEqTgt++;
-    }
-    const fmt = n => n.toLocaleString('en-US');
-    els.fileStats.textContent += ` · ${srcLang}→${tgtLang} · ${fmt(units.length)} segments · ${fmt(srcChars)} src chars · ${fmt(tgtChars)} tgt chars · ${fmt(srcWords)} src words · ${fmt(tgtWords)} tgt words · ${emptyTgt} empty · ${srcEqTgt} src=tgt`;
+    els.fileStats.textContent = ` • ${parsedData.units.length} translation units`;
 
     els.fileInfo.classList.remove('hidden');
     els.errorMessage.classList.add('hidden');
